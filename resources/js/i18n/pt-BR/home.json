@@ -1,0 +1,35 @@
+{
+  "header": {
+    "inicio": "Início",
+    "clientes": "Clientes",
+    "contato": "Contato",
+    "entrarGoogle": "Entrar com Google",
+    "sair": "Sair"
+  },
+  "hero": {
+    "titulo": "Bem-vindo(a) ao seu hub de sites",
+    "subtitulo": "Acesse rapidamente seus projetos, utilitários e recursos.",
+    "cta": "Acessar meus sites",
+    "altImagem": "Banner ilustrativo"
+  },
+  "cards": {
+    "buscaPlaceholder": "Buscar por título, categoria ou descrição...",
+    "categoria": "Categoria",
+    "botaoAcessar": "Acessar",
+    "semResultados": "Nenhum resultado encontrado."
+  },
+  "footer": {
+    "direitos": "Todos os direitos reservados.",
+    "sobreTitulo": "Sobre",
+    "sobreTexto": "Seu hub de sites, utilitários e projetos para acesso rápido.",
+    "contatoTitulo": "Contato",
+    "email": "E-mail",
+    "telefone": "Telefone",
+    "endereco": "Endereço",
+    "linksTitulo": "Links úteis",
+    "politicaPrivacidade": "Política de Privacidade",
+    "termosUso": "Termos de Uso",
+    "sigaNos": "Siga-nos",
+    "redesSociais": "Redes sociais"
+  }
+}

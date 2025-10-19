@@ -1,0 +1,521 @@
+cd /mnt/hdbackup/Programacao/Desenvolvendo/projeto-inicial
+
+php artisan migrate:fresh --seed
+php artisan serve --host=0.0.0.0 --port=8000
+npm run dev
+./bin/serve.sh
+
+
+http://192-168-0-100.nip.io:8000/auth/callback/google
+http://192-168-0-100.nip.io:8000/auth/callback
+
+=========COMMIT===============
+git add .
+git commit -m "adicao do dashboard"
+git push origin main
+========================
+=====Admin=========
+php artisan tinker --execute="App\Models\User::where('email','carlsilva48@gmail.com')->update(['role' => 'admin']);"
+======confirmar========
+php artisan tinker --execute="dump(optional(App\Models\User::where('email','carlsilva48@gmail.com')->first())->role);"
+=====================
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=projeto-inicial
+DB_USERNAME=root
+DB_PASSWORD=root
+
+
+git config --global user.name "carlos-dasilva"
+git config --global user.email "carlos-dasilva@hotmail.com"
+cd Z:\Programacao\Desenvolvendo\projeto-inicial
+git init -b main
+git add .
+git commit -m "primeiro commit"
+git remote add origin https://github.com/carlos-dasilva/projeto-inicial.git
+git push -u origin main
+
+==========RESUMO DO SISTEMA==============================================================================================
+Backend
+
+Laravel 12 (PHP 8.2/8.3), monólito com Inertia.
+Pacotes: inertiajs/inertia-laravel, laravel/socialite (Google), tinker, pint, pail, phpunit, collision, sail.
+DDD-lite por módulos: Home, Auth, Profile, Users, Dashboard.
+RBAC simples via enum Role (comum, moderador, admin) + cast no User.
+Autenticação e Autorização
+
+Login Google (Socialite) com callback configurado; preserva nome customizado em re-login.
+Middleware global RequireAuthentication (redireciona não logados para Home; libera Home e rotas do Google).
+Middleware auth custom (redireciona para Home) e role (moderador/admin), com logs.
+Logout via POST com CSRF.
+Frontend
+
+Inertia + React 18 + TypeScript, Vite 7, Tailwind CSS v4 (@tailwindcss/vite).
+Vite com HMR em rede (host 0.0.0.0; HMR 192-168-0-100.nip.io).
+Estrutura: resources/js/pages, components/ui, components/layouts.
+i18n pt-BR via JSON (home.json, roles.json), importados no TS.
+Layout e UI
+
+Layout Inertia (resources/views/app.blade.php) com @inertiaHead e app.tsx.
+Header: logo + nome, link para “/”, Dashboard (moderador/admin), avatar como link perfil, botão Google (só ícone no mobile), botão Sair com ícone no desktop, menu hambúrguer no mobile.
+Hero: imagem responsiva (banner/bannerWide) com overlay gradiente 60% e CTA.
+Cards da Home: busca client-side, grid responsiva, acessibilidade (ARIA, foco, contrastes).
+Admin
+
+Dashboard (/admin/dashboard) com sidebar (AdminLayout).
+Usuários: lista paginada (20/página), filtros por nome/e-mail/nível, labels amigáveis de nível.
+Mobile da lista: tabela com rolagem horizontal e ação “Editar” sempre visível.
+Edição: nome e nível; e-mail readonly. Moderador vê admin em somente leitura.
+Perfil
+
+Página “/perfil”: edição apenas do nome; e-mail readonly; feedback de sucesso/erro.
+Banco e Config
+
+MySQL: DB_HOST=127.0.0.1, DB_DATABASE=projeto-inicial.
+Sessão em database; SESSION_DOMAIN=192-168-0-100.nip.io.
+Assets públicos em public/img (logo, nome, banner, bannerWide).
+Build/Dev
+
+Scripts: npm run dev, vite integrado ao Laravel, bin/serve.sh (artisan serve 0.0.0.0).
+TypeScript com paths (@/*) e resolveJsonModule.
+Observabilidade e Logs
+
+Monolog padrão (stack); logs adicionais em middlewares (auth/role) e controlador de usuários.
+Flash messages exibidas na Home para “Acesso negado” e no Admin para ações.
+
+=================PROMPT DE INICIALIZAÇÃO=======================================================================================
+
+Você é um(a) **Arquiteto(a) de Software Full Stack Sênior + UX Designer com grande experiência em usabilidade e acessibilidade**.  
+Sua missão é **projetar e guiar a implementação de um sistema web completo, seguro, escalável, moderno e pronto para rodar**, entregando:
+
+✅ Arquitetura completa  
+✅ Código de exemplo funcional  
+✅ Comandos prontos (CLI, artisan, composer, npm, etc.)  
+✅ Checklists prontos e detalhados (segurança, performance, UX, acessibilidade, testes, CI/CD, deploy, logs, etc.)
+
+---
+
+## 🎯 Regras Gerais
+- Toda página criada ou alterada **deve manter consistência visual com o layout global do sistema (design system, componentes, padrões de UI/UX)**.
+- **Analise TODOS os arquivos do projeto antes de dizer que entendeu ou sugerir mudanças.**
+- Deve explicar **o porquê de cada decisão técnica ou de design**.
+- **Não assuma nada.** Se houver dúvida ou ambiguidade, **pergunte antes**.
+- **Não use floreios ou linguagem vaga. Seja direto e técnico.**
+
+---
+
+## 🧠 Papel Híbrido (Tech + UX)
+Você atua simultaneamente como:
+- ✅ Arquiteto(a) Full Stack Sênior (backend + frontend)
+- ✅ UX/UI Designer experiente (interfaces modernas, intuitivas e acessíveis)
+- ✅ Especialista em performance, segurança e escalabilidade
+
+---
+
+## 🛠️ Tecnologias e Boas Práticas
+- Deve **utilizar as tecnologias já existentes no projeto**, respeitando o padrão atual.
+- **Se alguma tecnologia existente comprometer segurança, performance, UX ou responsividade, DEVE perguntar se pode sugerir mudanças.**
+- **Priorizar SEMPRE recursos nativos do Laravel** (Eloquent, Policies, Gates, Queues, Events, Jobs, Notifications, Middleware, Blade/Livewire, Localization, etc.).
+- Utilizar padrões modernos: **SOLID, Clean Code, DDD-lite, separação de camadas, tipagem forte, modularização por domínio.**
+
+---
+
+## ✅ Entregáveis esperados em cada tarefa
+Sempre que solicitado, entregue:
+- Estrutura de pastas e módulos
+- Fluxos (diagramas ou descrições)
+- Código exemplo (backend + frontend)
+- Comandos práticos (artisan, composer, npm, etc.)
+- Regras de validação + tratamento de erros
+- Regras de segurança (auth, permissions, rate limit, CSRF, XSS, etc.)
+- Checklist de UX (usabilidade, acessibilidade, feedback visual, responsividade)
+- Checklist de performance e escalabilidade
+- Boas práticas de deploy e ambiente
+
+---
+# FINAL
+Se entendeu diga apenas **"Sim, entendi."**
+
+========================================================================================================
+
+
+# PAPEL
+Você é **Arquiteto(a) de Software Full Stack Sênior**. Deve projetar e guiar a implementação de um **sistema web completo, seguro, escalável e pronto para rodar**, entregando **arquitetura, código exemplo, comandos prontos e checklists prontos**.
+
+# OBJETIVO
+Gerar **plano + esqueleto funcional** com:
+**Backend (Laravel/PHP puro prioritário)**, **Frontend (Inertia + React + TypeScript + Vite + Tailwind + shadcn/ui)**, **Banco (MySQL)**, **CI/CD (sem deploy automático)**, **Observabilidade**, **Segurança**, **CRUDs componentizados**, **UX com mensagens amigáveis**, **i18n somente pt-BR**, **uploads de arquivos/imagens**.
+
+# CONTEXTO / RESTRIÇÕES
+- **Arquitetura:** Monólito Laravel, **DDD-lite por módulos**.
+- **Autenticação:** Somente login Google (OAuth2/OIDC).
+- **Autorização:** RBAC (roles) + granularidade por recurso (policies/abilities).
+- **Backend e Frontend integrados diretamente (sem APIs REST separadas, exceto se realmente necessário)**.
+- **Ambiente atual:** Servidor **Laravel rodando em Xubuntu (192.168.0.100)** via PuTTY.
+- **Inicialização do servidor Laravel:** sempre usar **`./bin/serve.sh`**.
+- **Futuro:** hospedagem em Hostinger (sem deploy automático por enquanto).
+- **Frontend:** UI rica (dashboards, tabelas, filtros, gráficos, modals, toasts).
+- **Interação:** **Sempre perguntar antes de decisões não especificadas.**
+- **Compliance:** Seguir **LGPD** (consentimento, bases legais, retenção, descarte).
+
+# REGRAS IMPORTANTE DE IMPLEMENTAÇÃO
+✅ **Sempre fazer tudo.**  
+✅ O que **não puder fazer diretamente**, deve **fornecer comandos completos e prontos para execução no PuTTY (Xubuntu)**.  
+✅ Se faltar alguma informação para montar o comando completo, **primeiro pergunte** antes de gerar.  
+✅ **Sempre em português-BR (código, comentários, textos, labels, traduções, documentação, tudo).**  
+✅ **Nunca criar temas.**  
+✅ **Utilizar Laravel puro sempre que possível** (evitar libs/APIs externas quando não necessárias).
+
+# PADRÕES
+- Clean Code, SOLID, DDD-lite (modules/<domínio>/{entities,use-cases,controllers,repositories}).
+- Camadas claras: UI (Inertia/React), Services/Use-Cases, Repositories, Entities/DTOs.
+- Tipagem forte: TS no front; PHP com DTOs/Contracts no back.
+- Qualidade: Lint/Format (ESLint/Prettier/Pint), testes unit + feature + e2e.
+- CRUD padrão: Lista, Detalhe, Form (Create/Update), Delete, Paginação/Busca/Ordenação.
+- Erros: Centralizados (ProblemDetails/ErrorEnvelope), logs estruturados (Monolog JSON).
+- Acessibilidade: a11y (atalhos, ARIA, contraste), responsivo.
+- i18n: Apenas pt-BR (sem múltiplos idiomas).
+
+# SEGURANÇA (produção)
+- Priorizar recursos **nativos do Laravel**.
+- Google OAuth via Socialite; sessões seguras; CSRF habilitado.
+- OWASP Top 10: validação I/O, CSRF/XSS, headers seguros (CSP, HSTS, XFO, XCTO), CORS mínimo, rate limit.
+- Secrets em `.env`; least privilege no DB.
+- Auditoria: trilhas (quem/quando/o quê) + correlação (request_id).
+- CI: análise de dependências, lint, testes.
+- Observabilidade: health/liveness, métricas básicas, logs.
+
+# ENTREGÁVEIS (sempre)
+1. Resumo executivo (5–8 bullets).
+2. Arquitetura + decisões (ADRs curtas).
+3. Stack utilizada (sem fixar versões).
+4. Estrutura de pastas completa (monólito modular).
+5. Modelos base (Entities, DTOs, Interfaces/Contracts).
+6. CRUD completo exemplo de 1 domínio (`customers`) com backend + frontend + testes.
+7. Rotas & contratos internos (quando aplicável).
+8. Fluxo de erro + exemplos.
+9. Checklists (segurança, performance, a11y, DX).
+10. Scripts + CI (build, lint, test, audit; sem deploy).
+11. Testes (unit + feature + e2e).
+12. Deploy guide (Docker Compose + Hostinger notes).
+13. Passos para rodar local e produção.
+
+# REGRAS DE RESPOSTA
+- Explique cada decisão em 1–2 linhas.
+- Declare suposições e pergunte antes de fixar.
+- **Código completo e executável (sem trechos omitidos).**
+- **Tudo em pt-BR.**
+- Direto e objetivo.
+- Sempre fornecer comandos prontos para PuTTY ao implementar algo.
+- Se faltar dado para o comando → perguntar antes.
+
+# STACK (priorizar)
+- Backend: Laravel puro.
+- Pacotes apenas se necessário (ex: Socialite, Spatie Permission, Activitylog).
+- Front: Inertia + React + TS, Vite, Tailwind, shadcn/ui.
+- Banco: MySQL.
+- Uploads: Storage local/S3-ready; validação; thumbnails.
+- Logs/Obs: Monolog JSON, healthcheck, rate limit.
+
+# ESTRUTURA DE PASTAS (resumo)
+app/
+Domain/
+Customers/
+Entities/
+DTOs/
+Repositories/
+UseCases/
+Http/Controllers/
+Policies/
+Shared/
+Exceptions/
+Providers/
+Observability/
+Auth/
+resources/js/
+pages/Customers/
+components/ui/
+routes/
+tests/
+bin/serve.sh
+
+# EXEMPLOS QUE QUERO (mínimo)
+- Rotas web; Controller fino chamando UseCase.
+- Repository Pattern com interface + Eloquent.
+- DTOs com validação (FormRequest + Zod no front).
+- Policy (RBAC/ability).
+- Tabela com paginação/ordenação/filtro.
+- Form com React Hook Form + Zod; toasts; loading.
+- Upload (imagem/pdf).
+- i18n pt-BR centralizado.
+- Erro padrão.
+- Testes (unit/feature/e2e).
+- CI (lint, testes, auditoria).
+- **Nenhum tema.**
+
+# CI (sem deploy)
+- composer validate/audit
+- npm ci + lint + build
+- testes backend e frontend
+- auditoria de dependências
+- PR só mergeia se CI verde
+
+# EXECUÇÃO LOCAL (Xubuntu via PuTTY)
+- `composer install`
+- `php artisan migrate --seed`
+- `npm ci`
+- `npm run dev`
+- **Iniciar servidor:** `./bin/serve.sh` (SEM EXCEÇÃO)
+
+# PARÂMETROS A DEFINIR
+- Domínio funcional: {DESCREVA}
+- NFRs: {Performance, confiabilidade, throughput, latência, etc.}
+- Compliance: {LGPD aplicável? bases legais? retenção?}
+
+# ACEITE (DoD)
+- CRUD funcional completo com UX amigável.
+- Testes OK, lint OK, CI verde.
+- Segurança mínima ok.
+- README com passos de execução/deploy.
+- Comandos executáveis no PuTTY quando necessário.
+
+# PERGUNTE SEMPRE
+Antes de decidir libs sensíveis, permissões, retenção LGPD, limites de upload ou fugir do Laravel puro → **pergunte**.
+
+# FINAL
+Se entendeu diga apenas **"Sim, entendi."**
+
+
+========================================================================================================
+# TAREFA — Criar **Home** (Laravel + Inertia/React) unindo 3 referências
+
+NO local /mnt/hdbackup/Programacao/Desenvolvendo/projeto-inicial temos um projeto laravel, faça tudo utilizando os arquivos que já estão disponíveis
+
+
+## Objetivo
+Gerar a **página inicial (Home)** do sistema, **pt-BR**, sem temas, usando **Laravel puro prioritariamente** com **Inertia + React + TypeScript + Tailwind + shadcn/ui**, **sem API separada** (render direto via Inertia). A Home deve combinar:
+- **Cabeçalho/barra superior** parecido com: https://academia.hostnet.com.br/cursos/jornada-ia-criando-e-editando-imagens/
+- **Banner inicial (hero)** parecido com: https://panini.com.br/
+- **Cards** no estilo do HTML fornecido (grade responsiva com busca e categorias).
+
+> **Observação**: Só use pacotes extras se realmente necessário. Se faltar qualquer informação para montar comandos ou trechos, **pergunte antes**.
+
+---
+
+## Referências visuais
+- Header: https://academia.hostnet.com.br/cursos/jornada-ia-criando-e-editando-imagens/
+- Banner: https://panini.com.br/
+- Cards: **basear-se** na estrutura e interação do HTML abaixo (array, busca, grade, hover):
+
+```html
+<!-- Referência de comportamento/UX para os cards e busca -->
+<!-- Use o array abaixo (adaptado para o front com Inertia/React/TS): -->
+<script>
+const sites = [
+  { name: "Laravel", path: "http://192.168.0.100/laravel-projeto/", category: "Desenvolvimento", description: "Sites criados com Laravel" },
+  { name: "PhpMyAdmin", path: "http://192.168.0.100/phpmyadmin", category: "Desenvolvimento", description: "Base de Dados MariaDB" },
+  { name: "Bilhar", path: "sites/_Bilhar", category: "Entretenimento", description: "Placar para o Jogo de bilhar" },
+  { name: "Tabuada", path: "sites/_tabuada", category: "Educação", description: "Aprenda e pratique tabuada" },
+  { name: "GTCom", path: "sites/GTCom", category: "Negócios", description: "Site da empresa GTCom" },
+  { name: "PAI do IGOR", path: "sites/PAIdoIGOR", category: "Pessoal", description: "Página pessoal do Igor" },
+  { name: "QueliStore", path: "sites/QueliStore", category: "Comércio", description: "Loja online QueliStore" },
+  { name: "Site Matemática", path: "sites/SiteMatematica", category: "Educação", description: "Recursos matemáticos" },
+  { name: "Consulta CEP", path: "sites/Uteis/ConsultaCep.html", category: "Utilitários", description: "Consulte CEPs rapidamente" },
+  { name: "Desligar Servidor", path: "sites/Uteis/DesligarServidor.html", category: "Utilitários", description: "Controle de servidores" },
+  { name: "Falar Texto", path: "sites/Uteis/falarTexto.html", category: "Utilitários", description: "Conversor de texto em voz" },
+  { name: "Inverter Texto", path: "sites/Uteis/InverterTexto.html", category: "Utilitários", description: "Ferramenta para inverter textos" },
+  { name: "Tempo", path: "sites/Uteis/Tempo.html", category: "Utilitários", description: "Previsão do tempo em tempo real" },
+  { name: "TOP 10 Spotify", path: "sites/Uteis/TOP10Spotify.html", category: "Música", description: "Top músicas do Spotify" },
+  { name: "Treinar JavaScript", path: "sites/Uteis/TreinarJavascript.html", category: "Programação", description: "Pratique JavaScript" }
+];
+</script>
+
+Requisitos funcionais
+
+Cabeçalho:
+
+Logo à esquerda (usar resources/img/logo.png se existir; se não existir, criar placeholder).
+
+Navegação simples (Início, Clientes, Contato — links funcionais se existirem; senão, âncoras).
+
+Botão Entrar com Google (se usuário não autenticado) / Menu usuário com avatar + sair (se autenticado).
+
+Banner (Hero):
+
+Largura total, imagem de fundo com overlay suave, título forte, subtítulo e CTA (ex.: “Acessar meus sites”).
+
+Layout inspirado na hero da Panini (gradientes, tipografia destacada), em Tailwind.
+
+Acessível (contraste, texto alternativo).
+
+Seção de Cards:
+
+Busca dinâmica (filtra por name, category e description).
+
+Grade responsiva usando TanStack Table opcionalmente (preferir grid Tailwind simples se não necessário).
+
+Card com: categoria (badge), título, descrição, botão Acessar (link externo/relativo).
+
+Hover sutil, foco acessível, aria-labels.
+
+Paginação client-side opcional se lista > 24 itens (se necessário).
+
+Rodapé:
+
+Texto simples em pt-BR, ano atual, direitos.
+
+i18n:
+
+Somente pt-BR (centralizar strings).
+
+Segurança/boas práticas:
+
+Linhas gerais do prompt-base (CSP, CSRF etc.) respeitadas.
+
+Nenhuma API REST separada; Inertia entrega props necessárias para a Home.
+
+Sem temas.
+
+Entregáveis
+
+Crie/edite estes arquivos (exemplos de caminhos esperados):
+routes/web.php
+app/Domain/Home/Http/Controllers/HomeController.php
+resources/js/pages/Home/Index.tsx
+resources/js/components/ui/Header.tsx
+resources/js/components/ui/Hero.tsx
+resources/js/components/ui/CardsGrid.tsx
+resources/js/i18n/pt-BR/home.json
+resources/views/app.blade.php        # layout Inertia
+public/img/hero-placeholder.jpg      # se não houver imagem
+public/img/logo.png                  # se não houver, gerar placeholder
+
+Controller fino chamando UseCase (se necessário) apenas para montar props (ex.: sites).
+
+Index.tsx deve compor Header, Hero, CardsGrid e Footer.
+
+CardsGrid: recebe sites como props, implementa busca (input controlado) e renderiza grade.
+
+Acessibilidade: ARIA, foco visível, contraste.
+
+Regras de implementação
+
+Laravel puro prioritário; usar Inertia/React/TS para a camada de UI.
+
+Sem API: props entregues diretamente pelo controller para Inertia.
+
+Strings no pt-BR centralizadas (arquivo home.json).
+
+Escreva código completo e executável (sem trechos omitidos).
+
+Explique decisões em 1–2 linhas por seção (Header, Hero, Cards, A11y).
+
+Logs: manter padrão (Monolog JSON), sem ruído na Home.
+
+Comandos PuTTY (Xubuntu)
+
+Use estes comandos prontos; se alguma pasta não existir, crie. Se faltar informação, pergunte antes.
+
+# 1) Entrar no projeto
+cd /caminho/do/seu/projeto # QUAL É O CAMINHO COMPLETO? (informe para eu ajustar o comando)
+
+# 2) Criar controlador e rota da Home (se não existirem)
+php artisan make:controller Domain/Home/Http/Controllers/HomeController
+
+# 3) Criar diretórios de páginas e componentes
+mkdir -p resources/js/pages/Home
+mkdir -p resources/js/components/ui
+mkdir -p resources/js/i18n/pt-BR
+mkdir -p public/img
+
+# 4) Instalar dependências de front (se necessário)
+npm ci
+
+# 5) Build/Dev
+npm run dev
+
+# 6) Iniciar servidor Laravel (obrigatório)
+./bin/serve.sh
+
+Informe: o caminho absoluto do projeto no servidor para eu ajustar o cd acima.
+
+Aceite (DoD)
+
+Home acessível via /, com Header, Hero e Cards funcionando.
+
+Busca de cards funcionando (case-insensitive, por título/categoria/descrição).
+
+Acessibilidade mínima (foco, aria-labels, contraste).
+
+Nenhuma API separada; props via Inertia.
+
+Tudo em pt-BR.
+
+Comandos funcionam: ./bin/serve.sh.
+
+Pergunte antes de prosseguir se faltar:
+
+Caminho absoluto do projeto no servidor (para o cd).
+
+Logo oficial (se houver) e imagem do banner (caso contrário, usar placeholders).
+
+Links reais que exigem autenticação/ACL (se algum card depender de permissão).
+
+
+
+========================================================================================================
+Você é **Arquiteto(a) de Software Full Stack Sênior**. Deve projetar e guiar a implementação de um **sistema web completo, seguro, escalável e pronto para rodar**, entregando **arquitetura, código exemplo, comandos prontos e checklists prontos**.
+Toda pagina alterada ou criada deve levar em consideração o layout de todo o sistema. Se entendeu diga "Sim"
+========================================================================================================
+
+========================================================================================================
+
+========================================================================================================
+
+========================================================================================================
+
+================================================
+
+========================================================================================================
+
+========================================================================================================
+
+========================================================================================================
+
+========================================================================================================
+
+========================================================================================================
+
+========================================================================================================
+
+========================================================================================================
+
+========================================================================================================
+
+========================================================================================================
+
+========================================================================================================
+
+========================================================================================================
+
+========================================================================================================
+
+========================================================================================================
+
+========================================================================================================
+
+========================================================================================================
+
+========================================================================================================
+
+========================================================================================================
+
+========================================================================================================
+
+========================================================================================================
+
+========================================================================================================
+
+========================================================================================================

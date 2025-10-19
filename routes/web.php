@@ -13,6 +13,7 @@ use App\Domain\Legal\Http\Controllers\PrivacyController;
 use App\Domain\Legal\Http\Controllers\TermsController;
 use App\Domain\Studios\Http\Controllers\StudioController;
 use App\Domain\Platforms\Http\Controllers\PlatformController;
+use App\Domain\Tags\Http\Controllers\TagController;
 
 // Rota Home (Inertia)
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -63,6 +64,14 @@ Route::middleware(['auth','role:moderador,admin'])->prefix('admin')->name('admin
     Route::get('/plataformas/{platform}/editar', [PlatformController::class, 'edit'])->name('platforms.edit');
     Route::put('/plataformas/{platform}', [PlatformController::class, 'update'])->name('platforms.update');
     Route::delete('/plataformas/{platform}', [PlatformController::class, 'destroy'])->name('platforms.destroy');
+
+    // Marcadores (moderador e admin)
+    Route::get('/marcadores', [TagController::class, 'index'])->name('tags.index');
+    Route::get('/marcadores/novo', [TagController::class, 'create'])->name('tags.create');
+    Route::post('/marcadores', [TagController::class, 'store'])->name('tags.store');
+    Route::get('/marcadores/{tag}/editar', [TagController::class, 'edit'])->name('tags.edit');
+    Route::put('/marcadores/{tag}', [TagController::class, 'update'])->name('tags.update');
+    Route::delete('/marcadores/{tag}', [TagController::class, 'destroy'])->name('tags.destroy');
 
     // Diagnóstico detalhado do servidor (somente admin)
     Route::get('/diagnostico', [DiagnosticsController::class, 'index'])

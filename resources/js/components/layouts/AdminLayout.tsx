@@ -25,6 +25,7 @@ export default function AdminLayout({ title, children }: Props) {
     ];
     base.push({ label: 'Estudios', href: '/admin/estudios' });
     base.push({ label: 'Plataformas', href: '/admin/plataformas' });
+    base.push({ label: 'Marcadores', href: '/admin/marcadores' });
     if (isAdmin) {
       base.push({ label: 'Configuração', href: '/admin/configuracao' });
       base.push({ label: 'Diagnóstico', href: '/admin/diagnostico' });
@@ -52,6 +53,14 @@ export default function AdminLayout({ title, children }: Props) {
               className="inline-flex items-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
             >
               Nova plataforma
+            </Link>
+          )}
+          {currentPath.startsWith('/admin/marcadores') && (
+            <Link
+              href="/admin/marcadores/novo"
+              className="inline-flex items-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
+            >
+              Novo marcador
             </Link>
           )}
         </div>
@@ -107,6 +116,7 @@ function renderIcon(href: string) {
   if (href.startsWith('/admin/usuarios')) return <UsersIcon className={cls} />;
   if (href.startsWith('/admin/estudios')) return <BuildingIcon className={cls} />;
   if (href.startsWith('/admin/plataformas')) return <GamepadIcon className={cls} />;
+  if (href.startsWith('/admin/marcadores')) return <HashtagIcon className={cls} />;
   if (href.startsWith('/admin/configuracao')) return <CogIcon className={cls} />;
   if (href.startsWith('/admin/diagnostico')) return <BeakerIcon className={cls} />;
   return null;
@@ -157,6 +167,14 @@ function GamepadIcon({ className }: { className?: string }) {
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
       <path d="M6.75 9.75h2.5a.75.75 0 010 1.5h-2.5v2.5a.75.75 0 01-1.5 0v-2.5h-2.5a.75.75 0 010-1.5h2.5v-2.5a.75.75 0 011.5 0v2.5zM15.5 12.5a1 1 0 100-2 1 1 0 000 2zm3 2a1 1 0 100-2 1 1 0 000 2z" />
       <path d="M7.25 6.5h9.5a4.25 4.25 0 014.25 4.25v2.5a4.25 4.25 0 01-4.25 4.25h-1.3l-1.6-1.6a1.75 1.75 0 00-1.24-.51h-1.22c-.46 0-.9.18-1.23.51l-1.6 1.6h-1.31A4.25 4.25 0 013 13.25v-2.5A4.25 4.25 0 017.25 6.5z" />
+    </svg>
+  );
+}
+
+function HashtagIcon({ className }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+      <path d="M9.5 3a1 1 0 01.98.804L11 7h4l.52-2.196a1 1 0 111.96.392L17 7h2a1 1 0 110 2h-2.5l-1 4H18a1 1 0 110 2h-2.5l-.5 2a1 1 0 11-1.936-.484L13.5 15h-4l-.5 2a1 1 0 11-1.936-.484L7.5 15H5a1 1 0 110-2h2.5l1-4H6a1 1 0 110-2h2.5l.5-2A1 1 0 019.5 3zm4 6h-4l-1 4h4l1-4z" />
     </svg>
   );
 }

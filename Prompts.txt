@@ -19,6 +19,22 @@ git config --global user.name "carlos-dasilva"; git config --global user.email "
 Após logar uma vez:
 php artisan tinker --execute="App\Models\User::where('email','carlsilva48@gmail.com')->update(['role' => 'admin']);"
 
+======Criar Favicon===========
+Crie um favicon inspirado na imagem em anexo
+✅ 32×32 pixels reais (não apenas visualmente pequeno)
+✅ Fundo 100% transparente (PNG)
+✅ Cores chapadas (sem brilho, sem sombra, sem gradiente)
+✅ Exportar também em .ICO
+✅ Totalmente centralizada (sem corte)
+✅ paleta simplificada "Até 16 cores"
+========================================
+=========COMMIT===============
+git add .
+git commit -m "cadatro de plataformas"
+git push origin main
+========================
+
+
 
 ==========CONFIGURAR GIT==============
 git init
@@ -44,11 +60,7 @@ git push -u origin main
 Copie e cole no Terminal do VSCode (PowerShell) em z:\Programacao\Desenvolvendo\curriculo_gamer:
 git init
 git config --global user.name "carlos-dasilva"; git config --global user.email "carlos-dasilva@hotmail.com"; git config --global --add safe.directory "//servidor.local/hdbackup/Programacao/Desenvolvendo/curriculo_gamer"; git config --global --add safe.directory "Z:/Programacao/Desenvolvendo/curriculo_gamer"; git init -b main; git add -A; git commit -m "primeiro commit"; git remote add origin https://github.com/carlos-dasilva/curriculo_gamer.git; git push -u origin main
-=========COMMIT===============
-git add .
-git commit -m "adicao do dashboard"
-git push origin main
-========================
+
 =====Admin=========
 php artisan tinker --execute="App\Models\User::where('email','carlsilva48@gmail.com')->update(['role' => 'admin']);"
 ======confirmar========
@@ -506,7 +518,7 @@ Toda pagina alterada ou criada deve levar em consideração o layout de todo o s
 ========================================================================================================
 
 ========================================================================================================
-
+no modo mobile quando estou no estudio e outros, se puxar para o lado vai para algo em branco
 ========================================================================================================
 
 ========================================================================================================

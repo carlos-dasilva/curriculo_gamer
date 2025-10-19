@@ -39,20 +39,23 @@ export default function Footer() {
   return (
     <footer className="border-t border-gray-200 bg-white" aria-label="Rodapé">
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {/* Coluna da marca (à esquerda dos itens) */}
-          <div className="flex items-start">
+          <div className="flex items-center justify-start">
             {logoFallback ? (
               <img src={logoFallback} alt="Logo" className="h-32 w-auto" />
             ) : (
               <img src="/img/logo.png" alt="Logo" className="h-32 w-auto" onError={handleLogoError} />
             )}
           </div>
+          <div className="flex items-center justify-start">
+            <img src="/img/nome.png" alt="Currículo Gamer" className="h-16 md:h-20 w-auto" />
+          </div>
           <div>
             <h2 className="text-sm font-semibold text-gray-900">{strings.footer.sobreTitulo}</h2>
             <p className="mt-3 text-sm text-gray-600">{strings.footer.sobreTexto}</p>
           </div>
-          <div>
+          <div className="hidden">
             <h2 className="text-sm font-semibold text-gray-900">{strings.footer.contatoTitulo}</h2>
             <ul className="mt-3 space-y-2 text-sm text-gray-600">
               {site?.contact?.email && (
@@ -94,7 +97,7 @@ export default function Footer() {
               </li>
             </ul>
           </div>
-          <div>
+          <div className="hidden">
             <h2 className="text-sm font-semibold text-gray-900">{strings.footer.sigaNos}</h2>
             {socials.length > 0 && (
               <div className="mt-3 flex flex-wrap items-center gap-3" aria-label={strings.footer.redesSociais}>

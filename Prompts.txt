@@ -1,14 +1,49 @@
-cd /mnt/hdbackup/Programacao/Desenvolvendo/projeto-inicial
+cd /mnt/hdbackup/Programacao/Desenvolvendo/curriculo_gamer
 
-php artisan migrate:fresh --seed
-php artisan serve --host=0.0.0.0 --port=8000
-npm run dev
+INICIAR BACKEND
 ./bin/serve.sh
+INICIAR FRONTEND
+npm run dev
+
+============PASSOS INICIAIS=================
+====LARAVEL====
+php artisan migrate:fresh --seed
+====FRONT====
+rm -rf node_modules
+npm ci
+npm run dev
+====GIT====(alterar repositorio)
+git init
+git config --global user.name "carlos-dasilva"; git config --global user.email "carlos-dasilva@hotmail.com"; git config --global --add safe.directory "//servidor.local/hdbackup/Programacao/Desenvolvendo/curriculo_gamer"; git config --global --add safe.directory "Z:/Programacao/Desenvolvendo/curriculo_gamer"; git init -b main; git add -A; git commit -m "primeiro commit"; git remote add origin https://github.com/carlos-dasilva/curriculo_gamer.git; git push -u origin main
+====ADMIN====
+Após logar uma vez:
+php artisan tinker --execute="App\Models\User::where('email','carlsilva48@gmail.com')->update(['role' => 'admin']);"
 
 
-http://192-168-0-100.nip.io:8000/auth/callback/google
-http://192-168-0-100.nip.io:8000/auth/callback
-
+==========CONFIGURAR GIT==============
+git init
+git init -b main
+git add .
+git commit -m "primeiro commit"
+git remote add origin https://github.com/carlos-dasilva/curriculo_gamer.git
+git push -u origin main
+===ajustou o erro====
+git config --global --add safe.directory "//servidor.local/hdbackup/Programacao/Desenvolvendo/curriculo_gamer"
+git config --global --add safe.directory "%(prefix)///servidor.local/hdbackup/Programacao/Desenvolvendo/curriculo_gamer"
+git config --global --add safe.directory "Z:/Programacao/Desenvolvendo/curriculo_gamer"
+git status
+git add .
+git commit -m "primeiro commit"
+========correcao 2==================
+git remote add origin https://github.com/carlos-dasilva/curriculo_gamer.git
+git remote set-url origin https://github.com/carlos-dasilva/curriculo_gamer.git
+git remote -v
+git branch -M main
+git push -u origin main
+==========CONFIGURAR GIT (Segundo o CODEX)==============
+Copie e cole no Terminal do VSCode (PowerShell) em z:\Programacao\Desenvolvendo\curriculo_gamer:
+git init
+git config --global user.name "carlos-dasilva"; git config --global user.email "carlos-dasilva@hotmail.com"; git config --global --add safe.directory "//servidor.local/hdbackup/Programacao/Desenvolvendo/curriculo_gamer"; git config --global --add safe.directory "Z:/Programacao/Desenvolvendo/curriculo_gamer"; git init -b main; git add -A; git commit -m "primeiro commit"; git remote add origin https://github.com/carlos-dasilva/curriculo_gamer.git; git push -u origin main
 =========COMMIT===============
 git add .
 git commit -m "adicao do dashboard"
@@ -30,7 +65,7 @@ DB_PASSWORD=root
 
 git config --global user.name "carlos-dasilva"
 git config --global user.email "carlos-dasilva@hotmail.com"
-cd Z:\Programacao\Desenvolvendo\projeto-inicial
+
 git init -b main
 git add .
 git commit -m "primeiro commit"

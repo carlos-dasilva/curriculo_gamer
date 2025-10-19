@@ -11,6 +11,7 @@ use App\Domain\Diagnostics\Http\Controllers\DiagnosticsController;
 use App\Domain\Settings\Http\Controllers\ConfigController;
 use App\Domain\Legal\Http\Controllers\PrivacyController;
 use App\Domain\Legal\Http\Controllers\TermsController;
+use App\Domain\Studios\Http\Controllers\StudioController;
 
 // Rota Home (Inertia)
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -45,6 +46,14 @@ Route::middleware(['auth','role:moderador,admin'])->prefix('admin')->name('admin
     Route::get('/usuarios', [UserManagementController::class, 'index'])->name('users.index');
     Route::get('/usuarios/{user}/editar', [UserManagementController::class, 'edit'])->name('users.edit');
     Route::put('/usuarios/{user}', [UserManagementController::class, 'update'])->name('users.update');
+
+    // Estúdios (moderador e admin)
+    Route::get('/estudios', [StudioController::class, 'index'])->name('studios.index');
+    Route::get('/estudios/novo', [StudioController::class, 'create'])->name('studios.create');
+    Route::post('/estudios', [StudioController::class, 'store'])->name('studios.store');
+    Route::get('/estudios/{studio}/editar', [StudioController::class, 'edit'])->name('studios.edit');
+    Route::put('/estudios/{studio}', [StudioController::class, 'update'])->name('studios.update');
+    Route::delete('/estudios/{studio}', [StudioController::class, 'destroy'])->name('studios.destroy');
 
     // Diagnóstico detalhado do servidor (somente admin)
     Route::get('/diagnostico', [DiagnosticsController::class, 'index'])

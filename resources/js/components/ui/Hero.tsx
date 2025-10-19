@@ -19,7 +19,7 @@ export default function Hero({ onCtaClick }: Props) {
       </picture>
 
       {/* Overlay de gradiente para contraste e legibilidade (opacidade reduzida de 75% -> 60%) */}
-      <div className="absolute inset-0 -z-0 bg-gradient-to-r from-sky-700/60 to-sky-800/60" aria-hidden="true" />
+      <div className="absolute inset-0 -z-0 bg-black/70" aria-hidden="true" />
 
       <div className="relative mx-auto max-w-7xl px-4 py-24 sm:py-28 sm:px-6 lg:px-8">
         <div className="max-w-2xl">

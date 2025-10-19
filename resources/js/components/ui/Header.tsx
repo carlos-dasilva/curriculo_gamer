@@ -36,9 +36,9 @@ export default function Header({ auth }: Props) {
   const handleNameError = () => {
     // Fallback SVG para nome da marca caso não exista nome.png
     const svg = encodeURIComponent(
-      `<svg xmlns='http://www.w3.org/2000/svg' width='160' height='28' viewBox='0 0 160 28'>
-         <rect width='160' height='28' rx='4' fill='transparent'/>
-         <text x='0' y='20' fill='#111827' font-family='Arial, sans-serif' font-size='16'>NOME</text>
+      `<svg xmlns='http://www.w3.org/2000/svg' width='200' height='28' viewBox='0 0 200 28'>
+         <rect width='200' height='28' rx='4' fill='transparent'/>
+         <text x='0' y='20' fill='#111827' font-family='Arial, sans-serif' font-size='16'>Currículo Gamer</text>
        </svg>`
     );
     setNameFallback(`data:image/svg+xml;charset=UTF-8,${svg}`);
@@ -56,9 +56,9 @@ export default function Header({ auth }: Props) {
           )}
           {/* Nome ao lado da logo */}
           {nameFallback ? (
-            <img src={nameFallback} alt="Nome da marca" className="hidden h-8 w-auto md:block" />
+            <img src={nameFallback} alt="Currículo Gamer" className="hidden h-8 w-auto md:block" />
           ) : (
-            <img src={nameSrc} alt="Nome da marca" className="hidden h-8 w-auto md:block" onError={handleNameError} />
+            <img src={nameSrc} alt="Currículo Gamer" className="hidden h-8 w-auto md:block" onError={handleNameError} />
           )}
           <span className="sr-only">Início</span>
         </Link>
@@ -66,9 +66,9 @@ export default function Header({ auth }: Props) {
         {/* Nome centralizado no mobile */}
         <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 md:hidden" aria-hidden="true" role="presentation">
           {nameFallback ? (
-            <img src={nameFallback} alt="" className="h-9 w-auto" />
+            <img src={nameFallback} alt="Currículo Gamer" className="h-9 w-auto" />
           ) : (
-            <img src={nameSrc} alt="" className="h-9 w-auto" />
+            <img src={nameSrc} alt="Currículo Gamer" className="h-9 w-auto" />
           )}
         </div>
 
@@ -239,4 +239,3 @@ function UserIcon({ className }: { className?: string }) {
     </svg>
   );
 }
-

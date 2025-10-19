@@ -17,7 +17,7 @@ class StudioController extends Controller
         $name = trim((string) request('name', ''));
 
         $query = Studio::query()
-            ->select(['id','name','website','email','phone','country','founded_year'])
+            ->select(['id','name','website','country','founded_year'])
             ->when($name !== '', function ($q) use ($name) {
                 $q->where('name', 'like', "%{$name}%");
             })
@@ -45,7 +45,7 @@ class StudioController extends Controller
     public function edit(Studio $studio)
     {
         return Inertia::render('Admin/Studios/Edit', [
-            'studio' => $studio->only(['id','name','website','email','phone','country','founded_year','description']),
+            'studio' => $studio->only(['id','name','website','country','founded_year','description']),
         ]);
     }
 
@@ -61,4 +61,3 @@ class StudioController extends Controller
         return redirect()->route('admin.studios.index')->with('success', 'Estúdio removido com sucesso.');
     }
 }
-

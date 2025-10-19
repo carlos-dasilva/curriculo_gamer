@@ -12,6 +12,7 @@ use App\Domain\Settings\Http\Controllers\ConfigController;
 use App\Domain\Legal\Http\Controllers\PrivacyController;
 use App\Domain\Legal\Http\Controllers\TermsController;
 use App\Domain\Studios\Http\Controllers\StudioController;
+use App\Domain\Platforms\Http\Controllers\PlatformController;
 
 // Rota Home (Inertia)
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -54,6 +55,14 @@ Route::middleware(['auth','role:moderador,admin'])->prefix('admin')->name('admin
     Route::get('/estudios/{studio}/editar', [StudioController::class, 'edit'])->name('studios.edit');
     Route::put('/estudios/{studio}', [StudioController::class, 'update'])->name('studios.update');
     Route::delete('/estudios/{studio}', [StudioController::class, 'destroy'])->name('studios.destroy');
+
+    // Plataformas (moderador e admin)
+    Route::get('/plataformas', [PlatformController::class, 'index'])->name('platforms.index');
+    Route::get('/plataformas/novo', [PlatformController::class, 'create'])->name('platforms.create');
+    Route::post('/plataformas', [PlatformController::class, 'store'])->name('platforms.store');
+    Route::get('/plataformas/{platform}/editar', [PlatformController::class, 'edit'])->name('platforms.edit');
+    Route::put('/plataformas/{platform}', [PlatformController::class, 'update'])->name('platforms.update');
+    Route::delete('/plataformas/{platform}', [PlatformController::class, 'destroy'])->name('platforms.destroy');
 
     // Diagnóstico detalhado do servidor (somente admin)
     Route::get('/diagnostico', [DiagnosticsController::class, 'index'])

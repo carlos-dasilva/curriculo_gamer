@@ -24,6 +24,7 @@ export default function AdminLayout({ title, children }: Props) {
       { label: 'Usuários', href: '/admin/usuarios' },
     ];
     base.push({ label: 'Estudios', href: '/admin/estudios' });
+    base.push({ label: 'Plataformas', href: '/admin/plataformas' });
     if (isAdmin) {
       base.push({ label: 'Configuração', href: '/admin/configuracao' });
       base.push({ label: 'Diagnóstico', href: '/admin/diagnostico' });
@@ -43,6 +44,14 @@ export default function AdminLayout({ title, children }: Props) {
               className="inline-flex items-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
             >
               Novo estúdio
+            </Link>
+          )}
+          {currentPath.startsWith('/admin/plataformas') && (
+            <Link
+              href="/admin/plataformas/novo"
+              className="inline-flex items-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
+            >
+              Nova plataforma
             </Link>
           )}
         </div>
@@ -97,6 +106,7 @@ function renderIcon(href: string) {
   if (href.startsWith('/admin/dashboard')) return <Squares2x2Icon className={cls} />;
   if (href.startsWith('/admin/usuarios')) return <UsersIcon className={cls} />;
   if (href.startsWith('/admin/estudios')) return <BuildingIcon className={cls} />;
+  if (href.startsWith('/admin/plataformas')) return <GamepadIcon className={cls} />;
   if (href.startsWith('/admin/configuracao')) return <CogIcon className={cls} />;
   if (href.startsWith('/admin/diagnostico')) return <BeakerIcon className={cls} />;
   return null;
@@ -138,6 +148,15 @@ function BuildingIcon({ className }: { className?: string }) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
       <path d="M3.75 3A.75.75 0 013 3.75v16.5c0 .414.336.75.75.75h5.5a.75.75 0 00.75-.75V17.5h4v2.75c0 .414.336.75.75.75h5.5a.75.75 0 00.75-.75V3.75A.75.75 0 0021.25 3H3.75zM8 6.5h2v2H8v-2zm0 4h2v2H8v-2zM6 6.5h2v2H6v-2zm0 4h2v2H6v-2zm8-4h2v2h-2v-2zm0 4h2v2h-2v-2z" />
+    </svg>
+  );
+}
+
+function GamepadIcon({ className }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+      <path d="M6.75 9.75h2.5a.75.75 0 010 1.5h-2.5v2.5a.75.75 0 01-1.5 0v-2.5h-2.5a.75.75 0 010-1.5h2.5v-2.5a.75.75 0 011.5 0v2.5zM15.5 12.5a1 1 0 100-2 1 1 0 000 2zm3 2a1 1 0 100-2 1 1 0 000 2z" />
+      <path d="M7.25 6.5h9.5a4.25 4.25 0 014.25 4.25v2.5a4.25 4.25 0 01-4.25 4.25h-1.3l-1.6-1.6a1.75 1.75 0 00-1.24-.51h-1.22c-.46 0-.9.18-1.23.51l-1.6 1.6h-1.31A4.25 4.25 0 013 13.25v-2.5A4.25 4.25 0 017.25 6.5z" />
     </svg>
   );
 }

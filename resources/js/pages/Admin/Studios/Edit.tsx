@@ -6,8 +6,6 @@ type Studio = {
   id: number;
   name: string;
   website?: string | null;
-  email?: string | null;
-  phone?: string | null;
   country?: string | null;
   founded_year?: number | null;
   description?: string | null;
@@ -45,16 +43,6 @@ export default function StudiosEdit({ studio }: Props) {
               <label htmlFor="website" className="block text-sm font-medium text-gray-700">Website</label>
               <input id="website" value={data.website || ''} onChange={(e) => setData('website', e.target.value)} className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500" />
               {errors.website && <p className="mt-1 text-xs text-red-600">{errors.website}</p>}
-            </div>
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">E-mail</label>
-              <input id="email" type="email" value={data.email || ''} onChange={(e) => setData('email', e.target.value)} className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500" />
-              {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email}</p>}
-            </div>
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">Telefone</label>
-              <input id="phone" value={data.phone || ''} onChange={(e) => setData('phone', e.target.value)} className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500" />
-              {errors.phone && <p className="mt-1 text-xs text-red-600">{errors.phone}</p>}
             </div>
             <div>
               <label htmlFor="country" className="block text-sm font-medium text-gray-700">País</label>

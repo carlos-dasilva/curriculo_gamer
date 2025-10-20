@@ -70,7 +70,7 @@ export default function AdminDiagnostics({ environment, limits, tempDirs, storag
           {/* Limites de upload */}
           <section aria-label="ini_get (limites de upload)" className="space-y-3">
             <h2 className="text-lg font-semibold text-gray-900">ini_get (limites de upload)</h2>
-            <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
+            <div className="max-w-full overflow-x-auto rounded-lg border border-gray-200 bg-white">
               <table className="min-w-[480px] w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
@@ -94,7 +94,7 @@ export default function AdminDiagnostics({ environment, limits, tempDirs, storag
           {/* Diretórios temporários */}
           <section aria-label="Diretórios temporários" className="space-y-3">
             <h2 className="text-lg font-semibold text-gray-900">Diretórios temporários</h2>
-            <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
+            <div className="max-w-full overflow-x-auto rounded-lg border border-gray-200 bg-white">
               <table className="min-w-[640px] w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>

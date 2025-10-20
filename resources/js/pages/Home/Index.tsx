@@ -2,7 +2,7 @@ import React from 'react';
 import { Head } from '@inertiajs/react';
 import Header from '@/components/ui/Header';
 import Hero from '@/components/ui/Hero';
-import CardsGrid, { type Site } from '@/components/ui/CardsGrid';
+import GameCards, { type GameCard } from '@/components/ui/GameCards';
 import Footer from '@/components/ui/Footer';
 
 type AuthInfo = {
@@ -14,12 +14,12 @@ type AuthInfo = {
 };
 
 type Props = {
-  sites: Site[];
+  games: GameCard[];
   auth: AuthInfo;
   flash?: { success?: string; error?: string };
 };
 
-export default function HomeIndex({ sites, auth, flash }: Props) {
+export default function HomeIndex({ games, auth, flash }: Props) {
   const handleCta = () => {
     const el = document.getElementById('sites');
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -38,7 +38,7 @@ export default function HomeIndex({ sites, auth, flash }: Props) {
           </div>
         )}
         <Hero onCtaClick={handleCta} />
-        <CardsGrid sites={sites} />
+        <GameCards games={games} />
       </main>
       <Footer />
     </div>

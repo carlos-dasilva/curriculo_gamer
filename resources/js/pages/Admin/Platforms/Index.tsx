@@ -62,7 +62,7 @@ export default function PlatformsIndex({ platforms, filters, flash }: Props) {
           <div className="mb-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">{flash.error}</div>
         )}
 
-        <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white shadow-sm">
+        <div className="max-w-full overflow-x-auto rounded-lg border border-gray-200 bg-white shadow-sm">
           <table className="min-w-[720px] w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>

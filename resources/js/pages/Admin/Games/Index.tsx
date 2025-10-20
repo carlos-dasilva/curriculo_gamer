@@ -2,13 +2,7 @@ import React from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import AdminLayout from '@/components/layouts/AdminLayout';
 
-type Studio = {
-  id: number;
-  name: string;
-  website?: string | null;
-  country?: string | null;
-  founded_year?: number | null;
-};
+type GameRow = { id: number; name: string; studio?: { name: string } | null; platforms_count: number; tags_count: number };
 
 type Paginator<T> = {
   data: T[];
@@ -20,33 +14,33 @@ type Paginator<T> = {
 };
 
 type Props = {
-  studios: Paginator<Studio>;
+  games: Paginator<GameRow>;
   filters?: { name?: string };
   flash?: { success?: string; error?: string };
 };
 
-export default function StudiosIndex({ studios, filters, flash }: Props) {
+export default function GamesIndex({ games, filters, flash }: Props) {
   const [name, setName] = React.useState(filters?.name ?? '');
 
   const applyFilters = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    router.get('/admin/estudios', { name }, { preserveScroll: true, replace: true });
+    router.get('/admin/jogos', { name }, { preserveScroll: true, replace: true });
   };
 
   const remove = (id: number) => {
-    if (!confirm('Remover este estúdio?')) return;
-    router.delete(`/admin/estudios/${id}`, { preserveScroll: true });
+    if (!confirm('Remover este jogo?')) return;
+    router.delete(`/admin/jogos/${id}`, { preserveScroll: true });
   };
 
   return (
     <div>
-      <Head title="Estúdios" />
-      <AdminLayout title="Estúdios">
+      <Head title="Jogos" />
+      <AdminLayout title="Jogos">
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end">
           <form onSubmit={applyFilters} className="flex flex-col gap-3 sm:flex-row sm:items-end">
             <div className="w-full sm:max-w-xs">
               <label htmlFor="name" className="block text-sm font-medium text-gray-700">Nome</label>
-              <input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+              <input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900" />
             </div>
             <div>
               <button type="submit" className="inline-flex items-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900">
@@ -68,23 +62,23 @@ export default function StudiosIndex({ studios, filters, flash }: Props) {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Nome</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Website</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">País</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Fundação</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Estúdio</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Plataformas</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Tags</th>
                 <th className="px-4 py-3 w-28 text-right" />
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {studios.data.map((s) => (
-                <tr key={s.id}>
-                  <td className="px-4 py-3 text-sm text-gray-900">{s.name}</td>
-                  <td className="px-4 py-3 text-sm text-sky-700">{s.website ? <a href={s.website} className="underline-offset-2 hover:underline" target="_blank" rel="noreferrer">{s.website}</a> : '-'}</td>
-                  <td className="px-4 py-3 text-sm text-gray-700">{s.country || '-'}</td>
-                  <td className="px-4 py-3 text-sm text-gray-700">{s.founded_year || '-'}</td>
+              {games.data.map((g) => (
+                <tr key={g.id}>
+                  <td className="px-4 py-3 text-sm text-gray-900">{g.name}</td>
+                  <td className="px-4 py-3 text-sm text-gray-700">{g.studio?.name || '-'}</td>
+                  <td className="px-4 py-3 text-sm text-gray-700">{g.platforms_count}</td>
+                  <td className="px-4 py-3 text-sm text-gray-700">{g.tags_count}</td>
                   <td className="px-4 py-3 text-right whitespace-nowrap">
                     <div className="inline-flex items-center gap-2">
                       <Link
-                        href={`/admin/estudios/${s.id}/editar`}
+                        href={`/admin/jogos/${g.id}/editar`}
                         aria-label="Editar"
                         title="Editar"
                         className="inline-flex items-center justify-center rounded-md bg-gray-900 p-2 text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
@@ -93,7 +87,7 @@ export default function StudiosIndex({ studios, filters, flash }: Props) {
                         <span className="sr-only">Editar</span>
                       </Link>
                       <button
-                        onClick={() => remove(s.id)}
+                        onClick={() => remove(g.id)}
                         aria-label="Remover"
                         title="Remover"
                         className="inline-flex items-center justify-center rounded-md bg-red-600 p-2 text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
@@ -111,11 +105,11 @@ export default function StudiosIndex({ studios, filters, flash }: Props) {
 
         <nav className="mt-6 flex justify-center" aria-label="Paginação">
           <ul className="inline-flex items-center gap-1">
-            {studios.links.map((l, idx) => {
+            {games.links.map((l, idx) => {
               const label = l.label.replace('&laquo;', '«').replace('&raquo;', '»');
               const isPrev = idx === 0;
-              const isNext = idx === studios.links.length - 1;
-              const common = 'min-w-9 select-none rounded-md px-3 py-2 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600';
+              const isNext = idx === games.links.length - 1;
+              const common = 'min-w-9 select-none rounded-md px-3 py-2 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900';
               if (!l.url) {
                 return (
                   <li key={idx}>

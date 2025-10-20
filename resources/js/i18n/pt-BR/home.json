@@ -7,13 +7,13 @@
     "sair": "Sair"
   },
   "hero": {
-    "titulo": "Bem-vindo(a) ao seu hub de sites",
-    "subtitulo": "Acesse rapidamente seus projetos, utilitários e recursos.",
-    "cta": "Acessar meus sites",
+    "titulo": "Bem-vindo(a) ao Currículo Gamer",
+    "subtitulo": "Acesse rapidamente a sua área.",
+    "cta": "Acessar meu Currículo",
     "altImagem": "Banner ilustrativo"
   },
   "cards": {
-    "buscaPlaceholder": "Buscar por título, categoria ou descrição...",
+    "buscaPlaceholder": "Buscar por nome, estúdio, plataforma ou marcadores...",
     "categoria": "Categoria",
     "botaoAcessar": "Acessar",
     "semResultados": "Nenhum resultado encontrado."

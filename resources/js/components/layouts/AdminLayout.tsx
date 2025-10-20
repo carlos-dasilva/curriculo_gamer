@@ -23,6 +23,7 @@ export default function AdminLayout({ title, children }: Props) {
       { label: 'Dashboard', href: '/admin/dashboard' },
       { label: 'Usuários', href: '/admin/usuarios' },
     ];
+    base.push({ label: 'Jogos', href: '/admin/jogos' });
     base.push({ label: 'Estudios', href: '/admin/estudios' });
     base.push({ label: 'Plataformas', href: '/admin/plataformas' });
     base.push({ label: 'Marcadores', href: '/admin/marcadores' });
@@ -37,12 +38,20 @@ export default function AdminLayout({ title, children }: Props) {
     <div className="min-h-screen bg-gray-50">
       <Header auth={auth} />
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-4 flex items-center justify-between gap-4">
+        <div className="mb-4 flex flex-wrap items-center gap-3 sm:justify-between">
           {title && <h1 className="text-2xl font-semibold text-gray-900">{title}</h1>}
+          {currentPath.startsWith('/admin/jogos') && (
+            <Link
+              href="/admin/jogos/novo"
+              className="inline-flex w-full sm:w-auto items-center justify-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
+            >
+              Novo jogo
+            </Link>
+          )}
           {currentPath.startsWith('/admin/estudios') && (
             <Link
               href="/admin/estudios/novo"
-              className="inline-flex items-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
+              className="inline-flex w-full sm:w-auto items-center justify-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
             >
               Novo estúdio
             </Link>
@@ -50,7 +59,7 @@ export default function AdminLayout({ title, children }: Props) {
           {currentPath.startsWith('/admin/plataformas') && (
             <Link
               href="/admin/plataformas/novo"
-              className="inline-flex items-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
+              className="inline-flex w-full sm:w-auto items-center justify-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
             >
               Nova plataforma
             </Link>
@@ -58,7 +67,7 @@ export default function AdminLayout({ title, children }: Props) {
           {currentPath.startsWith('/admin/marcadores') && (
             <Link
               href="/admin/marcadores/novo"
-              className="inline-flex items-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
+              className="inline-flex w-full sm:w-auto items-center justify-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
             >
               Novo marcador
             </Link>
@@ -100,7 +109,7 @@ export default function AdminLayout({ title, children }: Props) {
           </aside>
 
           {/* Conteúdo dinâmico à direita */}
-          <section className="min-w-0 overflow-hidden rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+          <section className="min-w-0 overflow-x-hidden rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
             {children}
           </section>
         </div>
@@ -114,6 +123,7 @@ function renderIcon(href: string) {
   const cls = 'h-4 w-4';
   if (href.startsWith('/admin/dashboard')) return <Squares2x2Icon className={cls} />;
   if (href.startsWith('/admin/usuarios')) return <UsersIcon className={cls} />;
+  if (href.startsWith('/admin/jogos')) return <GamepadIcon className={cls} />;
   if (href.startsWith('/admin/estudios')) return <BuildingIcon className={cls} />;
   if (href.startsWith('/admin/plataformas')) return <GamepadIcon className={cls} />;
   if (href.startsWith('/admin/marcadores')) return <HashtagIcon className={cls} />;

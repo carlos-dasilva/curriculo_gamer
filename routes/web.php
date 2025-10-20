@@ -14,6 +14,7 @@ use App\Domain\Legal\Http\Controllers\TermsController;
 use App\Domain\Studios\Http\Controllers\StudioController;
 use App\Domain\Platforms\Http\Controllers\PlatformController;
 use App\Domain\Tags\Http\Controllers\TagController;
+use App\Domain\Games\Http\Controllers\GameController as GamesController;
 
 // Rota Home (Inertia)
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -72,6 +73,14 @@ Route::middleware(['auth','role:moderador,admin'])->prefix('admin')->name('admin
     Route::get('/marcadores/{tag}/editar', [TagController::class, 'edit'])->name('tags.edit');
     Route::put('/marcadores/{tag}', [TagController::class, 'update'])->name('tags.update');
     Route::delete('/marcadores/{tag}', [TagController::class, 'destroy'])->name('tags.destroy');
+
+    // Jogos (moderador e admin)
+    Route::get('/jogos', [GamesController::class, 'index'])->name('games.index');
+    Route::get('/jogos/novo', [GamesController::class, 'create'])->name('games.create');
+    Route::post('/jogos', [GamesController::class, 'store'])->name('games.store');
+    Route::get('/jogos/{game}/editar', [GamesController::class, 'edit'])->name('games.edit');
+    Route::put('/jogos/{game}', [GamesController::class, 'update'])->name('games.update');
+    Route::delete('/jogos/{game}', [GamesController::class, 'destroy'])->name('games.destroy');
 
     // Diagnóstico detalhado do servidor (somente admin)
     Route::get('/diagnostico', [DiagnosticsController::class, 'index'])

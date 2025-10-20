@@ -14,14 +14,14 @@ export default function Hero({ onCtaClick }: Props) {
     <section id="inicio" aria-label={strings.hero.altImagem} className="relative isolate overflow-hidden">
       {/* Imagem responsiva */}
       <picture className="pointer-events-none absolute inset-0 -z-10">
-        <source media="(min-width: 768px)" srcSet="/img/bannerWide.png" />
-        <img src="/img/banner.png" alt={strings.hero.altImagem} className="h-full w-full object-cover" />
+        <source media="(min-width: 768px)" srcSet="/img/hero.png" />
+        <img src="/img/hero.png" alt={strings.hero.altImagem} className="h-full w-full object-cover" />
       </picture>
 
       {/* Overlay de gradiente para contraste e legibilidade (opacidade reduzida de 75% -> 60%) */}
       <div className="absolute inset-0 -z-0 bg-black/70" aria-hidden="true" />
 
-      <div className="relative mx-auto max-w-7xl px-4 py-24 sm:py-28 sm:px-6 lg:px-8">
+      <div className="relative mx-auto max-w-7xl px-4 py-[4.5rem] sm:py-[5.25rem] sm:px-6 lg:px-8">
         <div className="max-w-2xl">
           <h1 className="text-4xl font-bold tracking-tight text-white sm:text-6xl">
             {strings.hero.titulo}

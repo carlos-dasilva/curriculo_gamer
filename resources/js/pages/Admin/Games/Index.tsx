@@ -15,16 +15,17 @@ type Paginator<T> = {
 
 type Props = {
   games: Paginator<GameRow>;
-  filters?: { name?: string };
+  filters?: { name?: string; status?: '' | 'avaliacao' | 'liberado' };
   flash?: { success?: string; error?: string };
 };
 
 export default function GamesIndex({ games, filters, flash }: Props) {
   const [name, setName] = React.useState(filters?.name ?? '');
+  const [status, setStatus] = React.useState<'' | 'avaliacao' | 'liberado'>(filters?.status ?? '');
 
   const applyFilters = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    router.get('/admin/jogos', { name }, { preserveScroll: true, replace: true });
+    router.get('/admin/jogos', { name, status }, { preserveScroll: true, replace: true });
   };
 
   const remove = (id: number) => {
@@ -41,6 +42,19 @@ export default function GamesIndex({ games, filters, flash }: Props) {
             <div className="w-full sm:max-w-xs">
               <label htmlFor="name" className="block text-sm font-medium text-gray-700">Nome</label>
               <input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900" />
+            </div>
+            <div className="w-full sm:max-w-xs">
+              <label htmlFor="status" className="block text-sm font-medium text-gray-700">Status</label>
+              <select
+                id="status"
+                value={status}
+                onChange={(e) => setStatus(e.target.value as '' | 'avaliacao' | 'liberado')}
+                className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900"
+              >
+                <option value="">Todos</option>
+                <option value="avaliacao">Em avaliação</option>
+                <option value="liberado">Liberado</option>
+              </select>
             </div>
             <div>
               <button type="submit" className="inline-flex items-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900">
@@ -65,7 +79,7 @@ export default function GamesIndex({ games, filters, flash }: Props) {
                 <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Estúdio</th>
                 <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Plataformas</th>
                 <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Tags</th>
-                <th className="px-4 py-3 w-28 text-right" />
+                <th className="px-4 py-3 w-40 text-right" />
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -77,6 +91,15 @@ export default function GamesIndex({ games, filters, flash }: Props) {
                   <td className="px-4 py-3 text-sm text-gray-700">{g.tags_count}</td>
                   <td className="px-4 py-3 text-right whitespace-nowrap">
                     <div className="inline-flex items-center gap-2">
+                      <Link
+                        href={`/jogos/${g.id}`}
+                        aria-label="Visualizar"
+                        title="Visualizar"
+                        className="inline-flex items-center justify-center rounded-md bg-white p-2 text-gray-700 ring-1 ring-inset ring-gray-200 shadow-sm hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
+                      >
+                        <EyeIcon className="h-4 w-4" />
+                        <span className="sr-only">Visualizar</span>
+                      </Link>
                       <Link
                         href={`/admin/jogos/${g.id}/editar`}
                         aria-label="Editar"
@@ -152,6 +175,14 @@ function TrashIcon({ className }: { className?: string }) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={className} aria-hidden="true">
       <path d="M6 2.5A1.5 1.5 0 017.5 1h5A1.5 1.5 0 0114 2.5V3h3a1 1 0 010 2h-1v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5H3a1 1 0 110-2h3v-.5zM6 5v11h8V5H6zm2 2a1 1 0 112 0v7a1 1 0 11-2 0V7zm4 0a1 1 0 112 0v7a1 1 0 11-2 0V7z" />
+    </svg>
+  );
+}
+
+function EyeIcon({ className }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+      <path d="M12 5c-4.5 0-8.4 2.8-10 7 1.6 4.2 5.5 7 10 7s8.4-2.8 10-7c-1.6-4.2-5.5-7-10-7zm0 12a5 5 0 110-10 5 5 0 010 10zm0-2a3 3 0 100-6 3 3 0 000 6z" />
     </svg>
   );
 }

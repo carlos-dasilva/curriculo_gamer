@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from '@inertiajs/react';
 // Placeholder definido localmente para evitar confusão com o texto antigo de busca
 const SEARCH_PLACEHOLDER = 'Buscar por nome, estúdio, plataforma ou marcadores...';
 
@@ -63,6 +64,13 @@ export default function GameCards({ games }: Props) {
               <li key={g.id} className="group rounded-lg border border-gray-200 bg-white shadow-sm transition hover:shadow-md">
                 {/* Card quadrado com imagem de fundo */}
                 <div className="relative aspect-square w-full overflow-hidden rounded-lg">
+                  <Link
+                    href={`/jogos/${g.id}`}
+                    aria-label={`Ver detalhes de ${g.name}`}
+                    className="absolute inset-0 z-20 block"
+                  >
+                    <span className="sr-only">Ver detalhes de {g.name}</span>
+                  </Link>
                   <img
                     src={g.cover_url || placeholder}
                     onError={(e) => {

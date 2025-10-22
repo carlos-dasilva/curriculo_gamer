@@ -20,6 +20,7 @@ class GameController extends Controller
     {
         $perPage = 15;
         $name = trim((string) request('name', ''));
+        $status = trim((string) request('status', ''));
 
         $query = Game::query()
             ->with(['studio:id,name'])
@@ -27,13 +28,16 @@ class GameController extends Controller
             ->when($name !== '', function ($q) use ($name) {
                 $q->where('name', 'like', "%{$name}%");
             })
+            ->when(in_array($status, ['avaliacao','liberado'], true), function ($q) use ($status) {
+                $q->where('status', $status);
+            })
             ->orderBy('name');
 
         $games = $query->paginate($perPage)->withQueryString();
 
         return Inertia::render('Admin/Games/Index', [
             'games' => $games,
-            'filters' => [ 'name' => $name ],
+            'filters' => [ 'name' => $name, 'status' => $status ],
         ]);
     }
 

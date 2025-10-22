@@ -15,6 +15,7 @@ use App\Domain\Studios\Http\Controllers\StudioController;
 use App\Domain\Platforms\Http\Controllers\PlatformController;
 use App\Domain\Tags\Http\Controllers\TagController;
 use App\Domain\Games\Http\Controllers\GameController as GamesController;
+use App\Domain\Games\Http\Controllers\PublicGameController;
 
 // Rota Home (Inertia)
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -24,6 +25,9 @@ Route::get('/politica-privacidade', [PrivacyController::class, 'index'])->name('
 
 // Termos de Uso (pública)
 Route::get('/termos-uso', [TermsController::class, 'index'])->name('terms');
+
+// Página pública de jogo (apenas liberados)
+Route::get('/jogos/{game}', [PublicGameController::class, 'show'])->name('games.show');
 
 // Autenticação Google OAuth2 (Socialite)
 Route::get('/auth/redirect/google', [GoogleAuthController::class, 'redirect'])->name('auth.google.redirect');

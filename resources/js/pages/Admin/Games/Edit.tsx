@@ -129,6 +129,18 @@ export default function GamesEdit({ game, studios, platforms, tags, flash }: Pro
           <div className="mb-4 rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-800">{flash.success}</div>
         )}
 
+        <div className="mb-4 flex justify-end">
+          <Link
+            href={`/jogos/${game.id}`}
+            className="inline-flex items-center gap-2 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-200 hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
+            aria-label="Abrir visualização pública"
+            title="Abrir visualização pública"
+          >
+            <EyeIcon className="h-4 w-4" />
+            <span>Visualizar</span>
+          </Link>
+        </div>
+
         <form onSubmit={submit} className="space-y-8" aria-label="Formulário de edição de jogo">
           {/* Informações gerais */}
           <section>
@@ -344,5 +356,13 @@ function NumberField({ id, label, value, onChange, min, max, step = 1 }: { id: s
       <input id={id} type="number" value={value === '' ? '' : String(value)} onChange={handle} min={min} max={max} step={step}
         className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500" />
     </div>
+  );
+}
+
+function EyeIcon({ className }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+      <path d="M12 5c-4.5 0-8.4 2.8-10 7 1.6 4.2 5.5 7 10 7s8.4-2.8 10-7c-1.6-4.2-5.5-7-10-7zm0 12a5 5 0 110-10 5 5 0 010 10zm0-2a3 3 0 100-6 3 3 0 000 6z" />
+    </svg>
   );
 }

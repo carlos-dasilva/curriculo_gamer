@@ -1,4 +1,5 @@
 import React from 'react';
+import { usePage } from '@inertiajs/react';
 import strings from '@/i18n/pt-BR/home.json';
 
 type Props = {
@@ -6,6 +7,11 @@ type Props = {
 };
 
 export default function Hero({ onCtaClick }: Props) {
+  const page = usePage();
+  const auth = (page.props as any).auth as {
+    isAuthenticated: boolean;
+    loginUrl?: string;
+  };
   /*
    * Imagens públicas: /img/banner.png (mobile) e /img/bannerWide.png (md+)
    * Usamos <picture> para garantir troca por breakpoint, com overlay por cima.
@@ -31,8 +37,7 @@ export default function Hero({ onCtaClick }: Props) {
           </p>
           <div className="mt-10 flex items-center gap-x-6">
             <a
-              href="#sites"
-              onClick={onCtaClick}
+              href={auth?.isAuthenticated ? '/meu-curriculo' : (auth?.loginUrl || '#')}
               className="rounded-md bg-white px-5 py-3 text-sm font-semibold text-sky-700 shadow-sm hover:bg-sky-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               {strings.hero.cta}

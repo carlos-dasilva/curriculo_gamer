@@ -69,10 +69,13 @@ export default function GamesCreate({ studios, platforms, tags, flash }: Props) 
       if (v) platformReleases[id] = v;
     });
 
-    post('/admin/jogos', {
-      preserveScroll: true,
-      data: { ...data, gallery_urls: gallery, external_links: links, platform_releases: platformReleases },
-    });
+    const payload: any = { ...data, gallery_urls: gallery, external_links: links, platform_releases: platformReleases };
+    // Remover campos agregados (calculados) na criação
+    delete payload.overall_score;
+    delete payload.difficulty;
+    delete payload.gameplay_hours;
+
+    post('/admin/jogos', { preserveScroll: true, data: payload });
   };
 
   const toggleTag = (id: number) => {
@@ -335,8 +338,9 @@ function NumberField({ id, label, value, onChange, min, max, step = 1 }: { id: s
     if (!Number.isFinite(n)) return;
     onChange(n);
   };
+  const hidden = id === 'overall_score' || id === 'difficulty' || id === 'gameplay_hours';
   return (
-    <div>
+    <div className={hidden ? 'hidden' : ''}>
       <label htmlFor={id} className="block text-sm font-medium text-gray-700">{label}</label>
       <input id={id} type="number" value={value === '' ? '' : String(value)} onChange={handle} min={min} max={max} step={step}
         className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500" />

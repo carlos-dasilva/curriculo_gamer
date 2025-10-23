@@ -6,6 +6,11 @@ import Footer from '@/components/ui/Footer';
 type Props = {
   user: { name: string; email: string };
   authProvider: string;
+  followingSummary?: Array<{
+    id: number;
+    name: string;
+    counts: { cem_por_cento: number; finalizei: number; joguei: number; quero_jogar: number };
+  }>;
   auth: {
     isAuthenticated: boolean;
     user?: { name: string; email: string } | null;
@@ -16,7 +21,7 @@ type Props = {
   flash?: { success?: string; error?: string };
 };
 
-export default function ProfileIndex({ user, authProvider, auth, flash }: Props) {
+export default function ProfileIndex({ user, authProvider, auth, flash, followingSummary = [] }: Props) {
   const { data, setData, put, processing, errors, recentlySuccessful } = useForm({
     name: user.name,
   });
@@ -88,6 +93,43 @@ export default function ProfileIndex({ user, authProvider, auth, flash }: Props)
             </Link>
           </div>
         </form>
+        {/* Seguindo - resumo de currículos */}
+        <section className="mt-10">
+          <h2 className="text-lg font-semibold text-gray-900">Seguindo</h2>
+          <p className="mt-1 text-sm text-gray-600">Resumo do currículo das pessoas que você segue.</p>
+          {followingSummary.length === 0 ? (
+            <p className="mt-3 text-sm text-gray-600">Você ainda não segue ninguém.</p>
+          ) : (
+            <div className="mt-4 overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700">Seguindo</th>
+                    <th scope="col" className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700">Fiz 100%</th>
+                    <th scope="col" className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700">Finalizei</th>
+                    <th scope="col" className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700">Joguei</th>
+                    <th scope="col" className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700">Quero Jogar</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {followingSummary.map((f) => (
+                    <tr key={f.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-2 text-sm font-medium text-gray-900">
+                        <Link href={`/curriculo/${f.id}`} className="text-gray-900 hover:underline">
+                          {f.name}
+                        </Link>
+                      </td>
+                      <td className="px-4 py-2 text-sm text-gray-800">{f.counts.cem_por_cento}</td>
+                      <td className="px-4 py-2 text-sm text-gray-800">{f.counts.finalizei}</td>
+                      <td className="px-4 py-2 text-sm text-gray-800">{f.counts.joguei}</td>
+                      <td className="px-4 py-2 text-sm text-gray-800">{f.counts.quero_jogar}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
       </main>
       <Footer />
     </div>

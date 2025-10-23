@@ -16,6 +16,10 @@ use App\Domain\Platforms\Http\Controllers\PlatformController;
 use App\Domain\Tags\Http\Controllers\TagController;
 use App\Domain\Games\Http\Controllers\GameController as GamesController;
 use App\Domain\Games\Http\Controllers\PublicGameController;
+use App\Domain\Games\Http\Controllers\UserGameInfoController;
+use App\Domain\Games\Http\Controllers\GameProgressController;
+use App\Domain\Games\Http\Controllers\CurriculumController;
+use App\Domain\Users\Http\Controllers\FollowController;
 
 // Rota Home (Inertia)
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -28,6 +32,8 @@ Route::get('/termos-uso', [TermsController::class, 'index'])->name('terms');
 
 // Página pública de jogo (apenas liberados)
 Route::get('/jogos/{game}', [PublicGameController::class, 'show'])->name('games.show');
+Route::middleware('auth')->post('/jogos/{game}/minhas-informacoes', [UserGameInfoController::class, 'save'])->name('games.mine.save');
+Route::middleware('auth')->post('/jogos/{game}/plataformas/{platform}/status', [GameProgressController::class, 'update'])->name('games.platform.status');
 
 // Autenticação Google OAuth2 (Socialite)
 Route::get('/auth/redirect/google', [GoogleAuthController::class, 'redirect'])->name('auth.google.redirect');
@@ -46,6 +52,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/perfil', [ProfileController::class, 'index'])->name('profile.index');
     Route::put('/perfil', [ProfileController::class, 'update'])->name('profile.update');
 });
+
+// Meu Currículo (somente autenticado)
+Route::middleware('auth')->get('/meu-curriculo', [CurriculumController::class, 'index'])->name('curriculum.index');
+// Currículo de outro usuário (somente autenticado)
+Route::middleware('auth')->get('/curriculo/{user}', [CurriculumController::class, 'show'])->whereNumber('user')->name('curriculum.show');
+
+// Seguir/Deixar de seguir usuário (somente autenticado)
+Route::middleware('auth')->post('/usuarios/{user}/seguir', [FollowController::class, 'follow'])->name('users.follow');
+Route::middleware('auth')->delete('/usuarios/{user}/seguir', [FollowController::class, 'unfollow'])->name('users.unfollow');
 
 // Gestão de usuários (apenas moderador e admin)
 Route::middleware(['auth','role:moderador,admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -99,3 +114,4 @@ Route::middleware(['auth','role:moderador,admin'])->prefix('admin')->name('admin
         ->name('config.update')
         ->middleware('role:admin');
 });
+

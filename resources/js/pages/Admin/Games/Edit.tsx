@@ -50,13 +50,13 @@ export default function GamesEdit({ game, studios, platforms, tags, flash }: Pro
     gallery_urls: game.gallery_urls.length ? [...game.gallery_urls] : [''],
     external_links: game.external_links.length ? [...game.external_links] : [{ label: '', url: '' }],
     status: game.status,
+    overall_score: game.overall_score ?? '',
+    difficulty: game.difficulty ?? '',
+    gameplay_hours: game.gameplay_hours ?? '',
     metacritic_metascore: game.metacritic_metascore ?? '',
     metacritic_user_score: game.metacritic_user_score ?? '',
     ptbr_subtitled: !!game.ptbr_subtitled,
     ptbr_dubbed: !!game.ptbr_dubbed,
-    overall_score: game.overall_score ?? '',
-    difficulty: game.difficulty ?? '',
-    gameplay_hours: game.gameplay_hours ?? '',
     age_rating: game.age_rating ?? '',
     description: game.description ?? '',
   });
@@ -248,11 +248,11 @@ export default function GamesEdit({ game, studios, platforms, tags, flash }: Pro
           <section>
             <h2 className="text-lg font-semibold text-gray-900">Avaliação e características</h2>
             <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+              <NumberField id="overall_score" label="Nota geral" value={data.overall_score} onChange={(v) => setData('overall_score', v)} min={0} max={10} step={0.01} disabled />
+              <NumberField id="difficulty" label="Dificuldade" value={data.difficulty} onChange={(v) => setData('difficulty', v)} min={0} max={10} step={0.01} disabled />
+              <NumberField id="gameplay_hours" label="Tempo médio de gameplay (h)" value={data.gameplay_hours} onChange={(v) => setData('gameplay_hours', v)} min={0} step={0.1} disabled />
               <NumberField id="metacritic_metascore" label="Metascore (0–100)" value={data.metacritic_metascore} onChange={(v) => setData('metacritic_metascore', v)} min={0} max={100} step={1} />
               <NumberField id="metacritic_user_score" label="User Score (0.00–10.00)" value={data.metacritic_user_score} onChange={(v) => setData('metacritic_user_score', v)} min={0} max={10} step={0.01} />
-              <NumberField id="overall_score" label="Nota geral (0.00–10.00)" value={data.overall_score} onChange={(v) => setData('overall_score', v)} min={0} max={10} step={0.01} />
-              <NumberField id="difficulty" label="Dificuldade (0.00–10.00)" value={data.difficulty} onChange={(v) => setData('difficulty', v)} min={0} max={10} step={0.01} />
-              <NumberField id="gameplay_hours" label="Tempo médio de gameplay (h)" value={data.gameplay_hours} onChange={(v) => setData('gameplay_hours', v)} min={0} step={0.1} />
             </div>
 
             <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -342,7 +342,7 @@ export default function GamesEdit({ game, studios, platforms, tags, flash }: Pro
   );
 }
 
-function NumberField({ id, label, value, onChange, min, max, step = 1 }: { id: string; label: string; value?: number | ''; onChange: (v: number | '') => void; min?: number; max?: number; step?: number }) {
+function NumberField({ id, label, value, onChange, min, max, step = 1, disabled = false }: { id: string; label: string; value?: number | ''; onChange: (v: number | '') => void; min?: number; max?: number; step?: number; disabled?: boolean }) {
   const handle = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value;
     if (raw === '') return onChange('');
@@ -353,8 +353,18 @@ function NumberField({ id, label, value, onChange, min, max, step = 1 }: { id: s
   return (
     <div>
       <label htmlFor={id} className="block text-sm font-medium text-gray-700">{label}</label>
-      <input id={id} type="number" value={value === '' ? '' : String(value)} onChange={handle} min={min} max={max} step={step}
-        className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+      <input
+        id={id}
+        type="number"
+        value={value === '' ? '' : String(value)}
+        onChange={handle}
+        min={min}
+        max={max}
+        step={step}
+        disabled={disabled}
+        readOnly={disabled}
+        className={`mt-1 w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none ${disabled ? 'cursor-not-allowed border-gray-200 bg-gray-50 text-gray-500' : 'border-gray-300 bg-white text-gray-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500'}`}
+      />
     </div>
   );
 }

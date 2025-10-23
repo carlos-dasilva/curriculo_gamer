@@ -36,12 +36,16 @@ type AuthInfo = {
   abilities?: { manageUsers?: boolean };
 };
 
+type MyInfoDto = { score?: number | null; difficulty?: number | null; gameplay_hours?: number | null; notes?: string | null } | null;
+
 type Props = {
   game: GameDto;
   auth: AuthInfo;
+  myInfo?: MyInfoDto;
+  myPlatformStatuses?: Record<number, 'nao_joguei' | 'quero_jogar' | 'joguei' | 'finalizei' | 'cem_por_cento'>;
 };
 
-export default function GameShow({ game, auth }: Props) {
+export default function GameShow({ game, auth, myInfo, myPlatformStatuses }: Props) {
   const placeholder = '/img/sem-imagem.svg';
   const allImages = React.useMemo(() => {
     const arr = [game.cover_url, ...(game.gallery_urls || [])].filter(Boolean) as string[];
@@ -51,6 +55,39 @@ export default function GameShow({ game, auth }: Props) {
 
   const [isOpen, setOpen] = React.useState(false);
   const [index, setIndex] = React.useState(0);
+  // Estado local (apenas UI neste momento)
+  type LocalPlayStatus = 'nao_joguei' | 'quero_jogar' | 'joguei' | 'finalizei' | 'cem_por_cento';
+  const STATUS_LABELS: Record<LocalPlayStatus, string> = {
+    nao_joguei: 'Não joguei',
+    quero_jogar: 'Quero Jogar',
+    joguei: 'Joguei',
+    finalizei: 'Finalizei',
+    cem_por_cento: 'Fiz 100%',
+  };
+  const defaultStatuses = React.useMemo(() => {
+    const m: Record<number, LocalPlayStatus> = {};
+    (game.platforms || []).forEach((p) => {
+      const preset = myPlatformStatuses?.[p.id];
+      m[p.id] = (preset as LocalPlayStatus) || 'nao_joguei';
+    });
+    return m;
+  }, [game.platforms, myPlatformStatuses]);
+  const [myStatuses, setMyStatuses] = React.useState<Record<number, LocalPlayStatus>>(defaultStatuses);
+  const [myScore, setMyScore] = React.useState<number>(typeof myInfo?.score === 'number' ? myInfo!.score! : 0);
+  const [myDifficulty, setMyDifficulty] = React.useState<number>(typeof myInfo?.difficulty === 'number' ? myInfo!.difficulty! : 0);
+  const [myNotes, setMyNotes] = React.useState(myInfo?.notes || '');
+  const [myGameplayHours, setMyGameplayHours] = React.useState<number | ''>(typeof myInfo?.gameplay_hours === 'number' ? (myInfo!.gameplay_hours! as number) : 0);
+  const [communityScore, setCommunityScore] = React.useState<number | null>(
+    typeof game.overall_score === 'number' ? game.overall_score : (game.overall_score != null ? Number(game.overall_score) : null)
+  );
+  const [communityDifficulty, setCommunityDifficulty] = React.useState<number | null>(
+    game.difficulty != null ? Number(game.difficulty) : null
+  );
+  const [communityGameplay, setCommunityGameplay] = React.useState<number | null>(
+    game.gameplay_hours != null ? Number(game.gameplay_hours) : null
+  );
+  const [saving, setSaving] = React.useState(false);
+  const [saveState, setSaveState] = React.useState<null | { type: 'success' | 'error'; message: string }>(null);
 
   const openAt = (idx: number) => {
     setIndex(idx);
@@ -119,8 +156,8 @@ export default function GameShow({ game, auth }: Props) {
 
               {/* Destaques de notas */}
               <div className="mt-4 flex flex-wrap items-center gap-4">
-                {game.overall_score != null && (
-                  <Badge label="Nota da comunidade" value={`${Number(game.overall_score).toFixed(2)} / 10.00`} />
+                {communityScore != null && (
+                  <Badge label="Nota da comunidade" value={`${Number(communityScore).toFixed(2)} / 10.00`} />
                 )}
                 <MetacriticBadge label="Metascore" value={game.metacritic_metascore} suffix="/100" max={100} decimals={0} />
                 <MetacriticBadge label="User Score" value={game.metacritic_user_score} suffix="/10.00" max={10} decimals={2} />
@@ -187,6 +224,17 @@ export default function GameShow({ game, auth }: Props) {
           <section className="lg:col-span-2">
             <h2 className="text-lg font-semibold text-gray-900">Descrição</h2>
             <p className="mt-2 whitespace-pre-line text-gray-700">{game.description || 'Sem descrição.'}</p>
+
+            {/* Marcadores (movido logo após a descrição) */}
+            <div className="mt-8">
+              <h3 className="text-sm font-semibold text-gray-900">Marcadores</h3>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {game.tags.length === 0 && <span className="text-sm text-gray-600">—</span>}
+                {game.tags.map((t) => (
+                  <span key={t.id} className="inline-flex items-center gap-1 rounded-md bg-white px-3 py-1 text-sm text-gray-800 ring-1 ring-inset ring-gray-200">#{t.slug}</span>
+                ))}
+              </div>
+            </div>
           </section>
 
           {/* Coluna direita: dados e links */}
@@ -221,7 +269,7 @@ export default function GameShow({ game, auth }: Props) {
               <h3 className="text-sm font-semibold text-gray-900">Detalhes</h3>
               <dl className="mt-2 space-y-1 text-sm text-gray-800">
                 {game.difficulty != null && (
-                  <div className="flex items-center justify-between"><dt>Dificuldade</dt><dd>{`${Number(game.difficulty).toFixed(2)} / 10.00`}</dd></div>
+                  <div className="flex items-center justify-between"><dt>Dificuldade</dt><dd>{`${Number(communityDifficulty).toFixed(2)} / 10.00`}</dd></div>
                 )}
                 {game.gameplay_hours != null && (
                   <div className="flex items-center justify-between"><dt>Gameplay médio</dt><dd>{Number(game.gameplay_hours).toFixed(1)} h</dd></div>
@@ -243,19 +291,169 @@ export default function GameShow({ game, auth }: Props) {
                 ))}
               </ul>
             </div>
+
+            {/* Minhas Informações */}
+            <div className="mt-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+              <h3 className="text-sm font-semibold text-gray-900">Minhas Informações</h3>
+
+              {/* Progresso por plataforma */}
+              <div className="mt-3 space-y-2">
+                {(game.platforms || []).map((p) => (
+                  <div key={p.id} className="flex items-center justify-between gap-3">
+                    <span className="text-sm text-gray-800">{p.name}</span>
+                    <select
+                      value={myStatuses[p.id] || 'nao_joguei'}
+                      onChange={async (e) => {
+                        const value = e.target.value as LocalPlayStatus;
+                        setMyStatuses((s) => ({ ...s, [p.id]: value }));
+                        if (auth?.isAuthenticated) {
+                          try {
+                            // @ts-ignore
+                            await window.axios.post(`/jogos/${game.id}/plataformas/${p.id}/status`, { status: value });
+                          } catch (err) {
+                            // opcional: indicar erro visual se necessário
+                          }
+                        }
+                      }}
+                      className="w-44 rounded-md border border-gray-300 bg-white px-2 py-1 text-xs text-gray-800 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                      aria-label={`Meu status em ${p.name}`}
+                    >
+                      {Object.entries(STATUS_LABELS).map(([val, label]) => (
+                        <option key={val} value={val}>{label}</option>
+                      ))}
+                    </select>
+                  </div>
+                ))}
+              </div>
+
+              {/* Notas pessoais */}
+              <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
+                <div>
+                  <label htmlFor="myScore" className="block text-xs font-medium text-gray-700 whitespace-nowrap overflow-hidden text-ellipsis">Minha nota (0 a 10)</label>
+                  <input
+                    id="myScore"
+                    type="range"
+                    min={0}
+                    max={10}
+                    step={1}
+                    value={myScore}
+                    onChange={(e) => setMyScore(Math.round(Number(e.target.value)))}
+                    className="mt-2 w-full accent-sky-600"
+                  />
+                  <div className="mt-1 text-xs text-gray-700">{myScore} / 10</div>
+                </div>
+                <div>
+                  <label htmlFor="myDifficulty" className="block text-xs font-medium text-gray-700 whitespace-nowrap overflow-hidden text-ellipsis">Dificuldade (0 a 10)</label>
+                  <input
+                    id="myDifficulty"
+                    type="range"
+                    min={0}
+                    max={10}
+                    step={1}
+                    value={myDifficulty}
+                    onChange={(e) => setMyDifficulty(Math.round(Number(e.target.value)))}
+                    className="mt-2 w-full accent-sky-600"
+                  />
+                  <div className="mt-1 text-xs text-gray-700">{myDifficulty} / 10</div>
+                </div>
+                <div>
+                  <label htmlFor="myGameplayHours" className="block text-xs font-medium text-gray-700 whitespace-nowrap overflow-hidden text-ellipsis">Horas de Gameplay</label>
+                  <input
+                    id="myGameplayHours"
+                    type="number"
+                    min={0}
+                    step={1}
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={myGameplayHours === '' ? '' : String(myGameplayHours)}
+                    onChange={(e) => {
+                      const raw = e.target.value;
+                      if (raw === '') return setMyGameplayHours('');
+                      const n = Number(raw);
+                      if (Number.isFinite(n)) setMyGameplayHours(Math.max(0, Math.trunc(n)));
+                    }}
+                    className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  />
+                </div>
+              </div>
+
+              {/* Considerações */}
+              <div className="mt-4">
+                <label htmlFor="myNotes" className="block text-xs font-medium text-gray-700">Minhas considerações</label>
+                <textarea
+                  id="myNotes"
+                  rows={4}
+                  value={myNotes}
+                  onChange={(e) => setMyNotes(e.target.value)}
+                  placeholder="Compartilhe suas impressões sobre o jogo..."
+                  className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                />
+                {/* Ações */}
+                <div className="mt-4 flex items-center gap-3">
+                  {auth?.isAuthenticated ? (
+                    <button
+                      type="button"
+                      disabled={saving}
+                      onClick={async () => {
+                        try {
+                          setSaving(true);
+                          const played = Object.values(myStatuses || {}).some((v) => v === 'joguei' || v === 'finalizei' || v === 'cem_por_cento');
+                          const payload = {
+                            score: myScore,
+                            difficulty: myDifficulty,
+                            gameplay_hours: myGameplayHours === '' ? null : myGameplayHours,
+                            notes: myNotes,
+                          } as any;
+                          if (!played) {
+                            payload.score = 0;
+                            payload.difficulty = 0;
+                            payload.gameplay_hours = 0;
+                          }
+                          // @ts-ignore
+                          const resp = await window.axios.post(`/jogos/${game.id}/minhas-informacoes`, payload);
+                          if (resp?.data && typeof resp.data.overall_score !== 'undefined') {
+                            const os = resp.data.overall_score;
+                            setCommunityScore(os === null ? null : Number(os));
+                          }
+                          if (resp?.data && typeof resp.data.avg_difficulty !== 'undefined') {
+                            const ad = resp.data.avg_difficulty;
+                            setCommunityDifficulty(ad === null ? null : Number(ad));
+                          }
+                          if (resp?.data && typeof resp.data.avg_gameplay_hours !== 'undefined') {
+                            const agh = resp.data.avg_gameplay_hours;
+                            setCommunityGameplay(agh === null ? null : Number(agh));
+                          }
+                          setSaveState({ type: 'success', message: 'Informações salvas.' });
+                        } catch (e: any) {
+                          setSaveState({ type: 'error', message: 'Não foi possível salvar.' });
+                        } finally {
+                          setSaving(false);
+                          window.setTimeout(() => setSaveState(null), 3000);
+                        }
+                      }}
+                      className="inline-flex items-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {saving ? 'Salvando…' : 'Salvar'}
+                    </button>
+                  ) : (
+                    <a href={auth?.loginUrl || '#'} className="text-sm text-sky-700 underline-offset-2 hover:underline">Entre para salvar suas informações</a>
+                  )}
+                  {saveState && (
+                    <span
+                      role="status"
+                      className={`inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm shadow-sm ring-1 ring-inset ${saveState.type === 'success' ? 'bg-green-50 text-green-800 ring-green-200' : 'bg-red-50 text-red-800 ring-red-200'}`}
+                    >
+                      {saveState.type === 'success' ? <CheckIcon className="h-4 w-4" /> : <AlertIcon className="h-4 w-4" />}
+                      <span>{saveState.message}</span>
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
           </aside>
         </div>
 
-        {/* Tags */}
-        <section className="mt-8">
-          <h2 className="text-lg font-semibold text-gray-900">Marcadores</h2>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {game.tags.length === 0 && <span className="text-sm text-gray-600">—</span>}
-            {game.tags.map((t) => (
-              <span key={t.id} className="inline-flex items-center gap-1 rounded-md bg-white px-3 py-1 text-sm text-gray-800 ring-1 ring-inset ring-gray-200">#{t.slug}</span>
-            ))}
-          </div>
-        </section>
+        
       </div>
 
       {/* Modal + Carrossel */}
@@ -367,4 +565,20 @@ function formatDate(iso: string) {
   } catch {
     return iso;
   }
+}
+
+function CheckIcon({ className }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={className} aria-hidden="true">
+      <path fillRule="evenodd" d="M16.704 5.29a1 1 0 010 1.414l-7.25 7.25a1 1 0 01-1.414 0l-3-3a1 1 0 111.414-1.414l2.293 2.293 6.543-6.543a1 1 0 011.414 0z" clipRule="evenodd" />
+    </svg>
+  );
+}
+
+function AlertIcon({ className }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={className} aria-hidden="true">
+      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.72-1.36 3.485 0l6.518 11.586c.75 1.333-.21 2.99-1.742 2.99H3.48c-1.532 0-2.492-1.657-1.742-2.99L8.257 3.1zM11 14a1 1 0 10-2 0 1 1 0 002 0zm-1-2a1 1 0 01-1-1V8a1 1 0 112 0v3a1 1 0 01-1 1z" clipRule="evenodd" />
+    </svg>
+  );
 }

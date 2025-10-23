@@ -44,6 +44,29 @@ class PublicGameController extends Controller
         // Ordena imagens da galeria
         $gallery = $game->images->sortBy('sort_order')->pluck('url')->values()->all();
 
+        // Carrega minhas informações salvas (se autenticado)
+        $myInfo = null;
+        $myPlatformStatuses = [];
+        if (auth()->check()) {
+            try {
+                $myInfo = \App\Models\UserGameInfo::query()
+                    ->where('user_id', auth()->id())
+                    ->where('game_id', $game->id)
+                    ->first(['score','difficulty','gameplay_hours','notes']);
+            } catch (\Throwable $e) {
+                $myInfo = null;
+            }
+            try {
+                $rows = \App\Models\UserGamePlatformStatus::query()
+                    ->where('user_id', auth()->id())
+                    ->where('game_id', $game->id)
+                    ->get(['platform_id','status']);
+                $myPlatformStatuses = $rows->mapWithKeys(fn($r) => [$r->platform_id => (string) $r->status])->all();
+            } catch (\Throwable $e) {
+                $myPlatformStatuses = [];
+            }
+        }
+
         return Inertia::render('Games/Show', [
             'game' => [
                 'id' => $game->id,
@@ -70,6 +93,8 @@ class PublicGameController extends Controller
                 'gallery_urls' => $gallery,
                 'external_links' => $game->links->map(fn($l) => ['label' => $l->label, 'url' => $l->url])->values(),
             ],
+            'myInfo' => $myInfo,
+            'myPlatformStatuses' => $myPlatformStatuses,
         ]);
     }
 }

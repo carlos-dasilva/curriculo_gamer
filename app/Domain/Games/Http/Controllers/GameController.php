@@ -11,6 +11,7 @@ use App\Models\Game;
 use App\Models\GameImage;
 use App\Models\GameLink;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Http\RedirectResponse;
 use App\Domain\Games\Http\Requests\StoreGameRequest;
 
@@ -53,6 +54,46 @@ class GameController extends Controller
     public function store(StoreGameRequest $request): RedirectResponse
     {
         $data = $request->validated();
+
+        // Enriquecimento via RAWG: se metascore nao informado, tenta buscar por nome
+        try {
+            $hasMeta = isset($data['metacritic_metascore']) && $data['metacritic_metascore'] !== null && $data['metacritic_metascore'] !== '';
+            if (!$hasMeta) {
+                $apiKey = env('RAWG_API_KEY', '6dd272e717a64ad591eb4ef2889b1572');
+                $name = (string) ($data['name'] ?? '');
+                if ($apiKey && $name !== '') {
+                    $base = 'https://api.rawg.io/api/games';
+                    $resp = Http::timeout(8)->get($base, [
+                        'key' => $apiKey,
+                        'search' => $name,
+                        'search_exact' => true,
+                        'page_size' => 1,
+                    ]);
+                    if (!$resp->ok() || empty($resp['results'])) {
+                        // fallback mais amplo
+                        $resp = Http::timeout(8)->get($base, [
+                            'key' => $apiKey,
+                            'search' => $name,
+                            'page_size' => 1,
+                        ]);
+                    }
+                    if ($resp->ok() && !empty($resp['results'])) {
+                        $first = $resp['results'][0] ?? [];
+                        if (isset($first['metacritic']) && $first['metacritic'] !== null) {
+                            $data['metacritic_metascore'] = (int) $first['metacritic'];
+                        }
+                        // RAWG nao possui metacritic userscore direto; usa rating (0..5) como aproximacao
+                        $rating = $first['rating'] ?? null;
+                        if ((!isset($data['metacritic_user_score']) || $data['metacritic_user_score'] === null || $data['metacritic_user_score'] === '') && $rating !== null) {
+                            $score10 = round(((float) $rating) * 2, 2); // escala 0..5 -> 0..10
+                            $data['metacritic_user_score'] = $score10;
+                        }
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            // silencia enriquecimento se falhar
+        }
 
         return DB::transaction(function () use ($data) {
             $status = $data['status'] ?? 'avaliacao';
@@ -148,6 +189,44 @@ class GameController extends Controller
     public function update(\App\Domain\Games\Http\Requests\StoreGameRequest $request, Game $game): RedirectResponse
     {
         $data = $request->validated();
+
+        // Enriquecimento via RAWG na edição: se metascore não informado, tenta buscar
+        try {
+            $hasMeta = isset($data['metacritic_metascore']) && $data['metacritic_metascore'] !== null && $data['metacritic_metascore'] !== '';
+            if (!$hasMeta) {
+                $apiKey = env('RAWG_API_KEY', '6dd272e717a64ad591eb4ef2889b1572');
+                $name = (string) ($data['name'] ?? $game->name ?? '');
+                if ($apiKey && $name !== '') {
+                    $base = 'https://api.rawg.io/api/games';
+                    $resp = Http::timeout(8)->get($base, [
+                        'key' => $apiKey,
+                        'search' => $name,
+                        'search_exact' => true,
+                        'page_size' => 1,
+                    ]);
+                    if (!$resp->ok() || empty($resp['results'])) {
+                        $resp = Http::timeout(8)->get($base, [
+                            'key' => $apiKey,
+                            'search' => $name,
+                            'page_size' => 1,
+                        ]);
+                    }
+                    if ($resp->ok() && !empty($resp['results'])) {
+                        $first = $resp['results'][0] ?? [];
+                        if (isset($first['metacritic']) && $first['metacritic'] !== null) {
+                            $data['metacritic_metascore'] = (int) $first['metacritic'];
+                        }
+                        $rating = $first['rating'] ?? null;
+                        if ((!isset($data['metacritic_user_score']) || $data['metacritic_user_score'] === null || $data['metacritic_user_score'] === '') && $rating !== null) {
+                            $score10 = round(((float) $rating) * 2, 2);
+                            $data['metacritic_user_score'] = $score10;
+                        }
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            // ignora enriquecimento em caso de falha
+        }
 
         return DB::transaction(function () use ($data, $game) {
             $newStatus = $data['status'] ?? $game->status;

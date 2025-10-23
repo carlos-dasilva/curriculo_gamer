@@ -95,14 +95,12 @@ export default function Header({ auth }: Props) {
           ) : (
             <div className="flex items-center gap-3">
               <a
-                href="/perfil"
-                aria-label="Abrir meu perfil"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
-                title={auth.user?.name || 'Meu perfil'}
+                href="/opcoes"
+                aria-label="Abrir opções"
+                className="inline-flex items-center rounded-md bg-gray-900 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
+                title="Opções"
               >
-                <span className="select-none">
-                  {(auth.user?.name || 'U').slice(0, 1).toUpperCase()}
-                </span>
+                Opções
               </a>
               <form method="POST" action={auth.logoutUrl || '#'}>
                 <input type="hidden" name="_token" value={document.querySelector('meta[name=csrf-token]')?.getAttribute('content') || ''} />
@@ -167,9 +165,9 @@ export default function Header({ auth }: Props) {
               </a>
             ) : (
               <>
-                <a href="/perfil" className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm text-gray-800 hover:bg-gray-50" onClick={() => setMenuOpen(false)}>
+                <a href="/opcoes" className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm text-gray-800 hover:bg-gray-50" onClick={() => setMenuOpen(false)}>
                   <UserIcon className="h-4 w-4" />
-                  <span>Meu perfil</span>
+                  <span>Opções</span>
                 </a>
                 <Link
                   href={auth.logoutUrl || '#'}

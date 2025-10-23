@@ -20,6 +20,7 @@ use App\Domain\Games\Http\Controllers\UserGameInfoController;
 use App\Domain\Games\Http\Controllers\GameProgressController;
 use App\Domain\Games\Http\Controllers\CurriculumController;
 use App\Domain\Users\Http\Controllers\FollowController;
+use App\Domain\Profile\Http\Controllers\OptionsController;
 
 // Rota Home (Inertia)
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -52,6 +53,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/perfil', [ProfileController::class, 'index'])->name('profile.index');
     Route::put('/perfil', [ProfileController::class, 'update'])->name('profile.update');
 });
+
+// Opções (menu lateral para usuário)
+Route::middleware('auth')->get('/opcoes', [OptionsController::class, 'index'])->name('options.index');
 
 // Meu Currículo (somente autenticado)
 Route::middleware('auth')->get('/meu-curriculo', [CurriculumController::class, 'index'])->name('curriculum.index');
@@ -114,4 +118,3 @@ Route::middleware(['auth','role:moderador,admin'])->prefix('admin')->name('admin
         ->name('config.update')
         ->middleware('role:admin');
 });
-

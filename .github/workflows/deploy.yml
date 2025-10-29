@@ -67,20 +67,20 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
 
           echo ">> Criando known_hosts com ${{ secrets.HOSTINGER_HOST }}"
-          ssh-keyscan -H "${{ secrets.HOSTINGER_HOST }}" >> ~/.ssh/known_hosts
+          ssh-keyscan -p 65002 -H "${{ secrets.HOSTINGER_HOST }}" >> ~/.ssh/known_hosts
 
           echo ">> Conferindo conteúdo da pasta ~/.ssh"
           ls -la ~/.ssh
-          
+
       # 9. Faz upload dos arquivos pro servidor Hostinger usando rsync via SSH
       - name: Upload to Hostinger
         run: |
-          rsync -az --delete deploy_package/ ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}:${{ secrets.HOSTINGER_PATH }}/
+          rsync -az -e "ssh -p 65002" --delete deploy_package/ ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}:${{ secrets.HOSTINGER_PATH }}/
 
       # 10. Roda comandos de pós-deploy direto lá no servidor (migrate, cache, etc)
       - name: Run post-deploy commands on Hostinger
         run: |
-          ssh ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }} "\
+          ssh -p 65002 ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }} "\
             cd ${{ secrets.HOSTINGER_PATH }} && \
             php artisan migrate --force && \
             php artisan config:cache && \

@@ -94,23 +94,31 @@ jobs:
           mkdir -p ~/.ssh
           printf "%s\n" "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -p ${{ secrets.SSH_PORT }} -H "${{ secrets.HOSTINGER_HOST }}" >> ~/.ssh/known_hosts
+          PORT="${{ secrets.HOSTINGER_PORT }}"; [ -z "$PORT" ] && PORT="${{ secrets.SSH_PORT }}"; [ -z "$PORT" ] && PORT=22
+          HOST="${{ secrets.HOSTINGER_HOST }}"
+          ssh-keyscan -p "$PORT" -H "$HOST" >> ~/.ssh/known_hosts
 
       - name: Enviar arquivos para Hostinger (rsync)
         shell: bash
         run: |
           set -euo pipefail
+          PORT="${{ secrets.HOSTINGER_PORT }}"; [ -z "$PORT" ] && PORT="${{ secrets.SSH_PORT }}"; [ -z "$PORT" ] && PORT=22
+          USER="${{ secrets.HOSTINGER_USER }}"
+          HOST="${{ secrets.HOSTINGER_HOST }}"
+          PATH_REMOTE="${{ secrets.HOSTINGER_APP_PATH }}"
           rsync -az \
-            -e "ssh -p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519" \
+            -e "ssh -p $PORT -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519" \
             --delete \
             deploy_package/ \
-            "${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}:${{ secrets.HOSTINGER_APP_PATH }}/"
+            "$USER@$HOST:$PATH_REMOTE/"
 
       - name: Executar comandos de pos-deploy no servidor
         shell: bash
         run: |
           set -euo pipefail
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 -p "${{ secrets.SSH_PORT }}" "${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}" "bash -se -c '
+          PORT="${{ secrets.HOSTINGER_PORT }}"; [ -z "$PORT" ] && PORT="${{ secrets.SSH_PORT }}"; [ -z "$PORT" ] && PORT=22
+          USER="${{ secrets.HOSTINGER_USER }}"; HOST="${{ secrets.HOSTINGER_HOST }}"
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 -p "$PORT" "$USER@$HOST" "bash -se -c '
             APP_PATH=\"${{ secrets.HOSTINGER_APP_PATH }}\"
             WEBROOT=\"${{ secrets.HOSTINGER_WEBROOT }}\"
 

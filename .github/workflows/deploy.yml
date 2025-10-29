@@ -80,6 +80,7 @@ jobs:
           mkdir -p deploy_package
           rsync -a \
             --delete \
+            --exclude ".env*" \
             --exclude ".git" \
             --exclude ".github" \
             --exclude "node_modules" \
@@ -102,6 +103,7 @@ jobs:
           set -euo pipefail
           rsync -az \
             -e "ssh -p ${{ secrets.HOSTINGER_PORT }} -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519" \
+            --exclude ".env*" \
             --delete \
             deploy_package/ \
             "${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}:${{ secrets.HOSTINGER_APP_PATH }}/"
@@ -113,8 +115,15 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 -p "${{ secrets.HOSTINGER_PORT }}" "${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}" "bash -se -c '
             cd \"${{ secrets.HOSTINGER_APP_PATH }}\"
 
-            echo \"Limpando caches antigos...\"
-            php artisan optimize:clear || true
+            echo \"Garantindo APP_KEY...\"
+            if ! grep -qE "^APP_KEY=.+" .env 2>/dev/null; then
+              php artisan key:generate --force || true
+            fi
+
+            echo \"Limpando caches (sem tocar cache: database)...\"
+            php artisan config:clear || true
+            php artisan route:clear || true
+            php artisan view:clear || true
 
             echo \"Rodando migrations (forcado em producao)...\"
             php artisan migrate --force

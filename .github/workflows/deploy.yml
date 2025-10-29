@@ -57,11 +57,20 @@ jobs:
 
       # 8. Adiciona a chave SSH pra conseguir conectar na Hostinger
       - name: Add SSH key
+        shell: bash
         run: |
+          set -e
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+
+          echo ">> Gravando chave privada em ~/.ssh/id_ed25519"
+          printf "%s\n" "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H ${{ secrets.HOSTINGER_HOST }} >> ~/.ssh/known_hosts
+
+          echo ">> Criando known_hosts com ${{ secrets.HOSTINGER_HOST }}"
+          ssh-keyscan -H "${{ secrets.HOSTINGER_HOST }}" >> ~/.ssh/known_hosts
+
+          echo ">> Conferindo conteúdo da pasta ~/.ssh"
+          ls -la ~/.ssh
 
       # 9. Faz upload dos arquivos pro servidor Hostinger usando rsync via SSH
       - name: Upload to Hostinger

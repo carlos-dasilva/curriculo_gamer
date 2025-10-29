@@ -133,14 +133,21 @@ jobs:
             php artisan route:cache
             php artisan view:cache
 
-            echo \"Permissoes e storage...\"
-            chmod -R 775 storage bootstrap/cache || true
-            rm -rf \"${{ secrets.HOSTINGER_WEBROOT }}/storage\" || true
-            ln -s \"${{ secrets.HOSTINGER_APP_PATH }}/storage/app/public\" \"${{ secrets.HOSTINGER_WEBROOT }}/storage\" || true
+            echo \"Permissoes e storage...\" 
+            chmod -R 775 storage bootstrap/cache || true 
+            rm -rf \"${{ secrets.HOSTINGER_WEBROOT }}/storage\" || true 
+            ln -s \"${{ secrets.HOSTINGER_APP_PATH }}/storage/app/public\" \"${{ secrets.HOSTINGER_WEBROOT }}/storage\" || true 
 
-            echo \"Atualizando webroot (index.php e .htaccess)...\"
-            cp -f \"${{ secrets.HOSTINGER_APP_PATH }}/deploy/webroot/index.php\" \"${{ secrets.HOSTINGER_WEBROOT }}/index.php\"
-            cp -f \"${{ secrets.HOSTINGER_APP_PATH }}/deploy/webroot/.htaccess\" \"${{ secrets.HOSTINGER_WEBROOT }}/.htaccess\"
+            echo \"Atualizando webroot (index.php e .htaccess)...\" 
+            cp -f \"${{ secrets.HOSTINGER_APP_PATH }}/deploy/webroot/index.php\" \"${{ secrets.HOSTINGER_WEBROOT }}/index.php\" 
+            cp -f \"${{ secrets.HOSTINGER_APP_PATH }}/deploy/webroot/.htaccess\" \"${{ secrets.HOSTINGER_WEBROOT }}/.htaccess\" 
+            echo \"Expondo assets publicos (build, img, favicon)...\" 
+            rm -rf \"${{ secrets.HOSTINGER_WEBROOT }}/build\" || true 
+            cp -R \"${{ secrets.HOSTINGER_APP_PATH }}/public/build\" \"${{ secrets.HOSTINGER_WEBROOT }}/\" || true 
+            rm -rf \"${{ secrets.HOSTINGER_WEBROOT }}/img\" || true 
+            cp -R \"${{ secrets.HOSTINGER_APP_PATH }}/public/img\" \"${{ secrets.HOSTINGER_WEBROOT }}/\" || true 
+            cp -f \"${{ secrets.HOSTINGER_APP_PATH }}/public/favicon.ico\" \"${{ secrets.HOSTINGER_WEBROOT }}/favicon.ico\" || true 
+            [ -f \"${{ secrets.HOSTINGER_APP_PATH }}/public/robots.txt\" ] && cp -f \"${{ secrets.HOSTINGER_APP_PATH }}/public/robots.txt\" \"${{ secrets.HOSTINGER_WEBROOT }}/robots.txt\" || true 
 
             echo \"Health-check...\"
             (curl -sSf -I https://curriculogamer.com.br >/dev/null && echo OK) || {

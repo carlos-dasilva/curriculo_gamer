@@ -1,93 +1,30 @@
-name: Deploy to Hostinger
+- name: Executar comandos de pós-deploy no servidor
+  run: |
+    ssh -o StrictHostKeyChecking=no -p "${{ secrets.SSH_PORT }}" "${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}" "
+      set -euo pipefail
+      APP_PATH='${{ secrets.HOSTINGER_APP_PATH }}'
+      WEBROOT='${{ secrets.HOSTINGER_WEBROOT }}'
 
-on:
-  push:
-    branches: ["main"]
+      cd \$APP_PATH
 
-permissions:
-  contents: read
+      echo '→ Limpando caches antigos...'
+      php artisan optimize:clear
 
-concurrency:
-  group: deploy-curriculogamer
-  cancel-in-progress: true
+      echo '→ Rodando migrations (forçado em produção)...'
+      php artisan migrate --force
 
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
+      echo '→ Recriando caches...'  # depois das migrations
+      php artisan config:cache
+      php artisan route:cache
+      php artisan view:cache
 
-    env:
-      SSH_PORT: "65002"
+      echo '→ Permissões e storage...'
+      chmod -R 775 storage bootstrap/cache || true
+      rm -rf \$WEBROOT/storage || true
+      ln -s \$APP_PATH/storage/app/public \$WEBROOT/storage || true
 
-    steps:
-      # 1) Código
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      # 2) PHP/Composer
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: "8.2"
-          extensions: mbstring, intl, pdo_mysql, bcmath, curl
-          tools: composer
-
-      - name: Install Composer deps (prod)
-        run: |
-          composer install --no-interaction --no-dev --prefer-dist --optimize-autoloader
-
-      # 3) Node/Vite
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      - name: Install NPM deps
-        run: npm ci
-
-      - name: Build assets
-        run: npm run build
-
-      # 4) Empacotar só o necessário
-      - name: Prepare deployment package
-        run: |
-          mkdir -p deploy_package
-          rsync -av \
-            --exclude=".git" \
-            --exclude=".github" \
-            --exclude="node_modules" \
-            --exclude="tests" \
-            --exclude="storage/logs/*.log" \
-            ./ deploy_package/
-
-      # 5) SSH key + known_hosts
-      - name: Add SSH key
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p ~/.ssh
-          printf "%s\n" "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          # host key
-          ssh-keyscan -p "${SSH_PORT}" -H "${{ secrets.HOSTINGER_HOST }}" >> ~/.ssh/known_hosts
-          ls -la ~/.ssh
-
-      # 6) Upload do app (NÃO é o webroot)
-      - name: Upload application to Hostinger (rsync)
-        run: |
-          rsync -az -e "ssh -p ${SSH_PORT}" --delete \
-            deploy_package/ \
-            "${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}:${{ secrets.HOSTINGER_APP_PATH }}/"
-
-      # 7) Pós-deploy (index.php, .htaccess, storage link, perms, caches)
-      - name: Atualizar index.php e .htaccess no Hostinger
-        run: |
-          ssh -p "${{ secrets.SSH_PORT }}" "${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}" "
-            set -euo pipefail
-            APP_PATH='${{ secrets.HOSTINGER_APP_PATH }}'
-            WEBROOT='${{ secrets.HOSTINGER_WEBROOT }}'
-
-            # Recria index.php (aponta para ../curriculogamer)
-            cat > \"\$WEBROOT/index.php\" <<'EOF'
+      echo '→ Garantindo index.php no webroot...'
+      cat > \"\$WEBROOT/index.php\" <<'EOF'
 <?php
 define('LARAVEL_START', microtime(true));
 require __DIR__.'/../curriculogamer/vendor/autoload.php';
@@ -99,17 +36,25 @@ $response = $kernel->handle(
 $kernel->terminate($request, $response);
 EOF
 
-            # Recria .htaccess
-            cat > \"\$WEBROOT/.htaccess\" <<'EOF'
+      echo '→ .htaccess...'
+      cat > \"\$WEBROOT/.htaccess\" <<'EOF'
 <IfModule mod_rewrite.c>
-    <IfModule mod_negotiation.c>
-        Options -MultiViews -Indexes
-    </IfModule>
-
-    RewriteEngine On
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^ index.php [L]
+  <IfModule mod_negotiation.c>
+    Options -MultiViews -Indexes
+  </IfModule>
+  RewriteEngine On
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteRule ^ index.php [L]
 </IfModule>
 EOF
-          "
+
+      echo '→ Health-check...'
+      (curl -sSf -I https://curriculogamer.com.br >/dev/null && echo 'OK') || { 
+        echo 'Falha no health-check. Últimas linhas do log:'
+        tail -n 200 storage/logs/laravel.log || true
+        exit 1
+      }
+
+      echo '✅ Deploy concluído com sucesso!'
+    "

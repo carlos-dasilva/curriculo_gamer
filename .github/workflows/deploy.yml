@@ -9,11 +9,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Baixa o código da sua branch main
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Configura PHP (ajuste a versão se teu projeto precisar, ex: '8.2')
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -21,29 +19,23 @@ jobs:
           extensions: mbstring, intl, pdo_mysql, bcmath, curl
           tools: composer
 
-      # 3. Instala dependências Laravel
       - name: Install Composer deps
         run: |
           composer install --no-interaction --no-dev --prefer-dist --optimize-autoloader
 
-      # 4. Configura Node para build do frontend
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      # 5. Instala dependências JS
       - name: Install NPM deps
         run: |
           npm install
 
-      # 6. Gera build de produção (ajuste se o comando do seu projeto não for esse)
       - name: Build assets
         run: |
           npm run build
 
-      # 7. Prepara pasta final para enviar
-      #    Aqui vamos montar um "pacote" limpo sem coisas desnecessárias
       - name: Prepare deployment package
         run: |
           mkdir deploy_package
@@ -55,35 +47,46 @@ jobs:
             --exclude="storage/logs/*.log" \
             ./ deploy_package/
 
-      # 8b. Adiciona a chave SSH pra conseguir conectar na Hostinger
+      - name: Pre-flight debug
+        shell: bash
+        run: |
+          set -e
+          echo "HOST: ${{ secrets.HOSTINGER_HOST }}"
+          echo "USER: ${{ secrets.HOSTINGER_USER }}"
+          echo "PATH: ${{ secrets.HOSTINGER_PATH }}"
+          echo "PORT: ${{ secrets.HOSTINGER_PORT }}"
+
       - name: Add SSH key
         shell: bash
         run: |
           set -e
           mkdir -p ~/.ssh
-
-          echo ">> Gravando chave privada em ~/.ssh/id_ed25519"
           printf "%s\n" "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-
-          echo ">> Criando known_hosts com ${{ secrets.HOSTINGER_HOST }}"
-          ssh-keyscan -p 65002 -H "${{ secrets.HOSTINGER_HOST }}" >> ~/.ssh/known_hosts
-
-          echo ">> Conferindo conteúdo da pasta ~/.ssh"
+          ssh-keyscan -p ${{ secrets.HOSTINGER_PORT }} -H "${{ secrets.HOSTINGER_HOST }}" >> ~/.ssh/known_hosts
           ls -la ~/.ssh
 
-      # 9. Faz upload dos arquivos pro servidor Hostinger usando rsync via SSH
       - name: Upload to Hostinger
+        shell: bash
         run: |
-          rsync -az -e "ssh -p 65002" --delete deploy_package/ ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}:${{ secrets.HOSTINGER_PATH }}/
+          set -e
+          rsync -az \
+            -e "ssh -p ${{ secrets.HOSTINGER_PORT }} -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519" \
+            --delete \
+            deploy_package/ \
+            ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}:${{ secrets.HOSTINGER_PATH }}/
 
-      # 10. Roda comandos de pós-deploy direto lá no servidor (migrate, cache, etc)
       - name: Run post-deploy commands on Hostinger
+        shell: bash
         run: |
-          ssh -p 65002 ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }} "\
-            cd ${{ secrets.HOSTINGER_PATH }} && \
-            php artisan migrate --force && \
-            php artisan config:cache && \
-            php artisan route:cache && \
-            php artisan view:cache \
-          "
+          set -e
+          ssh -p ${{ secrets.HOSTINGER_PORT }} \
+              -o StrictHostKeyChecking=no \
+              -i ~/.ssh/id_ed25519 \
+              ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }} "\
+                cd ${{ secrets.HOSTINGER_PATH }} && \
+                php artisan migrate --force && \
+                php artisan config:cache && \
+                php artisan route:cache && \
+                php artisan view:cache \
+              "

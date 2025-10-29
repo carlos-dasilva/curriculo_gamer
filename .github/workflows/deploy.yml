@@ -1,30 +1,137 @@
-- name: Executar comandos de pós-deploy no servidor
-  run: |
-    ssh -o StrictHostKeyChecking=no -p "${{ secrets.SSH_PORT }}" "${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}" "
-      set -euo pipefail
-      APP_PATH='${{ secrets.HOSTINGER_APP_PATH }}'
-      WEBROOT='${{ secrets.HOSTINGER_WEBROOT }}'
+name: CI/CD
 
-      cd \$APP_PATH
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
 
-      echo '→ Limpando caches antigos...'
-      php artisan optimize:clear
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
-      echo '→ Rodando migrations (forçado em produção)...'
-      php artisan migrate --force
+jobs:
+  test:
+    name: Testes (PHPUnit)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      echo '→ Recriando caches...'  # depois das migrations
-      php artisan config:cache
-      php artisan route:cache
-      php artisan view:cache
+      - name: Setup PHP 8.2
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, intl, pdo_mysql, bcmath, curl
+          tools: composer
+          coverage: none
 
-      echo '→ Permissões e storage...'
-      chmod -R 775 storage bootstrap/cache || true
-      rm -rf \$WEBROOT/storage || true
-      ln -s \$APP_PATH/storage/app/public \$WEBROOT/storage || true
+      - name: Instalar dependências do Composer (com dev)
+        run: |
+          composer install --no-interaction --prefer-dist --ansi
 
-      echo '→ Garantindo index.php no webroot...'
-      cat > \"\$WEBROOT/index.php\" <<'EOF'
+      - name: Preparar ambiente de teste
+        run: |
+          php -r "file_exists('.env') || copy('.env.example', '.env');"
+          php artisan key:generate --ansi
+          php artisan config:clear --ansi
+
+      - name: Executar testes
+        run: |
+          composer test
+
+  deploy:
+    name: Deploy para Hostinger
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.2 (produção)
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, intl, pdo_mysql, bcmath, curl
+          tools: composer
+
+      - name: Instalar dependências do Composer (sem dev)
+        run: |
+          composer install --no-interaction --no-dev --prefer-dist --optimize-autoloader --ansi
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Instalar dependências NPM e build
+        run: |
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+          npm run build
+
+      - name: Montar pacote de deploy
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p deploy_package
+          rsync -a \
+            --delete \
+            --exclude ".git" \
+            --exclude ".github" \
+            --exclude "node_modules" \
+            --exclude "tests" \
+            --exclude "storage/logs/*.log" \
+            ./ deploy_package/
+
+      - name: Adicionar chave SSH
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          printf "%s\n" "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -p ${{ secrets.SSH_PORT }} -H "${{ secrets.HOSTINGER_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Enviar arquivos para Hostinger (rsync)
+        shell: bash
+        run: |
+          set -euo pipefail
+          rsync -az \
+            -e "ssh -p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519" \
+            --delete \
+            deploy_package/ \
+            "${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}:${{ secrets.HOSTINGER_APP_PATH }}/"
+
+      - name: Executar comandos de pós-deploy no servidor
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh -o StrictHostKeyChecking=no -p "${{ secrets.SSH_PORT }}" "${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}" 'bash -se <<\'\''EOSH'\''
+          APP_PATH="'"'${{ secrets.HOSTINGER_APP_PATH }}'"'"
+          WEBROOT="'"'${{ secrets.HOSTINGER_WEBROOT }}'"'"
+
+          cd "$APP_PATH"
+
+          echo "✅ Limpando caches antigos..."
+          php artisan optimize:clear
+
+          echo "✅ Rodando migrations (forçado em produção)..."
+          php artisan migrate --force
+
+          echo "✅ Recriando caches..." # depois das migrations
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
+
+          echo "✅ Permissões e storage..."
+          chmod -R 775 storage bootstrap/cache || true
+          rm -rf "$WEBROOT/storage" || true
+          ln -s "$APP_PATH/storage/app/public" "$WEBROOT/storage" || true
+
+          echo "✅ Garantindo index.php no webroot..."
+          cat > "$WEBROOT/index.php" <<'PHP'
 <?php
 define('LARAVEL_START', microtime(true));
 require __DIR__.'/../curriculogamer/vendor/autoload.php';
@@ -34,10 +141,10 @@ $response = $kernel->handle(
     $request = Illuminate\Http\Request::capture()
 )->send();
 $kernel->terminate($request, $response);
-EOF
+PHP
 
-      echo '→ .htaccess...'
-      cat > \"\$WEBROOT/.htaccess\" <<'EOF'
+          echo "✅ .htaccess..."
+          cat > "$WEBROOT/.htaccess" <<'HT'
 <IfModule mod_rewrite.c>
   <IfModule mod_negotiation.c>
     Options -MultiViews -Indexes
@@ -47,14 +154,15 @@ EOF
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteRule ^ index.php [L]
 </IfModule>
-EOF
+HT
 
-      echo '→ Health-check...'
-      (curl -sSf -I https://curriculogamer.com.br >/dev/null && echo 'OK') || { 
-        echo 'Falha no health-check. Últimas linhas do log:'
-        tail -n 200 storage/logs/laravel.log || true
-        exit 1
-      }
+          echo "✅ Health-check..."
+          (curl -sSf -I https://curriculogamer.com.br >/dev/null && echo "OK") || {
+            echo "Falha no health-check. Últimas linhas do log:"
+            tail -n 200 storage/logs/laravel.log || true
+            exit 1
+          }
 
-      echo '✅ Deploy concluído com sucesso!'
-    "
+          echo "✅ Deploy concluído com sucesso!"
+          EOSH'
+

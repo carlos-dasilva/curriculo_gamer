@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup PHP
@@ -19,9 +19,8 @@ jobs:
           extensions: mbstring, intl, pdo_mysql, bcmath, curl
           tools: composer
 
-      - name: Install Composer deps
-        run: |
-          composer install --no-interaction --no-dev --prefer-dist --optimize-autoloader
+      - name: Install Composer deps (no-dev)
+        run: composer install --no-interaction --no-dev --prefer-dist --optimize-autoloader
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -29,16 +28,14 @@ jobs:
           node-version: '20'
 
       - name: Install NPM deps
-        run: |
-          npm install
+        run: npm ci
 
       - name: Build assets
-        run: |
-          npm run build
+        run: npm run build
 
       - name: Prepare deployment package
         run: |
-          mkdir deploy_package
+          mkdir -p deploy_package
           rsync -av \
             --exclude=".git" \
             --exclude="node_modules" \
@@ -47,15 +44,6 @@ jobs:
             --exclude="storage/logs/*.log" \
             ./ deploy_package/
 
-      - name: Pre-flight debug
-        shell: bash
-        run: |
-          set -e
-          echo "HOST: ${{ secrets.HOSTINGER_HOST }}"
-          echo "USER: ${{ secrets.HOSTINGER_USER }}"
-          echo "PATH: ${{ secrets.HOSTINGER_PATH }}"
-          echo "PORT: ${{ secrets.HOSTINGER_PORT }}"
-
       - name: Add SSH key
         shell: bash
         run: |
@@ -63,30 +51,32 @@ jobs:
           mkdir -p ~/.ssh
           printf "%s\n" "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -p ${{ secrets.HOSTINGER_PORT }} -H "${{ secrets.HOSTINGER_HOST }}" >> ~/.ssh/known_hosts
+          ssh-keyscan -p 65002 -H "${{ secrets.HOSTINGER_HOST }}" >> ~/.ssh/known_hosts
           ls -la ~/.ssh
 
-      - name: Upload to Hostinger
-        shell: bash
+      # 1º sync: código inteiro para a pasta do app (curriculogamer)
+      - name: Upload app (curriculogamer)
         run: |
-          set -e
-          rsync -az \
-            -e "ssh -p ${{ secrets.HOSTINGER_PORT }} -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519" \
-            --delete \
+          rsync -az -e "ssh -p 65002" --delete \
             deploy_package/ \
-            ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}:${{ secrets.HOSTINGER_PATH }}/
+            "${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}:${{ secrets.HOSTINGER_APP_PATH }}/"
 
-      - name: Run post-deploy commands on Hostinger
-        shell: bash
+      # 2º sync: conteúdo do public/ para o webroot (public_html)
+      - name: Upload web assets (public -> public_html)
         run: |
-          set -e
-          ssh -p ${{ secrets.HOSTINGER_PORT }} \
-              -o StrictHostKeyChecking=no \
-              -i ~/.ssh/id_ed25519 \
-              ${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }} "\
-                cd ${{ secrets.HOSTINGER_PATH }} && \
-                php artisan migrate --force && \
-                php artisan config:cache && \
-                php artisan route:cache && \
-                php artisan view:cache \
-              "
+          rsync -az -e "ssh -p 65002" --delete \
+            deploy_package/public/ \
+            "${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}:${{ secrets.HOSTINGER_WEBROOT }}/"
+
+      - name: Post-deploy (migrate, caches, permissões, .htaccess)
+        run: |
+          ssh -p 65002 "${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}" "\
+            set -e && \
+            cd '${{ secrets.HOSTINGER_APP_PATH }}' && \
+            php artisan config:clear && \
+            php artisan migrate --force && \
+            php artisan optimize && \
+            php artisan storage:link || true && \
+            chmod -R 775 storage bootstrap/cache && \
+            cp public/.htaccess '${{ secrets.HOSTINGER_WEBROOT }}'/.htaccess \
+          "

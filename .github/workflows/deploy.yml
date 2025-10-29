@@ -23,11 +23,11 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          extensions: mbstring, intl, pdo_mysql, bcmath, curl
+          extensions: mbstring, intl, pdo_mysql, pdo_sqlite, bcmath, curl
           tools: composer
           coverage: none
 
-      - name: Instalar dependências do Composer (com dev)
+      - name: Instalar dependencias do Composer (com dev)
         run: |
           composer install --no-interaction --prefer-dist --ansi
 
@@ -50,14 +50,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup PHP 8.2 (produção)
+      - name: Setup PHP 8.2 (producao)
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          extensions: mbstring, intl, pdo_mysql, bcmath, curl
+          extensions: mbstring, intl, pdo_mysql, pdo_sqlite, bcmath, curl
           tools: composer
 
-      - name: Instalar dependências do Composer (sem dev)
+      - name: Instalar dependencias do Composer (sem dev)
         run: |
           composer install --no-interaction --no-dev --prefer-dist --optimize-autoloader --ansi
 
@@ -66,7 +66,7 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Instalar dependências NPM e build
+      - name: Instalar dependencias NPM e build
         run: |
           if [ -f package-lock.json ]; then npm ci; else npm install; fi
           npm run build
@@ -104,65 +104,43 @@ jobs:
             deploy_package/ \
             "${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}:${{ secrets.HOSTINGER_APP_PATH }}/"
 
-      - name: Executar comandos de pós-deploy no servidor
+      - name: Executar comandos de pos-deploy no servidor
         shell: bash
         run: |
           set -euo pipefail
-          ssh -o StrictHostKeyChecking=no -p "${{ secrets.SSH_PORT }}" "${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}" 'bash -se <<\'\''EOSH'\''
-          APP_PATH="'"'${{ secrets.HOSTINGER_APP_PATH }}'"'"
-          WEBROOT="'"'${{ secrets.HOSTINGER_WEBROOT }}'"'"
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 -p "${{ secrets.SSH_PORT }}" "${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}" "bash -se -c '
+            APP_PATH=\"${{ secrets.HOSTINGER_APP_PATH }}\"
+            WEBROOT=\"${{ secrets.HOSTINGER_WEBROOT }}\"
 
-          cd "$APP_PATH"
+            cd \"$APP_PATH\"
 
-          echo "✅ Limpando caches antigos..."
-          php artisan optimize:clear
+            echo \"Limpando caches antigos...\"
+            php artisan optimize:clear
 
-          echo "✅ Rodando migrations (forçado em produção)..."
-          php artisan migrate --force
+            echo \"Rodando migrations (forcado em producao)...\"
+            php artisan migrate --force
 
-          echo "✅ Recriando caches..." # depois das migrations
-          php artisan config:cache
-          php artisan route:cache
-          php artisan view:cache
+            echo \"Recriando caches...\"
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
 
-          echo "✅ Permissões e storage..."
-          chmod -R 775 storage bootstrap/cache || true
-          rm -rf "$WEBROOT/storage" || true
-          ln -s "$APP_PATH/storage/app/public" "$WEBROOT/storage" || true
+            echo \"Permissoes e storage...\"
+            chmod -R 775 storage bootstrap/cache || true
+            rm -rf \"$WEBROOT/storage\" || true
+            ln -s \"$APP_PATH/storage/app/public\" \"$WEBROOT/storage\" || true
 
-          echo "✅ Garantindo index.php no webroot..."
-          cat > "$WEBROOT/index.php" <<'PHP'
-<?php
-define('LARAVEL_START', microtime(true));
-require __DIR__.'/../curriculogamer/vendor/autoload.php';
-$app = require __DIR__.'/../curriculogamer/bootstrap/app.php';
-$kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
-$response = $kernel->handle(
-    $request = Illuminate\Http\Request::capture()
-)->send();
-$kernel->terminate($request, $response);
-PHP
+            echo \"Atualizando webroot (index.php e .htaccess)...\"
+            cp -f \"$APP_PATH/deploy/webroot/index.php\" \"$WEBROOT/index.php\"
+            cp -f \"$APP_PATH/deploy/webroot/.htaccess\" \"$WEBROOT/.htaccess\"
 
-          echo "✅ .htaccess..."
-          cat > "$WEBROOT/.htaccess" <<'HT'
-<IfModule mod_rewrite.c>
-  <IfModule mod_negotiation.c>
-    Options -MultiViews -Indexes
-  </IfModule>
-  RewriteEngine On
-  RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteRule ^ index.php [L]
-</IfModule>
-HT
+            echo \"Health-check...\"
+            (curl -sSf -I https://curriculogamer.com.br >/dev/null && echo OK) || {
+              echo \"Falha no health-check. Ultimas linhas do log:\"
+              tail -n 200 storage/logs/laravel.log || true
+              exit 1
+            }
 
-          echo "✅ Health-check..."
-          (curl -sSf -I https://curriculogamer.com.br >/dev/null && echo "OK") || {
-            echo "Falha no health-check. Últimas linhas do log:"
-            tail -n 200 storage/logs/laravel.log || true
-            exit 1
-          }
-
-          echo "✅ Deploy concluído com sucesso!"
-          EOSH'
-
+            echo \"Deploy concluido com sucesso!\"
+          '
+          "

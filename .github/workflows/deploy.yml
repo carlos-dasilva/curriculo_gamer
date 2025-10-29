@@ -35,7 +35,9 @@ jobs:
         run: |
           cp .env.example .env
           php artisan key:generate --ansi
-          php artisan optimize:clear --ansi
+          php artisan config:clear --ansi
+          php artisan view:clear --ansi
+          php artisan route:clear --ansi
 
       - name: Executar testes
         run: |

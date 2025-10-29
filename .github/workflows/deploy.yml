@@ -33,7 +33,7 @@ jobs:
 
       - name: Preparar ambiente de teste
         run: |
-          php -r "file_exists('.env') || copy('.env.example', '.env');"
+          cp .env.example .env
           php artisan key:generate --ansi
           php artisan config:clear --ansi
 

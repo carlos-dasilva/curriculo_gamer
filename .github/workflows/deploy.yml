@@ -4,28 +4,42 @@ on:
   push:
     branches: ["main"]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-curriculogamer
+  cancel-in-progress: true
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
+    env:
+      SSH_PORT: "65002"
+
     steps:
-      - name: Checkout
+      # 1) Código
+      - name: Checkout code
         uses: actions/checkout@v4
 
+      # 2) PHP/Composer
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: "8.2"
           extensions: mbstring, intl, pdo_mysql, bcmath, curl
           tools: composer
 
-      - name: Install Composer deps (no-dev)
-        run: composer install --no-interaction --no-dev --prefer-dist --optimize-autoloader
+      - name: Install Composer deps (prod)
+        run: |
+          composer install --no-interaction --no-dev --prefer-dist --optimize-autoloader
 
+      # 3) Node/Vite
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Install NPM deps
         run: npm ci
@@ -33,50 +47,78 @@ jobs:
       - name: Build assets
         run: npm run build
 
+      # 4) Empacotar só o necessário
       - name: Prepare deployment package
         run: |
           mkdir -p deploy_package
           rsync -av \
             --exclude=".git" \
+            --exclude=".github" \
             --exclude="node_modules" \
             --exclude="tests" \
-            --exclude=".github" \
             --exclude="storage/logs/*.log" \
             ./ deploy_package/
 
+      # 5) SSH key + known_hosts
       - name: Add SSH key
         shell: bash
         run: |
-          set -e
+          set -euo pipefail
           mkdir -p ~/.ssh
           printf "%s\n" "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -p 65002 -H "${{ secrets.HOSTINGER_HOST }}" >> ~/.ssh/known_hosts
+          # host key
+          ssh-keyscan -p "${SSH_PORT}" -H "${{ secrets.HOSTINGER_HOST }}" >> ~/.ssh/known_hosts
           ls -la ~/.ssh
 
-      # 1º sync: código inteiro para a pasta do app (curriculogamer)
-      - name: Upload app (curriculogamer)
+      # 6) Upload do app (NÃO é o webroot)
+      - name: Upload application to Hostinger (rsync)
         run: |
-          rsync -az -e "ssh -p 65002" --delete \
+          rsync -az -e "ssh -p ${SSH_PORT}" --delete \
             deploy_package/ \
             "${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}:${{ secrets.HOSTINGER_APP_PATH }}/"
 
-      # 2º sync: conteúdo do public/ para o webroot (public_html)
-      - name: Upload web assets (public -> public_html)
+      # 7) Pós-deploy (index.php, .htaccess, storage link, perms, caches)
+      - name: Post-deploy on Hostinger (webroot & caches)
         run: |
-          rsync -az -e "ssh -p 65002" --delete \
-            deploy_package/public/ \
-            "${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}:${{ secrets.HOSTINGER_WEBROOT }}/"
-
-      - name: Post-deploy (migrate, caches, permissões, .htaccess)
-        run: |
-          ssh -p 65002 "${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}" "\
-            set -e && \
-            cd '${{ secrets.HOSTINGER_APP_PATH }}' && \
-            php artisan config:clear && \
-            php artisan migrate --force && \
-            php artisan optimize && \
-            php artisan storage:link || true && \
-            chmod -R 775 storage bootstrap/cache && \
-            cp public/.htaccess '${{ secrets.HOSTINGER_WEBROOT }}'/.htaccess \
+          ssh -p "${SSH_PORT}" "${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}" "\
+            set -euo pipefail; \
+            APP_PATH='${{ secrets.HOSTINGER_APP_PATH }}'; \
+            WEBROOT='${{ secrets.HOSTINGER_WEBROOT }}'; \
+            # Recria index.php (aponta para ../curriculogamer)
+            cat > \"\$WEBROOT/index.php\" <<'PHP'
+<?php
+define('LARAVEL_START', microtime(true));
+require __DIR__.'/../curriculogamer/vendor/autoload.php';
+$app = require __DIR__.'/../curriculogamer/bootstrap/app.php';
+$kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
+$response = $kernel->handle(
+    $request = Illuminate\Http\Request::capture()
+)->send();
+$kernel->terminate($request, $response);
+PHP
+            # Recria .htaccess
+            cat > \"\$WEBROOT/.htaccess\" <<'HT'
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} !^/index\.php$
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.php [L]
+</IfModule>
+HT
+            # Symlink do storage (sem usar PHP/exec)
+            rm -rf \"\$WEBROOT/storage\"
+            ln -s \"\$APP_PATH/storage/app/public\" \"\$WEBROOT/storage\" || true
+            # Permissões
+            chmod -R 775 \"\$APP_PATH/storage\" \"\$APP_PATH/bootstrap/cache\" \"\$WEBROOT\"
+            # Caches
+            cd \"\$APP_PATH\" && \
+              php artisan optimize:clear && \
+              php artisan config:cache && \
+              php artisan route:cache && \
+              php artisan view:cache \
           "

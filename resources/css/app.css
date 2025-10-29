@@ -1,0 +1,24 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+@source '../**/*.ts';
+@source '../**/*.tsx';
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+/* Impede arrasto horizontal da página inteira no mobile.
+   Mantém rolagem horizontal apenas em contêineres específicos (overflow-x-auto). */
+@layer base {
+  html, body {
+    max-width: 100%;
+    overflow-x: hidden;           /* Evita largura > viewport causar pan lateral */
+    overscroll-behavior-x: none;  /* Evita bounce lateral em navegadores móveis */
+    touch-action: pan-y;          /* Somente rolagem vertical da página */
+  }
+}

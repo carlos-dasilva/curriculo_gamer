@@ -1,0 +1,294 @@
+<?php
+
+namespace App\Domain\Games\Http\Controllers;
+
+use Illuminate\Routing\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
+use App\Models\Game;
+use App\Models\User;
+
+class CurriculumController extends Controller
+{
+    /**
+     * Exibe a página "Meu Currículo" com resumo por status e por plataforma
+     * e lista de jogos conforme filtro selecionado (modo Todos ou por Plataforma).
+     */
+    public function index(Request $request)
+    {
+        if (!auth()->check()) {
+            return redirect()->route('home');
+        }
+
+        $userId = (int) auth()->id();
+
+        $allowedStatuses = ['cem_por_cento','finalizei','joguei','quero_jogar'];
+        $status = (string) $request->input('status', 'cem_por_cento');
+        if (!in_array($status, $allowedStatuses, true)) {
+            $status = 'cem_por_cento';
+        }
+
+        $mode = (string) $request->input('mode', 'all'); // 'all' | 'platform'
+        if (!in_array($mode, ['all','platform'], true)) {
+            $mode = 'all';
+        }
+
+        // Resumo (Todos): contagem de jogos distintos por status
+        // Observação: por padrão filtramos apenas jogos liberados (status = 'liberado')
+        // para manter consistência com o restante do site.
+        $rawSummary = DB::table('user_game_platform_statuses as ugps')
+            ->join('games', 'games.id', '=', 'ugps.game_id')
+            ->where('ugps.user_id', $userId)
+            ->where('games.status', 'liberado')
+            ->whereIn('ugps.status', $allowedStatuses)
+            ->selectRaw('ugps.status, COUNT(DISTINCT ugps.game_id) as total')
+            ->groupBy('ugps.status')
+            ->pluck('total', 'ugps.status');
+
+        $summary = [
+            'cem_por_cento' => (int) ($rawSummary['cem_por_cento'] ?? 0),
+            'finalizei' => (int) ($rawSummary['finalizei'] ?? 0),
+            'joguei' => (int) ($rawSummary['joguei'] ?? 0),
+            'quero_jogar' => (int) ($rawSummary['quero_jogar'] ?? 0),
+        ];
+
+        // Contagens por plataforma
+        $platformRows = DB::table('user_game_platform_statuses as ugps')
+            ->join('games', 'games.id', '=', 'ugps.game_id')
+            ->join('platforms as p', 'p.id', '=', 'ugps.platform_id')
+            ->where('ugps.user_id', $userId)
+            ->where('games.status', 'liberado')
+            ->whereIn('ugps.status', $allowedStatuses)
+            ->select('p.id as platform_id', 'p.name as platform_name', 'ugps.status', DB::raw('COUNT(DISTINCT ugps.game_id) as total'))
+            ->groupBy('p.id', 'p.name', 'ugps.status')
+            ->get();
+
+        $byPlatformMap = [];
+        foreach ($platformRows as $r) {
+            $pid = (int) $r->platform_id;
+            if (!isset($byPlatformMap[$pid])) {
+                $byPlatformMap[$pid] = [
+                    'platform' => ['id' => $pid, 'name' => (string) $r->platform_name],
+                    'counts' => [
+                        'cem_por_cento' => 0,
+                        'finalizei' => 0,
+                        'joguei' => 0,
+                        'quero_jogar' => 0,
+                    ],
+                ];
+            }
+            $st = (string) $r->status;
+            if (isset($byPlatformMap[$pid]['counts'][$st])) {
+                $byPlatformMap[$pid]['counts'][$st] = (int) $r->total;
+            }
+        }
+
+        $byPlatform = array_values($byPlatformMap);
+        // Ordenação pedida: maior Fiz 100%, depois maior Finalizei, depois Joguei, depois Quero Jogar
+        usort($byPlatform, function ($a, $b) {
+            $orderKeys = ['cem_por_cento','finalizei','joguei','quero_jogar'];
+            foreach ($orderKeys as $k) {
+                $diff = ($b['counts'][$k] ?? 0) <=> ($a['counts'][$k] ?? 0);
+                if ($diff !== 0) return $diff;
+            }
+            // desempate por nome
+            return strcmp($a['platform']['name'], $b['platform']['name']);
+        });
+
+        // Seleção padrão de plataforma (quando em modo plataforma)
+        $platformId = $request->integer('platform') ?: null;
+        if ($mode === 'platform') {
+            $platformIds = array_map(fn ($g) => (int) $g['platform']['id'], $byPlatform);
+            if (!$platformId || !in_array($platformId, $platformIds, true)) {
+                $platformId = $byPlatform[0]['platform']['id'] ?? null;
+            }
+        } else {
+            $platformId = null;
+        }
+
+        // Lista de jogos conforme filtro selecionado
+        $gamesQuery = Game::query()
+            ->select(['id','name','cover_url','description','overall_score'])
+            ->where('status', 'liberado')
+            ->with([
+                'studio:id,name',
+                'platforms:id,name',
+                'tags:id,name,slug',
+            ])
+            ->orderByDesc('overall_score')
+            ->orderBy('name')
+            ->whereExists(function ($q) use ($userId, $status, $platformId) {
+                $q->select(DB::raw(1))
+                    ->from('user_game_platform_statuses as ug')
+                    ->whereColumn('ug.game_id', 'games.id')
+                    ->where('ug.user_id', $userId)
+                    ->where('ug.status', $status);
+                if ($platformId) {
+                    $q->where('ug.platform_id', (int) $platformId);
+                }
+            });
+
+        $games = $gamesQuery->get();
+
+        return Inertia::render('Curriculum/Index', [
+            'mode' => $mode,
+            'summary' => $summary,
+            'byPlatform' => $byPlatform,
+            'selected' => [
+                'mode' => $mode,
+                'status' => $status,
+                'platformId' => $platformId,
+            ],
+            'games' => $games,
+            'subject' => [
+                'id' => $userId,
+                'name' => auth()->user()->name ?? 'Usuário',
+                'isMe' => true,
+                'isFollowed' => false,
+            ],
+        ]);
+    }
+
+    /**
+     * Exibe o currículo de outro usuário (auth obrigatório).
+     */
+    public function show(Request $request, User $user)
+    {
+        if (!auth()->check()) {
+            return redirect()->route('home');
+        }
+
+        $userId = (int) $user->id;
+
+        $allowedStatuses = ['cem_por_cento','finalizei','joguei','quero_jogar'];
+        $status = (string) $request->input('status', 'cem_por_cento');
+        if (!in_array($status, $allowedStatuses, true)) {
+            $status = 'cem_por_cento';
+        }
+
+        $mode = (string) $request->input('mode', 'all'); // 'all' | 'platform'
+        if (!in_array($mode, ['all','platform'], true)) {
+            $mode = 'all';
+        }
+
+        $rawSummary = DB::table('user_game_platform_statuses as ugps')
+            ->join('games', 'games.id', '=', 'ugps.game_id')
+            ->where('ugps.user_id', $userId)
+            ->where('games.status', 'liberado')
+            ->whereIn('ugps.status', $allowedStatuses)
+            ->selectRaw('ugps.status, COUNT(DISTINCT ugps.game_id) as total')
+            ->groupBy('ugps.status')
+            ->pluck('total', 'ugps.status');
+
+        $summary = [
+            'cem_por_cento' => (int) ($rawSummary['cem_por_cento'] ?? 0),
+            'finalizei' => (int) ($rawSummary['finalizei'] ?? 0),
+            'joguei' => (int) ($rawSummary['joguei'] ?? 0),
+            'quero_jogar' => (int) ($rawSummary['quero_jogar'] ?? 0),
+        ];
+
+        $platformRows = DB::table('user_game_platform_statuses as ugps')
+            ->join('games', 'games.id', '=', 'ugps.game_id')
+            ->join('platforms as p', 'p.id', '=', 'ugps.platform_id')
+            ->where('ugps.user_id', $userId)
+            ->where('games.status', 'liberado')
+            ->whereIn('ugps.status', $allowedStatuses)
+            ->select('p.id as platform_id', 'p.name as platform_name', 'ugps.status', DB::raw('COUNT(DISTINCT ugps.game_id) as total'))
+            ->groupBy('p.id', 'p.name', 'ugps.status')
+            ->get();
+
+        $byPlatformMap = [];
+        foreach ($platformRows as $r) {
+            $pid = (int) $r->platform_id;
+            if (!isset($byPlatformMap[$pid])) {
+                $byPlatformMap[$pid] = [
+                    'platform' => ['id' => $pid, 'name' => (string) $r->platform_name],
+                    'counts' => [
+                        'cem_por_cento' => 0,
+                        'finalizei' => 0,
+                        'joguei' => 0,
+                        'quero_jogar' => 0,
+                    ],
+                ];
+            }
+            $st = (string) $r->status;
+            if (isset($byPlatformMap[$pid]['counts'][$st])) {
+                $byPlatformMap[$pid]['counts'][$st] = (int) $r->total;
+            }
+        }
+
+        $byPlatform = array_values($byPlatformMap);
+        usort($byPlatform, function ($a, $b) {
+            $orderKeys = ['cem_por_cento','finalizei','joguei','quero_jogar'];
+            foreach ($orderKeys as $k) {
+                $diff = ($b['counts'][$k] ?? 0) <=> ($a['counts'][$k] ?? 0);
+                if ($diff !== 0) return $diff;
+            }
+            return strcmp($a['platform']['name'], $b['platform']['name']);
+        });
+
+        $platformId = $request->integer('platform') ?: null;
+        if ($mode === 'platform') {
+            $platformIds = array_map(fn ($g) => (int) $g['platform']['id'], $byPlatform);
+            if (!$platformId || !in_array($platformId, $platformIds, true)) {
+                $platformId = $byPlatform[0]['platform']['id'] ?? null;
+            }
+        } else {
+            $platformId = null;
+        }
+
+        $gamesQuery = Game::query()
+            ->select(['id','name','cover_url','description','overall_score'])
+            ->where('status', 'liberado')
+            ->with([
+                'studio:id,name',
+                'platforms:id,name',
+                'tags:id,name,slug',
+            ])
+            ->orderByDesc('overall_score')
+            ->orderBy('name')
+            ->whereExists(function ($q) use ($userId, $status, $platformId) {
+                $q->select(DB::raw(1))
+                    ->from('user_game_platform_statuses as ug')
+                    ->whereColumn('ug.game_id', 'games.id')
+                    ->where('ug.user_id', $userId)
+                    ->where('ug.status', $status);
+                if ($platformId) {
+                    $q->where('ug.platform_id', (int) $platformId);
+                }
+            });
+
+        $games = $gamesQuery->get();
+
+        $isFollowed = false;
+        if (auth()->check() && (int) auth()->id() !== (int) $user->id) {
+            try {
+                $isFollowed = \Illuminate\Support\Facades\DB::table('user_follows')
+                    ->where('follower_id', auth()->id())
+                    ->where('followed_id', $user->id)
+                    ->exists();
+            } catch (\Throwable $e) {
+                $isFollowed = false;
+            }
+        }
+
+        return Inertia::render('Curriculum/Index', [
+            'mode' => $mode,
+            'summary' => $summary,
+            'byPlatform' => $byPlatform,
+            'selected' => [
+                'mode' => $mode,
+                'status' => $status,
+                'platformId' => $platformId,
+            ],
+            'games' => $games,
+            'subject' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'isMe' => (int) $user->id === (int) auth()->id(),
+                'isFollowed' => $isFollowed,
+            ],
+        ]);
+    }
+}

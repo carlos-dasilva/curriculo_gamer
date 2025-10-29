@@ -94,38 +94,27 @@ jobs:
           mkdir -p ~/.ssh
           printf "%s\n" "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          PORT="${{ secrets.HOSTINGER_PORT }}"; [ -z "$PORT" ] && PORT="${{ secrets.SSH_PORT }}"; [ -z "$PORT" ] && PORT=22
-          HOST="${{ secrets.HOSTINGER_HOST }}"
-          ssh-keyscan -p "$PORT" -H "$HOST" >> ~/.ssh/known_hosts
+          ssh-keyscan -p ${{ secrets.HOSTINGER_PORT }} -H "${{ secrets.HOSTINGER_HOST }}" >> ~/.ssh/known_hosts
 
       - name: Enviar arquivos para Hostinger (rsync)
         shell: bash
         run: |
           set -euo pipefail
-          PORT="${{ secrets.HOSTINGER_PORT }}"; [ -z "$PORT" ] && PORT="${{ secrets.SSH_PORT }}"; [ -z "$PORT" ] && PORT=22
-          USER="${{ secrets.HOSTINGER_USER }}"
-          HOST="${{ secrets.HOSTINGER_HOST }}"
-          PATH_REMOTE="${{ secrets.HOSTINGER_APP_PATH }}"
           rsync -az \
-            -e "ssh -p $PORT -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519" \
+            -e "ssh -p ${{ secrets.HOSTINGER_PORT }} -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519" \
             --delete \
             deploy_package/ \
-            "$USER@$HOST:$PATH_REMOTE/"
+            "${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}:${{ secrets.HOSTINGER_APP_PATH }}/"
 
       - name: Executar comandos de pos-deploy no servidor
         shell: bash
         run: |
           set -euo pipefail
-          PORT="${{ secrets.HOSTINGER_PORT }}"; [ -z "$PORT" ] && PORT="${{ secrets.SSH_PORT }}"; [ -z "$PORT" ] && PORT=22
-          USER="${{ secrets.HOSTINGER_USER }}"; HOST="${{ secrets.HOSTINGER_HOST }}"
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 -p "$PORT" "$USER@$HOST" "bash -se -c '
-            APP_PATH=\"${{ secrets.HOSTINGER_APP_PATH }}\"
-            WEBROOT=\"${{ secrets.HOSTINGER_WEBROOT }}\"
-
-            cd \"$APP_PATH\"
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_ed25519 -p "${{ secrets.HOSTINGER_PORT }}" "${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}" "bash -se -c '
+            cd \"${{ secrets.HOSTINGER_APP_PATH }}\"
 
             echo \"Limpando caches antigos...\"
-            php artisan optimize:clear
+            php artisan optimize:clear || true
 
             echo \"Rodando migrations (forcado em producao)...\"
             php artisan migrate --force
@@ -137,12 +126,12 @@ jobs:
 
             echo \"Permissoes e storage...\"
             chmod -R 775 storage bootstrap/cache || true
-            rm -rf \"$WEBROOT/storage\" || true
-            ln -s \"$APP_PATH/storage/app/public\" \"$WEBROOT/storage\" || true
+            rm -rf \"${{ secrets.HOSTINGER_WEBROOT }}/storage\" || true
+            ln -s \"${{ secrets.HOSTINGER_APP_PATH }}/storage/app/public\" \"${{ secrets.HOSTINGER_WEBROOT }}/storage\" || true
 
             echo \"Atualizando webroot (index.php e .htaccess)...\"
-            cp -f \"$APP_PATH/deploy/webroot/index.php\" \"$WEBROOT/index.php\"
-            cp -f \"$APP_PATH/deploy/webroot/.htaccess\" \"$WEBROOT/.htaccess\"
+            cp -f \"${{ secrets.HOSTINGER_APP_PATH }}/deploy/webroot/index.php\" \"${{ secrets.HOSTINGER_WEBROOT }}/index.php\"
+            cp -f \"${{ secrets.HOSTINGER_APP_PATH }}/deploy/webroot/.htaccess\" \"${{ secrets.HOSTINGER_WEBROOT }}/.htaccess\"
 
             echo \"Health-check...\"
             (curl -sSf -I https://curriculogamer.com.br >/dev/null && echo OK) || {

@@ -8,10 +8,15 @@
         <link rel="shortcut icon" href="/favicon.ico" />
         <title inertia>{{ config('app.name', 'Aplicação') }}</title>
         @inertiaHead
-        @viteReactRefresh
-        @vite(['resources/css/app.css','resources/js/app.tsx'])
+        @env('testing')
+            
+        @else
+            @viteReactRefresh
+            @vite(['resources/css/app.css','resources/js/app.tsx'])
+        @endenv
     </head>
     <body class="min-h-screen bg-gray-50 text-gray-900">
         @inertia
     </body>
-</html>
+    </html>
+

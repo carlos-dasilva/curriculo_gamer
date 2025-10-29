@@ -79,14 +79,15 @@ jobs:
             "${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}:${{ secrets.HOSTINGER_APP_PATH }}/"
 
       # 7) Pós-deploy (index.php, .htaccess, storage link, perms, caches)
-      - name: Post-deploy on Hostinger (webroot & caches)
+      - name: Atualizar index.php e .htaccess no Hostinger
         run: |
-          ssh -p "${SSH_PORT}" "${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}" "\
-            set -euo pipefail; \
-            APP_PATH='${{ secrets.HOSTINGER_APP_PATH }}'; \
-            WEBROOT='${{ secrets.HOSTINGER_WEBROOT }}'; \
+          ssh -p "${{ secrets.SSH_PORT }}" "${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}" "
+            set -euo pipefail
+            APP_PATH='${{ secrets.HOSTINGER_APP_PATH }}'
+            WEBROOT='${{ secrets.HOSTINGER_WEBROOT }}'
+
             # Recria index.php (aponta para ../curriculogamer)
-            cat > \"\$WEBROOT/index.php\" <<'PHP'
+            cat > \"\$WEBROOT/index.php\" <<'EOF'
 <?php
 define('LARAVEL_START', microtime(true));
 require __DIR__.'/../curriculogamer/vendor/autoload.php';
@@ -96,29 +97,19 @@ $response = $kernel->handle(
     $request = Illuminate\Http\Request::capture()
 )->send();
 $kernel->terminate($request, $response);
-PHP
+EOF
+
             # Recria .htaccess
-            cat > \"\$WEBROOT/.htaccess\" <<'HT'
+            cat > \"\$WEBROOT/.htaccess\" <<'EOF'
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes
     </IfModule>
+
     RewriteEngine On
-    RewriteCond %{REQUEST_URI} !^/index\.php$
-    RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
-HT
-            # Symlink do storage (sem usar PHP/exec)
-            rm -rf \"\$WEBROOT/storage\"
-            ln -s \"\$APP_PATH/storage/app/public\" \"\$WEBROOT/storage\" || true
-            # Permissões
-            chmod -R 775 \"\$APP_PATH/storage\" \"\$APP_PATH/bootstrap/cache\" \"\$WEBROOT\"
-            # Caches
-            cd \"\$APP_PATH\" && \
-              php artisan optimize:clear && \
-              php artisan config:cache && \
-              php artisan route:cache && \
-              php artisan view:cache \
+EOF
           "

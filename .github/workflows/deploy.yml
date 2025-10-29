@@ -55,7 +55,7 @@ jobs:
             --exclude="storage/logs/*.log" \
             ./ deploy_package/
 
-      # 8. Adiciona a chave SSH pra conseguir conectar na Hostinger
+      # 8b. Adiciona a chave SSH pra conseguir conectar na Hostinger
       - name: Add SSH key
         shell: bash
         run: |
@@ -71,7 +71,7 @@ jobs:
 
           echo ">> Conferindo conteúdo da pasta ~/.ssh"
           ls -la ~/.ssh
-
+          
       # 9. Faz upload dos arquivos pro servidor Hostinger usando rsync via SSH
       - name: Upload to Hostinger
         run: |

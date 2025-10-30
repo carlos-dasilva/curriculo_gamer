@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import Header from '@/components/ui/Header';
 import Footer from '@/components/ui/Footer';
@@ -54,7 +54,7 @@ export default function AdminLayout({ title, children }: Props) {
               href="/admin/estudios/novo"
               className="hidden sm:inline-flex items-center justify-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
             >
-              Novo estÃºdio
+              Novo estúdio
             </Link>
           )}
           {currentPath.startsWith('/admin/plataformas') && (
@@ -96,7 +96,7 @@ export default function AdminLayout({ title, children }: Props) {
                   );
                 })}
               </ul>
-              {/* AÃ§Ãµes rÃ¡pidas abaixo da lista (apenas mobile) */}
+              {/* Ações rápidas abaixo da lista (apenas mobile) */}
               <div className="mt-4 space-y-2 sm:hidden">
                 {currentPath.startsWith('/admin/jogos') && (
                   <Link href="/admin/jogos/novo" className="inline-flex w-full items-center justify-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800">
@@ -210,5 +210,4 @@ function BookIcon({ className }: { className?: string }) {
     </svg>
   );
 }
-
 

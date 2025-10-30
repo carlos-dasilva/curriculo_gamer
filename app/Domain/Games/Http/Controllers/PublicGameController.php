@@ -13,7 +13,7 @@ class PublicGameController extends Controller
         $query = Game::query()
             ->with([
                 'studio:id,name',
-                'platforms:id,name',
+                'platforms:id,name,release_year',
                 'tags:id,name,slug',
                 'images:id,game_id,url,sort_order',
                 'links:id,game_id,label,url',
@@ -95,6 +95,7 @@ class PublicGameController extends Controller
                     return [
                         'id' => $p->id,
                         'name' => $p->name,
+                        'release_year' => $p->release_year,
                         'release_date' => optional($p->pivot)->release_date,
                     ];
                 })->values(),

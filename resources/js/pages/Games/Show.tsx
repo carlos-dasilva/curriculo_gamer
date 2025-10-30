@@ -2,6 +2,7 @@ import React from 'react';
 import { Head, Link } from '@inertiajs/react';
 import Header from '@/components/ui/Header';
 import Footer from '@/components/ui/Footer';
+import GameTitle from '@/components/ui/GameTitle';
 
 type Studio = { id: number; name: string } | null;
 type Platform = { id: number; name: string; release_date?: string | null; release_year?: number | null };
@@ -47,11 +48,12 @@ type Props = {
 
 export default function GameShow({ game, auth, myInfo, myPlatformStatuses }: Props) {
   const placeholder = '/img/sem-imagem.svg';
+  const [gallery, setGallery] = React.useState<{ id: number; url: string }[]>([...((game as any).gallery || [])]);
+  const imagesMap = React.useMemo(() => new Map(gallery.map((g) => [g.url, g.id])), [gallery]);
   const allImages = React.useMemo(() => {
-    const arr = [game.cover_url, ...(game.gallery_urls || [])].filter(Boolean) as string[];
-    // remove duplicadas preservando ordem
+    const arr = [game.cover_url, ...gallery.map((g) => g.url)].filter(Boolean) as string[];
     return Array.from(new Set(arr));
-  }, [game.cover_url, game.gallery_urls]);
+  }, [game.cover_url, gallery]);
 
   const [isOpen, setOpen] = React.useState(false);
   const [index, setIndex] = React.useState(0);
@@ -123,6 +125,24 @@ export default function GameShow({ game, auth, myInfo, myPlatformStatuses }: Pro
   const close = () => setOpen(false);
   const prev = () => setIndex((i) => (i > 0 ? i - 1 : allImages.length - 1));
   const next = () => setIndex((i) => (i + 1) % allImages.length);
+  const canManage = !!auth?.abilities?.manageUsers;
+  const removeImage = async (imageId: number, url: string) => {
+    if (!canManage || !imageId) return;
+    if (!confirm('Remover esta imagem da galeria?')) return;
+    try {
+      // @ts-ignore
+      await window.axios.delete(`/admin/jogos/${game.id}/imagens/${imageId}`);
+      setGallery((prev) => prev.filter((g) => g.id !== imageId));
+      setIndex((i) => {
+        const currentUrl = allImages[i];
+        if (currentUrl === url) {
+          const nextLen = Math.max(0, allImages.length - 1);
+          return i >= nextLen ? Math.max(0, nextLen - 1) : i;
+        }
+        return i;
+      });
+    } catch {}
+  };
 
   React.useEffect(() => {
     if (!isOpen) return;
@@ -172,7 +192,7 @@ export default function GameShow({ game, auth, myInfo, myPlatformStatuses }: Pro
             <div className="w-full">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                  <h1 className="text-2xl font-bold text-white sm:text-3xl md:text-4xl">{game.name}</h1>
+                  <GameTitle as="h1" text={game.name} className="text-2xl font-bold text-white sm:text-3xl md:text-4xl" />
                   <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-sky-50/90">
                     {game.studio?.name && (
                       <span className="rounded bg-white/10 px-2 py-1">Estúdio: {game.studio.name}</span>
@@ -225,22 +245,26 @@ export default function GameShow({ game, auth, myInfo, myPlatformStatuses }: Pro
             </button>
             <div className="overflow-x-auto px-10">
               <ul id="thumb-track" className="flex flex-nowrap items-center gap-2" role="list">
-                {allImages.map((url, i) => (
-                  <li key={i} className="flex-shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => openAt(i)}
-                      className="group block overflow-hidden rounded-md border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-sky-500"
-                    >
-                      <img
-                        src={url || placeholder}
-                        onError={(e) => { const t = e.currentTarget; t.onerror = null; t.src = placeholder; }}
-                        alt={`Imagem ${i + 1} de ${game.name}`}
-                        className="h-24 w-24 sm:h-28 sm:w-28 md:h-36 md:w-36 object-cover transition group-hover:scale-[1.03]"
-                      />
-                    </button>
-                  </li>
-                ))}
+                {allImages.map((url, i) => {
+                  const imageId = imagesMap.get(url || '');
+                  return (
+                    <li key={i} className="relative flex-shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => openAt(i)}
+                        className="group block overflow-hidden rounded-md border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-sky-500"
+                      >
+                        <img
+                          src={url || placeholder}
+                          onError={(e) => { const t = e.currentTarget; t.onerror = null; t.src = placeholder; }}
+                          alt={`Imagem ${i + 1} de ${game.name}`}
+                          className="h-24 w-24 sm:h-28 sm:w-28 md:h-36 md:w-36 object-cover transition group-hover:scale-[1.03]"
+                        />
+                      </button>
+                      {null}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
             <button
@@ -527,6 +551,19 @@ export default function GameShow({ game, auth, myInfo, myPlatformStatuses }: Pro
             >
               <span className="block h-5 w-5">×</span>
             </button>
+            {canManage && imagesMap.get(allImages[index] || '') && (
+              <button
+                onClick={() => {
+                  const url = allImages[index] || '';
+                  const id = imagesMap.get(url || '');
+                  if (id) removeImage(id, url);
+                }}
+                aria-label="Excluir imagem atual"
+                className="absolute right-14 top-2 z-10 rounded bg-red-600/90 px-2 py-1 text-sm font-semibold text-white shadow hover:bg-red-600"
+              >
+                Excluir
+              </button>
+            )}
 
             <div className="flex h-full w-full items-center justify-center">
               <button

@@ -12,7 +12,7 @@ use App\Models\User;
 class CurriculumController extends Controller
 {
     /**
-     * Exibe a página "Meu Currículo" com resumo por status e por plataforma.
+     * Exibe a pÃ¡gina "Meu CurrÃ­culo" com resumo por status e por plataforma.
      */
     public function index(Request $request)
     {
@@ -33,7 +33,7 @@ class CurriculumController extends Controller
             $mode = 'all';
         }
 
-        // Resumo por jogo com precedência: 100% > Finalizei > Joguei > Quero Jogar
+        // Resumo por jogo com precedÃªncia: 100% > Finalizei > Joguei > Quero Jogar
         $rankCase = "CASE ugps.status WHEN 'quero_jogar' THEN 1 WHEN 'joguei' THEN 2 WHEN 'finalizei' THEN 3 WHEN 'cem_por_cento' THEN 4 END";
         $perGame = DB::table('user_game_platform_statuses as ugps')
             ->join('games', 'games.id', '=', 'ugps.game_id')
@@ -87,7 +87,7 @@ class CurriculumController extends Controller
         }
 
         $byPlatform = array_values($byPlatformMap);
-        // Ordenação: 100% > Finalizei > Joguei > Quero Jogar
+        // OrdenaÃ§Ã£o: 100% > Finalizei > Joguei > Quero Jogar
         usort($byPlatform, function ($a, $b) {
             $orderKeys = ['cem_por_cento','finalizei','joguei','quero_jogar'];
             foreach ($orderKeys as $k) {
@@ -109,6 +109,10 @@ class CurriculumController extends Controller
         }
 
         // Lista de jogos conforme filtro (exclui jogos com status superior em outra plataforma)
+        $q = trim((string) request('q', ''));
+        $sub = request()->boolean('sub');
+        $dub = request()->boolean('dub');
+
         $gamesQuery = Game::query()
             ->select(['id','name','cover_url','description','overall_score','metacritic_metascore','ptbr_subtitled','ptbr_dubbed','created_at'])
             ->where('status', 'liberado')
@@ -117,7 +121,18 @@ class CurriculumController extends Controller
                 'platforms:id,name',
                 'tags:id,name,slug',
             ])
-            // 1) Nota geral > 2) Metascore > 3) User Score (do usuário logado) > 4) Últimos cadastrados > 5) Nome
+            ->when($q !== '', function ($query) use ($q) {
+                $like = "%{$q}%";
+                $query->where(function ($w) use ($like) {
+                    $w->where('name','like',$like)
+                      ->orWhereHas('studio', fn($s) => $s->where('name','like',$like))
+                      ->orWhereHas('platforms', fn($p) => $p->where('name','like',$like))
+                      ->orWhereHas('tags', fn($t) => $t->where('name','like',$like)->orWhere('slug','like',$like));
+                });
+            })
+            ->when($sub, fn($q2) => $q2->where('ptbr_subtitled', true))
+            ->when($dub, fn($q2) => $q2->where('ptbr_dubbed', true))
+            // 1) Nota geral > 2) Metascore > 3) User Score (do usuÃ¡rio logado) > 4) Ãšltimos cadastrados > 5) Nome
             ->orderByDesc('overall_score')
             ->orderByDesc('metacritic_metascore')
             ->whereExists(function ($q) use ($userId, $status, $platformId) {
@@ -166,9 +181,10 @@ class CurriculumController extends Controller
                 'platformId' => $platformId,
             ],
             'games' => $games,
+            'filters' => [ 'q' => $q, 'sub' => $sub, 'dub' => $dub ],
             'subject' => [
                 'id' => $userId,
-                'name' => auth()->user()->name ?? 'Usuário',
+                'name' => auth()->user()->name ?? 'UsuÃ¡rio',
                 'isMe' => true,
                 'isFollowed' => false,
             ],
@@ -176,7 +192,7 @@ class CurriculumController extends Controller
     }
 
     /**
-     * Exibe o currículo de outro usuário (auth obrigatório).
+     * Exibe o currÃ­culo de outro usuÃ¡rio (auth obrigatÃ³rio).
      */
     public function show(Request $request, int $user)
     {
@@ -269,6 +285,11 @@ class CurriculumController extends Controller
             $platformId = null;
         }
 
+        // Filtros de busca/idioma
+        $q = trim((string) request('q', ''));
+        $sub = request()->boolean('sub');
+        $dub = request()->boolean('dub');
+
         $gamesQuery = Game::query()
             ->select(['id','name','cover_url','description','overall_score','metacritic_metascore','ptbr_subtitled','ptbr_dubbed','created_at'])
             ->where('status', 'liberado')
@@ -277,6 +298,17 @@ class CurriculumController extends Controller
                 'platforms:id,name',
                 'tags:id,name,slug',
             ])
+            ->when($q !== '', function ($query) use ($q) {
+                $like = "%{$q}%";
+                $query->where(function ($w) use ($like) {
+                    $w->where('name','like',$like)
+                      ->orWhereHas('studio', fn($s) => $s->where('name','like',$like))
+                      ->orWhereHas('platforms', fn($p) => $p->where('name','like',$like))
+                      ->orWhereHas('tags', fn($t) => $t->where('name','like',$like)->orWhere('slug','like',$like));
+                });
+            })
+            ->when($sub, fn($q2) => $q2->where('ptbr_subtitled', true))
+            ->when($dub, fn($q2) => $q2->where('ptbr_dubbed', true))
             ->orderByDesc('overall_score')
             ->orderByDesc('metacritic_metascore')
             ->whereExists(function ($q) use ($userId, $status, $platformId) {
@@ -337,6 +369,7 @@ class CurriculumController extends Controller
                 'platformId' => $platformId,
             ],
             'games' => $games,
+            'filters' => [ 'q' => $q, 'sub' => $sub, 'dub' => $dub ],
             'subject' => [
                 'id' => $userModel->id,
                 'name' => $userModel->name,
@@ -346,3 +379,4 @@ class CurriculumController extends Controller
         ]);
     }
 }
+

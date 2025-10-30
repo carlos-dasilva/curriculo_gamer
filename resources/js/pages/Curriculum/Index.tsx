@@ -50,6 +50,7 @@ type Props = {
   subject: { id: number; name: string; isMe: boolean; isFollowed?: boolean };
   auth: AuthInfo;
   flash?: { success?: string; error?: string };
+  filters?: { q?: string; sub?: boolean; dub?: boolean };
 };
 
 const STATUS_LABELS: Record<StatusKey, string> = {
@@ -59,9 +60,12 @@ const STATUS_LABELS: Record<StatusKey, string> = {
   quero_jogar: 'Quero Jogar',
 };
 
-export default function CurriculumIndex({ mode, summary, byPlatform, selected, games, subject, auth, flash }: Props) {
+export default function CurriculumIndex({ mode, summary, byPlatform, selected, games, subject, auth, flash, filters }: Props) {
   const [currentMode, setCurrentMode] = React.useState<'all' | 'platform'>(mode || 'all');
   const basePath = subject?.isMe ? '/meu-curriculo' : `/curriculo/${subject?.id}`;
+  const [q, setQ] = React.useState<string>(filters?.q || '');
+  const [sub, setSub] = React.useState<boolean>(!!filters?.sub);
+  const [dub, setDub] = React.useState<boolean>(!!filters?.dub);
 
   React.useEffect(() => {
     setCurrentMode(mode);
@@ -77,6 +81,18 @@ export default function CurriculumIndex({ mode, summary, byPlatform, selected, g
   const onPick = (s: StatusKey, platformId?: number) => {
     const params: Record<string, string | number> = { mode: currentMode, status: s };
     if (currentMode === 'platform' && platformId) params.platform = platformId;
+    if (q.trim()) params.q = q.trim();
+    if (sub) params.sub = 1;
+    if (dub) params.dub = 1;
+    router.get(basePath, params, { preserveScroll: true, preserveState: true });
+  };
+  const applyFilters = (e: React.FormEvent) => {
+    e.preventDefault();
+    const params: Record<string, string | number> = { mode: currentMode, status: selected.status };
+    if (currentMode === 'platform' && selected.platformId) params.platform = selected.platformId;
+    if (q.trim()) params.q = q.trim();
+    if (sub) params.sub = 1;
+    if (dub) params.dub = 1;
     router.get(basePath, params, { preserveScroll: true, preserveState: true });
   };
 
@@ -190,12 +206,44 @@ export default function CurriculumIndex({ mode, summary, byPlatform, selected, g
 
           {/* Conteúdo principal: cards */}
           <section className="lg:col-start-2 min-w-0">
+            <form onSubmit={applyFilters} className="mb-4 rounded-lg border border-gray-200 bg-white p-3 shadow-sm">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+                <div className="sm:flex-1">
+                  <label htmlFor="q2" className="block text-sm font-medium text-gray-700">Buscar</label>
+                  <input id="q2" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Nome, estúdio, plataforma ou marcador"
+                    className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    aria-pressed={!!sub}
+                    onClick={() => setSub((v) => !v)}
+                    className={`${sub ? 'bg-gray-900 text-white ring-gray-900' : 'bg-white text-gray-800 ring-gray-300 hover:bg-gray-50'} inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm ring-1 ring-inset shadow-sm transition cursor-pointer`}
+                  >
+                    <span className="sm:hidden">Legendado</span>
+                    <span className="hidden sm:inline">Legendado em PT-BR</span>
+                  </button>
+                  <button
+                    type="button"
+                    aria-pressed={!!dub}
+                    onClick={() => setDub((v) => !v)}
+                    className={`${dub ? 'bg-gray-900 text-white ring-gray-900' : 'bg-white text-gray-800 ring-gray-300 hover:bg-gray-50'} inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm ring-1 ring-inset shadow-sm transition cursor-pointer`}
+                  >
+                    <span className="sm:hidden">Dublado</span>
+                    <span className="hidden sm:inline">Dublado em PT-BR</span>
+                  </button>
+                </div>
+                <div>
+                  <button type="submit" className="inline-flex items-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800">Aplicar filtros</button>
+                </div>
+              </div>
+            </form>
             <h2 className="sr-only">Jogos filtrados</h2>
             {games.data.length === 0 ? (
               <p className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-600 shadow-sm">Nenhum jogo encontrado para o filtro selecionado.</p>
             ) : (
               <>
-                <GameCards games={games.data} subjectName={subject?.name} />
+                <GameCards games={games.data} subjectName={subject?.name} disableLocalFilters />
                 {Array.isArray(games?.links) && games.links.length > 0 && (
                   <nav className="mt-8 flex justify-center" aria-label="Paginação">
                     <ul className="inline-flex items-center gap-1">

@@ -19,15 +19,17 @@ export type GameCard = {
 type Props = {
   games: GameCard[];
   subjectName?: string;
+  disableLocalFilters?: boolean;
 };
 
-export default function GameCards({ games, subjectName }: Props) {
+export default function GameCards({ games, subjectName, disableLocalFilters }: Props) {
   const placeholder = '/img/sem-imagem.svg';
   const [query, setQuery] = React.useState('');
   const [onlySubtitled, setOnlySubtitled] = React.useState(false);
   const [onlyDubbed, setOnlyDubbed] = React.useState(false);
 
   const filtered = React.useMemo(() => {
+    if (disableLocalFilters) return games;
     const isTrue = (v: any) => v === true || v === 1 || v === '1' || v === 'true';
     const q = query.trim().toLowerCase();
     let list = games;
@@ -51,55 +53,57 @@ export default function GameCards({ games, subjectName }: Props) {
   return (
     <section id="sites" aria-label="Lista de jogos">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="mb-6">
-          {/* Filtros de idioma (pills modernos) */}
-          <div className="mb-3" role="group" aria-label="Filtros de idioma">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  aria-pressed={onlySubtitled}
-                  onClick={() => setOnlySubtitled((v) => !v)}
-                  className={`${onlySubtitled ? 'bg-gray-900 text-white ring-gray-900' : 'bg-white text-gray-800 ring-gray-300 hover:bg-gray-50'} inline-flex items-center justify-center gap-2 rounded-full px-3 py-1.5 text-sm ring-1 ring-inset shadow-sm transition cursor-pointer`}
-                >
-                  <SubtitleIcon className="h-4 w-4" />
-                  <span className="sm:hidden">Legendado</span>
-                  <span className="hidden sm:inline">Legendado em PT-BR</span>
-                </button>
-                <button
-                  type="button"
-                  aria-pressed={onlyDubbed}
-                  onClick={() => setOnlyDubbed((v) => !v)}
-                  className={`${onlyDubbed ? 'bg-gray-900 text-white ring-gray-900' : 'bg-white text-gray-800 ring-gray-300 hover:bg-gray-50'} inline-flex items-center justify-center gap-2 rounded-full px-3 py-1.5 text-sm ring-1 ring-inset shadow-sm transition cursor-pointer`}
-                >
-                  <MicIcon className="h-4 w-4" />
-                  <span className="sm:hidden">Dublado</span>
-                  <span className="hidden sm:inline">Dublado em PT-BR</span>
-                </button>
+        {!disableLocalFilters && (
+          <div className="mb-6">
+            {/* Filtros de idioma (pills modernos) */}
+            <div className="mb-3" role="group" aria-label="Filtros de idioma">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    aria-pressed={onlySubtitled}
+                    onClick={() => setOnlySubtitled((v) => !v)}
+                    className={`${onlySubtitled ? 'bg-gray-900 text-white ring-gray-900' : 'bg-white text-gray-800 ring-gray-300 hover:bg-gray-50'} inline-flex items-center justify-center gap-2 rounded-full px-3 py-1.5 text-sm ring-1 ring-inset shadow-sm transition cursor-pointer`}
+                  >
+                    <SubtitleIcon className="h-4 w-4" />
+                    <span className="sm:hidden">Legendado</span>
+                    <span className="hidden sm:inline">Legendado em PT-BR</span>
+                  </button>
+                  <button
+                    type="button"
+                    aria-pressed={onlyDubbed}
+                    onClick={() => setOnlyDubbed((v) => !v)}
+                    className={`${onlyDubbed ? 'bg-gray-900 text-white ring-gray-900' : 'bg-white text-gray-800 ring-gray-300 hover:bg-gray-50'} inline-flex items-center justify-center gap-2 rounded-full px-3 py-1.5 text-sm ring-1 ring-inset shadow-sm transition cursor-pointer`}
+                  >
+                    <MicIcon className="h-4 w-4" />
+                    <span className="sm:hidden">Dublado</span>
+                    <span className="hidden sm:inline">Dublado em PT-BR</span>
+                  </button>
+                </div>
+                {(onlySubtitled || onlyDubbed) && (
+                  <button
+                    type="button"
+                    onClick={() => { setOnlySubtitled(false); setOnlyDubbed(false); }}
+                    className="inline-flex items-center text-xs text-gray-600 underline-offset-2 hover:underline sm:ml-auto"
+                  >
+                    Limpar filtros
+                  </button>
+                )}
               </div>
-              {(onlySubtitled || onlyDubbed) && (
-                <button
-                  type="button"
-                  onClick={() => { setOnlySubtitled(false); setOnlyDubbed(false); }}
-                  className="inline-flex items-center text-xs text-gray-600 underline-offset-2 hover:underline sm:ml-auto"
-                >
-                  Limpar filtros
-                </button>
-              )}
             </div>
+            <label htmlFor="busca" className="sr-only">{SEARCH_PLACEHOLDER}</label>
+            <input
+              id="busca"
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={SEARCH_PLACEHOLDER}
+              className="w-full rounded-md border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500 sm:text-sm"
+              aria-describedby="resultado-contagem"
+            />
+            <p id="resultado-contagem" className="mt-2 text-sm text-gray-600">{filtered.length} resultado(s)</p>
           </div>
-          <label htmlFor="busca" className="sr-only">{SEARCH_PLACEHOLDER}</label>
-          <input
-            id="busca"
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={SEARCH_PLACEHOLDER}
-            className="w-full rounded-md border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500 sm:text-sm"
-            aria-describedby="resultado-contagem"
-          />
-          <p id="resultado-contagem" className="mt-2 text-sm text-gray-600">{filtered.length} resultado(s)</p>
-        </div>
+        )}
 
         {filtered.length === 0 ? (
           <p className="text-center text-gray-600">Nenhum jogo liberado encontrado.</p>

@@ -123,6 +123,7 @@ Route::middleware(['auth','role:moderador,admin'])->prefix('admin')->name('admin
     Route::get('/jogos/{game}/editar', [GamesController::class, 'edit'])->name('games.edit');
     Route::post('/jogos/capturar', [GamesController::class, 'capture'])->name('games.capture');
     Route::put('/jogos/{game}', [GamesController::class, 'update'])->name('games.update');
+    Route::delete('/jogos/{game}/imagens/{image}', [GamesController::class, 'removeImage'])->name('games.images.destroy');
     Route::delete('/jogos/{game}', [GamesController::class, 'destroy'])->name('games.destroy');
 
     // Diagnóstico detalhado do servidor (somente admin)

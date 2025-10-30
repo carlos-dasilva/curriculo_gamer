@@ -540,6 +540,22 @@ class GameController extends Controller
 
         return redirect()->route('admin.games.index')->with('success', 'Jogo removido com sucesso.');
     }
+
+    /**
+     * Remove uma imagem específica da galeria (admin/moderador).
+     */
+    public function removeImage(Request $request, Game $game, GameImage $image): JsonResponse
+    {
+        if ((int) $image->game_id !== (int) $game->id) {
+            return response()->json(['ok' => false, 'message' => 'Imagem não pertence ao jogo.'], 422);
+        }
+        try {
+            $image->delete();
+        } catch (\Throwable $e) {
+            return response()->json(['ok' => false], 500);
+        }
+        return response()->json(['ok' => true]);
+    }
     
     // (Removido) suporte a traduÃ§Ã£o automÃ¡tica
 }

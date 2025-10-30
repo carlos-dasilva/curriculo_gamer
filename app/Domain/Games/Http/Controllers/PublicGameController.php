@@ -51,7 +51,8 @@ class PublicGameController extends Controller
         }
 
         // Ordena imagens da galeria
-        $gallery = $game->images->sortBy('sort_order')->pluck('url')->values()->all();
+        $sortedImages = $game->images->sortBy('sort_order')->values();
+        $gallery = $sortedImages->pluck('url')->values()->all();
 
         // Carrega minhas informações salvas (se autenticado)
         $myInfo = null;
@@ -100,7 +101,10 @@ class PublicGameController extends Controller
                     ];
                 })->values(),
                 'tags' => $game->tags->map(fn($t) => ['id' => $t->id, 'name' => $t->name, 'slug' => $t->slug])->values(),
+                // urls para exibição geral
                 'gallery_urls' => $gallery,
+                // metadados para admins (permitir excluir)
+                'gallery' => $sortedImages->map(fn($im) => ['id' => $im->id, 'url' => $im->url])->values(),
                 'external_links' => $game->links->map(fn($l) => ['label' => $l->label, 'url' => $l->url])->values(),
             ],
             'myInfo' => $myInfo,

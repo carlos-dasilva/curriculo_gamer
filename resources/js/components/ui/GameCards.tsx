@@ -1,5 +1,5 @@
-﻿﻿import React from 'react';
-// Placeholder definido localmente para evitar confusão com o texto antigo de busca
+﻿import React from 'react';
+import GameTitle from '@/components/ui/GameTitle';
 const SEARCH_PLACEHOLDER = 'Buscar por nome, estúdio, plataforma ou marcadores...';
 
 export type GameCard = {
@@ -160,7 +160,7 @@ export default function GameCards({ games, subjectName }: Props) {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" aria-hidden="true" />
                   {/* Nome + descrição no rodapé (ellipsis) */}
                   <div className="absolute bottom-0 left-0 right-0 p-3">
-                    <h3 className="line-clamp-2 text-base font-semibold text-white">{g.name}</h3>
+                    <GameTitle as="h3" text={g.name} className="line-clamp-2 text-base font-semibold text-white" />
                     {g.description && (
                       <p className="mt-1 line-clamp-3 text-sm text-sky-50">{g.description}</p>
                     )}
@@ -190,4 +190,5 @@ function MicIcon({ className }: { className?: string }) {
     </svg>
   );
 }
+
 

@@ -211,7 +211,9 @@ export default function GameShow({ game, auth, myInfo, myPlatformStatuses }: Pro
                   <CommunityBadge label="Nota desta comunidade" value={Number(communityScore)} max={10} decimals={2} />
                 )}
                 <MetacriticBadge label="Metascore" value={game.metacritic_metascore} suffix="/100" max={100} decimals={0} />
-                <MetacriticBadge label="User Score" value={game.metacritic_user_score} suffix="/10.00" max={10} decimals={2} />
+                {(game.metacritic_user_score != null && Number(game.metacritic_user_score) > 0) && (
+                  <MetacriticBadge label="User Score" value={game.metacritic_user_score} suffix="/10.00" max={10} decimals={2} />
+                )}
               </div>
 
               {/* Botão Editar: último no mobile; ancorado no canto inferior direito no desktop */}

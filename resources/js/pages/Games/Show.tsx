@@ -685,7 +685,7 @@ function AlertIcon({ className }: { className?: string }) {
 // --- Comentários da Comunidade ---
 type CommunityComment = {
   id: string;
-  author: { id: number; name: string };
+  author: { id: number; name: string; score?: number | null; platform?: { id: number; name: string; status?: 'nao_joguei' | 'quero_jogar' | 'joguei' | 'finalizei' | 'cem_por_cento' | null } | null };
   content: string;
   updated_at: string;
   avg_rating: number;
@@ -757,6 +757,23 @@ function CommunityComments({ gameId, isAuthenticated, canModerate }: { gameId: n
   const [confirmDelete, setConfirmDelete] = React.useState<null | { authorId: number; name: string }>(null);
   const [deleting, setDeleting] = React.useState(false);
 
+  const statusToLabel = (s?: string | null): string | null => {
+    switch (s) {
+      case 'cem_por_cento':
+        return 'Fiz 100%';
+      case 'finalizei':
+        return 'Finalizei';
+      case 'joguei':
+        return 'Joguei';
+      case 'quero_jogar':
+        return 'Quero jogar';
+      case 'nao_joguei':
+        return 'Não joguei';
+      default:
+        return null;
+    }
+  };
+
   const fetchComments = React.useCallback(async (p = 1) => {
     try {
       setLoading(true);
@@ -823,7 +840,20 @@ function CommunityComments({ gameId, isAuthenticated, canModerate }: { gameId: n
               <div className="flex-1">
                 <div className="flex items-start justify-between">
                   <div className="min-w-0 pr-4">
-                    <p className="truncate text-sm font-semibold text-gray-900" title={c.author.name}>{c.author.name}</p>
+                    <p className="truncate text-sm font-semibold text-gray-900" title={c.author.name}>
+                      {c.author.name}
+                    </p>
+                    {(c.author.platform?.name || (c.author.score ?? 0) > 0) && (
+                      <p className="mt-0.5 text-xs text-gray-600">
+                        {c.author.platform?.name || ''}
+                        {(() => {
+                          const lab = statusToLabel(c.author.platform?.status ?? null);
+                          return lab ? `(${lab})` : '';
+                        })()}
+                        {(c.author.platform?.name && (c.author.score ?? 0) > 0) ? ' · ' : ''}
+                        {(c.author.score ?? 0) > 0 ? `Nota ${Number(c.author.score)}` : ''}
+                      </p>
+                    )}
                     <p className="mt-0.5 text-xs text-gray-500">Atualizado em {new Date(c.updated_at).toLocaleDateString('pt-BR')}</p>
                   </div>
                   <div className="flex flex-col items-end gap-2">

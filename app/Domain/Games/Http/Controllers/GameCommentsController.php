@@ -54,6 +54,7 @@ class GameCommentsController extends Controller
             ->select([
                 'ugi.user_id as author_id',
                 'u.name as author_name',
+                'ugi.score as author_score',
                 'ugi.notes as content',
                 'ugi.updated_at as updated_at',
                 DB::raw('COALESCE(ar.avg_rating, 0) as avg_rating'),
@@ -66,12 +67,81 @@ class GameCommentsController extends Controller
 
         $paginator = $query->paginate($perPage, ['*'], 'page', $page);
 
-        $items = collect($paginator->items())->map(function ($r) use ($game) {
+        $rows = collect($paginator->items());
+
+        // Coleta autores desta página
+        $authorIds = $rows->pluck('author_id')->unique()->filter()->map(fn($v) => (int) $v)->values()->all();
+
+        // Plataformas do jogo (para fallback)
+        $fallbackPlatforms = DB::table('game_platform as gp')
+            ->join('platforms as p', 'p.id', '=', 'gp.platform_id')
+            ->where('gp.game_id', $game->id)
+            ->select(['p.id', 'p.name', 'p.release_year'])
+            ->get();
+
+        // Status por autor para este jogo
+        $statusRows = empty($authorIds) ? collect() : DB::table('user_game_platform_statuses as s')
+            ->join('platforms as p', 'p.id', '=', 's.platform_id')
+            ->where('s.game_id', $game->id)
+            ->whereIn('s.user_id', $authorIds)
+            ->select(['s.user_id', 'p.id as platform_id', 'p.name', 'p.release_year', 's.status'])
+            ->get();
+
+        // Função de prioridade
+        $statusWeight = function (?string $status): int {
+            $s = (string) $status;
+            return match ($s) {
+                'cem_por_cento' => 1,
+                'finalizei' => 2,
+                'joguei' => 3,
+                default => 99,
+            };
+        };
+
+        // Seleciona a melhor plataforma por autor
+        $bestByAuthor = [];
+        foreach ($authorIds as $uid) {
+            $list = $statusRows->where('user_id', $uid)->values();
+            $chosen = null;
+            if ($list->count() > 0) {
+                $chosen = $list->sort(function ($a, $b) use ($statusWeight) {
+                    $wa = $statusWeight($a->status);
+                    $wb = $statusWeight($b->status);
+                    if ($wa !== $wb) return $wa <=> $wb;
+                    $ay = $a->release_year ?? 9999;
+                    $by = $b->release_year ?? 9999;
+                    if ($ay !== $by) return $ay <=> $by;
+                    return strcmp((string) $a->name, (string) $b->name);
+                })->first();
+            }
+            if (!$chosen) {
+                // Fallback: menor ano de lançamento dentre as plataformas do jogo, depois alfabética
+                $chosen = $fallbackPlatforms->sort(function ($a, $b) {
+                    $ay = $a->release_year ?? 9999;
+                    $by = $b->release_year ?? 9999;
+                    if ($ay !== $by) return $ay <=> $by;
+                    return strcmp((string) $a->name, (string) $b->name);
+                })->first();
+            }
+            if ($chosen) {
+                $pid = property_exists($chosen, 'platform_id') ? (int) $chosen->platform_id : (int) ($chosen->id ?? 0);
+                $bestByAuthor[$uid] = [
+                    'id' => $pid,
+                    'name' => (string) $chosen->name,
+                    'status' => property_exists($chosen, 'status') ? (string) $chosen->status : null,
+                ];
+            }
+        }
+
+        $items = $rows->map(function ($r) use ($game, $bestByAuthor) {
+            $aid = (int) $r->author_id;
             return [
-                'id' => $game->id . ':' . $r->author_id,
+                'id' => $game->id . ':' . $aid,
                 'author' => [
-                    'id' => (int) $r->author_id,
+                    'id' => $aid,
                     'name' => (string) $r->author_name,
+                    'score' => isset($r->author_score) ? (is_numeric($r->author_score) ? (float) $r->author_score : null) : null,
+                    'platform' => $bestByAuthor[$aid] ?? null,
                 ],
                 'content' => (string) $r->content,
                 'updated_at' => (string) $r->updated_at,

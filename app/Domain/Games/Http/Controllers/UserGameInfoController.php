@@ -37,6 +37,8 @@ class UserGameInfoController extends Controller
             $data['score'] = 0;
             $data['difficulty'] = 0;
             $data['gameplay_hours'] = 0;
+            // Exclui o comentário (notes) se não houver progresso em nenhuma plataforma
+            $data['notes'] = null;
         }
 
         $overall = null;

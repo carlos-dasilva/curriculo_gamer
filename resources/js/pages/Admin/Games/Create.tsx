@@ -59,6 +59,10 @@ export default function GamesCreate({ studios, platforms, tags, flash }: Props) 
   });
 
   const [capturing, setCapturing] = React.useState(false);
+  // Listas locais atualizáveis para refletir itens criados na captura
+  const [allStudios, setAllStudios] = React.useState<Studio[]>(studios);
+  const [allTags, setAllTags] = React.useState<Tag[]>(tags);
+  const [allPlatforms, setAllPlatforms] = React.useState<Platform[]>(platforms);
   const applyCaptured = (d: any) => {
     if (!d || typeof d !== 'object') return;
     // Scalars: só preencher se vazio
@@ -68,16 +72,42 @@ export default function GamesCreate({ studios, platforms, tags, flash }: Props) 
     if ('metacritic_metascore' in d && !(data as any).metacritic_metascore) setData('metacritic_metascore', d.metacritic_metascore ?? '');
     if ('metacritic_user_score' in d && !(data as any).metacritic_user_score) setData('metacritic_user_score', d.metacritic_user_score ?? '');
     if ('studio_id' in d && !(data as any).studio_id) setData('studio_id', d.studio_id ?? '');
+    // Atualiza combos com metadados retornados
+    if (d.studio_id && d.studio_name) {
+      const sid = Number(d.studio_id);
+      if (Number.isFinite(sid) && sid > 0 && !allStudios.some((s) => s.id === sid)) {
+        setAllStudios([...allStudios, { id: sid, name: String(d.studio_name) }]);
+      }
+    }
     // Arrays/objetos: mesclar sem sobrescrever
     if ('tag_ids' in d && Array.isArray(d.tag_ids)) {
       const incoming = d.tag_ids.filter((n: any) => Number.isFinite(n)).map((n: any) => Number(n));
       const merged = Array.from(new Set([...(data.tag_ids || []), ...incoming]));
       setData('tag_ids', merged);
     }
+    if (Array.isArray(d.tags_meta)) {
+      const byId = new Map<number, Tag>(allTags.map((t) => [t.id, t]));
+      (d.tags_meta as any[]).forEach((t: any) => {
+        const id = Number(t?.id);
+        const name = typeof t?.name === 'string' ? t.name : '';
+        const slug = typeof t?.slug === 'string' ? t.slug : '';
+        if (Number.isFinite(id) && id > 0 && !byId.has(id)) byId.set(id, { id, name, slug });
+      });
+      setAllTags(Array.from(byId.values()));
+    }
     if ('platform_ids' in d && Array.isArray(d.platform_ids)) {
       const incoming = d.platform_ids.filter((n: any) => Number.isFinite(n)).map((n: any) => Number(n));
       const merged = Array.from(new Set([...(data.platform_ids || []), ...incoming]));
       setData('platform_ids', merged);
+    }
+    if (Array.isArray(d.platforms_meta)) {
+      const byId = new Map<number, Platform>(allPlatforms.map((p) => [p.id, p]));
+      (d.platforms_meta as any[]).forEach((p: any) => {
+        const id = Number(p?.id);
+        const name = typeof p?.name === 'string' ? p.name : '';
+        if (Number.isFinite(id) && id > 0 && !byId.has(id)) byId.set(id, { id, name });
+      });
+      setAllPlatforms(Array.from(byId.values()));
     }
     if ('platform_releases' in d && d.platform_releases && typeof d.platform_releases === 'object') {
       const cur = { ...(data.platform_releases || {}) } as Record<number, string>;
@@ -226,7 +256,7 @@ export default function GamesCreate({ studios, platforms, tags, flash }: Props) 
                 <label htmlFor="studio_id" className="block text-sm font-medium text-gray-700">Estúdio de desenvolvimento</label>
                 <select id="studio_id" value={data.studio_id ?? ''} onChange={(e) => setData('studio_id', e.target.value ? Number(e.target.value) : '')} className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500">
                   <option value="">Selecione…</option>
-                  {studios.map((s) => (
+                  {allStudios.map((s) => (
                     <option key={s.id} value={s.id}>{s.name}</option>
                   ))}
                 </select>
@@ -277,7 +307,7 @@ export default function GamesCreate({ studios, platforms, tags, flash }: Props) 
                   <label htmlFor="tag-combo" className="block text-sm font-medium text-gray-700">Adicionar marcador</label>
                   <select id="tag-combo" value={selectedTagId} onChange={(e) => setSelectedTagId(e.target.value)} className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500">
                     <option value="">Selecione...</option>
-                    {tags.filter(t => !data.tag_ids.includes(t.id)).map((t) => (
+                    {allTags.filter(t => !data.tag_ids.includes(t.id)).map((t) => (
                       <option key={t.id} value={t.id}>{`#${t.slug}`}</option>
                     ))}
                   </select>
@@ -288,7 +318,7 @@ export default function GamesCreate({ studios, platforms, tags, flash }: Props) 
               </div>
               <div className="flex flex-wrap gap-2">
                 {data.tag_ids.map((id) => {
-                  const t = tags.find((x) => x.id === id);
+                  const t = allTags.find((x) => x.id === id);
                   if (!t) return null;
                   return (
                     <span key={id} className="inline-flex items-center gap-2 rounded-full bg-sky-50 px-3 py-1 text-sm text-sky-800 ring-1 ring-inset ring-sky-200">
@@ -311,7 +341,7 @@ export default function GamesCreate({ studios, platforms, tags, flash }: Props) 
                   <label htmlFor="platform-combo" className="block text-sm font-medium text-gray-700">Adicionar plataforma</label>
                   <select id="platform-combo" value={selectedPlatformId} onChange={(e) => setSelectedPlatformId(e.target.value)} className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500">
                     <option value="">Selecione...</option>
-                    {platforms.filter(p => !data.platform_ids.includes(p.id)).map((p) => (
+                    {allPlatforms.filter(p => !data.platform_ids.includes(p.id)).map((p) => (
                       <option key={p.id} value={p.id}>{p.name}</option>
                     ))}
                   </select>
@@ -323,7 +353,7 @@ export default function GamesCreate({ studios, platforms, tags, flash }: Props) 
               {/* Selecionadas */}
               <div className="space-y-2">
                 {data.platform_ids.map((id) => {
-                  const p = platforms.find((x) => x.id === id);
+                  const p = allPlatforms.find((x) => x.id === id);
                   if (!p) return null;
                   return (
                     <div key={id} className="rounded-md border border-gray-200 bg-white p-3">

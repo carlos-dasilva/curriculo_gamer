@@ -226,6 +226,31 @@ class GameController extends Controller
             // ignore enrichment errors
         }
 
+        // Anexa metadados para o frontend atualizar combos imediatamente (sem refresh)
+        try {
+            // Studio name
+            if (!empty($data['studio_id']) && empty($data['studio_name'] ?? null)) {
+                $s = Studio::query()->select(['id','name'])->find($data['studio_id']);
+                if ($s) { $data['studio_name'] = $s->name; }
+            }
+
+            // Tags meta
+            $tagIds = array_values(array_unique((array) ($data['tag_ids'] ?? [])));
+            if (!empty($tagIds)) {
+                $tags = Tag::query()->whereIn('id', $tagIds)->select(['id','name','slug'])->orderBy('name')->get();
+                $data['tags_meta'] = $tags->map(fn($t) => ['id' => $t->id, 'name' => $t->name, 'slug' => $t->slug])->values();
+            }
+
+            // Platforms meta
+            $platIds = array_values(array_unique((array) ($data['platform_ids'] ?? [])));
+            if (!empty($platIds)) {
+                $plats = Platform::query()->whereIn('id', $platIds)->select(['id','name'])->orderBy('name')->get();
+                $data['platforms_meta'] = $plats->map(fn($p) => ['id' => $p->id, 'name' => $p->name])->values();
+            }
+        } catch (\Throwable $e) {
+            // Ignora falha ao montar metadados
+        }
+
         return response()->json(['ok' => true, 'data' => $data]);
     }
 

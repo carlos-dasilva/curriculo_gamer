@@ -59,6 +59,12 @@ Route::middleware('auth')->group(function () {
     Route::put('/perfil', [ProfileController::class, 'update'])->name('profile.update');
 });
 
+// Seguir/Deixar de seguir usuários (somente autenticado)
+Route::middleware('auth')->group(function () {
+    Route::post('/usuarios/{user}/seguir', [FollowController::class, 'follow'])->whereNumber('user')->name('users.follow');
+    Route::delete('/usuarios/{user}/seguir', [FollowController::class, 'unfollow'])->whereNumber('user')->name('users.unfollow');
+});
+
 // Opções (menu lateral para usuário)
 Route::middleware('auth')->get('/opcoes', [OptionsController::class, 'index'])->name('options.index');
 // Solicitações (criação/edição de jogos em avaliação pelo usuário)

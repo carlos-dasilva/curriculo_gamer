@@ -25,6 +25,7 @@ class Game extends Model
         'overall_score',
         'difficulty',
         'gameplay_hours',
+        'hours_to_finish',
         'ptbr_subtitled',
         'ptbr_dubbed',
     ];
@@ -36,6 +37,7 @@ class Game extends Model
         'overall_score' => 'decimal:2',
         'difficulty' => 'decimal:2',
         'gameplay_hours' => 'decimal:1',
+        'hours_to_finish' => 'integer',
     ];
 
     public function studio()

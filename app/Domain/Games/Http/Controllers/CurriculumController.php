@@ -171,6 +171,16 @@ class CurriculumController extends Controller
 
         $games = $gamesQuery->paginate(30)->withQueryString();
 
+        // Jogo atual (Estou jogando) do próprio usuário
+        $nowPlaying = null;
+        try {
+            $cid = auth()->user()->currently_playing_game_id ?? null;
+            if ($cid) {
+                $g = Game::query()->select(['id','name','cover_url'])->find($cid);
+                if ($g) { $nowPlaying = ['id' => $g->id, 'name' => $g->name, 'cover_url' => $g->cover_url]; }
+            }
+        } catch (\Throwable $e) { $nowPlaying = null; }
+
         return Inertia::render('Curriculum/Index', [
             'mode' => $mode,
             'summary' => $summary,
@@ -188,6 +198,7 @@ class CurriculumController extends Controller
                 'isMe' => true,
                 'isFollowed' => false,
             ],
+            'nowPlaying' => $nowPlaying,
         ]);
     }
 
@@ -347,6 +358,16 @@ class CurriculumController extends Controller
 
         $games = $gamesQuery->paginate(30)->withQueryString();
 
+        // Jogo atual (Estou jogando) do usuário visitado
+        $nowPlaying = null;
+        try {
+            $cid = $userModel->currently_playing_game_id ?? null;
+            if ($cid) {
+                $g = Game::query()->select(['id','name','cover_url'])->find($cid);
+                if ($g) { $nowPlaying = ['id' => $g->id, 'name' => $g->name, 'cover_url' => $g->cover_url]; }
+            }
+        } catch (\Throwable $e) { $nowPlaying = null; }
+
         $isFollowed = false;
         if (auth()->check() && (int) auth()->id() !== (int) $userModel->id) {
             try {
@@ -376,6 +397,7 @@ class CurriculumController extends Controller
                 'isMe' => (int) $userModel->id === (int) auth()->id(),
                 'isFollowed' => $isFollowed,
             ],
+            'nowPlaying' => $nowPlaying,
         ]);
     }
 }

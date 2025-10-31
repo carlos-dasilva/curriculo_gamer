@@ -22,6 +22,7 @@ type GameDto = {
   overall_score?: number | null;
   difficulty?: number | null;
   gameplay_hours?: number | null;
+  hours_to_finish?: number | null;
   ptbr_subtitled: boolean;
   ptbr_dubbed: boolean;
   tag_ids: number[];
@@ -53,6 +54,7 @@ export default function GamesEdit({ game, studios, platforms, tags, flash }: Pro
     overall_score: game.overall_score ?? '',
     difficulty: game.difficulty ?? '',
     gameplay_hours: game.gameplay_hours ?? '',
+    hours_to_finish: (game as any).hours_to_finish ?? '',
     metacritic_metascore: game.metacritic_metascore ?? '',
     metacritic_user_score: game.metacritic_user_score ?? '',
     ptbr_subtitled: !!game.ptbr_subtitled,
@@ -247,6 +249,13 @@ export default function GamesEdit({ game, studios, platforms, tags, flash }: Pro
               <div>
                 <label htmlFor="age_rating" className="block text-sm font-medium text-gray-700">Classificação indicativa</label>
                 <input id="age_rating" placeholder="ESRB: T / PEGI: 16 / BR: 12+" value={data.age_rating || ''} onChange={(e) => setData('age_rating', e.target.value)} className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+                <div className="mt-3 grid grid-cols-1 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Horas para Finalizar</label>
+                    <input type="number" inputMode="numeric" min={0} step={1} value={(data as any).hours_to_finish === '' ? '' : Number((data as any).hours_to_finish)} onChange={(e) => { const raw = e.target.value; setData('hours_to_finish', raw === '' ? '' : Number(raw)); }} className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+                    {(errors as any).hours_to_finish && <p className="mt-1 text-sm text-red-600">{(errors as any).hours_to_finish}</p>}
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -395,7 +404,7 @@ export default function GamesEdit({ game, studios, platforms, tags, flash }: Pro
           </section>
 
           {/* Links externos */}
-          <section>
+          <section className="hidden">
             <h2 className="text-lg font-semibold text-gray-900">Links externos</h2>
             <div className="mt-3 space-y-3">
               {(data.external_links || []).map((l: ExternalLink, idx: number) => (
@@ -427,6 +436,8 @@ export default function GamesEdit({ game, studios, platforms, tags, flash }: Pro
               {errors.external_links && <p className="text-sm text-red-600">{errors.external_links}</p>}
             </div>
           </section>
+
+                    {/* Campo \u0027Horas para Finalizar\u0027 removido daqui (mantido após Classificação indicativa) */}
 
           {/* AÃ§Ãµes */}
           <div className="flex items-center gap-3">
@@ -491,6 +502,7 @@ function MicIcon({ className }: { className?: string }) {
     </svg>
   );
 }
+
 
 
 

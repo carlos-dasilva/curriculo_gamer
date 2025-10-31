@@ -11,6 +11,21 @@ use App\Models\UserGameCommentRating;
 
 class UserGameInfoController extends Controller
 {
+    public function setPlaying(Request $request, Game $game)
+    {
+        if (!auth()->check()) {
+            abort(401);
+        }
+        $user = auth()->user();
+        $user->currently_playing_game_id = $game->id;
+        $user->save();
+
+        return response()->json([
+            'ok' => true,
+            'currently_playing_game_id' => $user->currently_playing_game_id,
+        ]);
+    }
+
     public function save(Request $request, Game $game)
     {
         if (!auth()->check()) {

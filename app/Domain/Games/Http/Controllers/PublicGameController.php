@@ -89,6 +89,7 @@ class PublicGameController extends Controller
                 'metacritic_user_score' => $game->metacritic_user_score,
                 'difficulty' => $game->difficulty,
                 'gameplay_hours' => $game->gameplay_hours,
+                'hours_to_finish' => $game->hours_to_finish,
                 'ptbr_subtitled' => (bool) $game->ptbr_subtitled,
                 'ptbr_dubbed' => (bool) $game->ptbr_dubbed,
                 'studio' => $game->studio ? [ 'id' => $game->studio->id, 'name' => $game->studio->name ] : null,

@@ -46,6 +46,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'role' => Role::class,
             'is_blocked' => 'boolean',
+            'currently_playing_game_id' => 'integer',
         ];
     }
 }

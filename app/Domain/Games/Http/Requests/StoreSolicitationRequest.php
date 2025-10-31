@@ -32,6 +32,7 @@ class StoreSolicitationRequest extends FormRequest
             'gallery_urls' => ['array'],
             'gallery_urls.*' => ['nullable','url','max:2048'],
 
+            'hours_to_finish' => ['nullable','integer','min:0'],
             'ptbr_subtitled' => ['boolean'],
             'ptbr_dubbed' => ['boolean'],
         ];
@@ -53,6 +54,7 @@ class StoreSolicitationRequest extends FormRequest
             'ptbr_subtitled' => filter_var($this->ptbr_subtitled, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false,
             'ptbr_dubbed' => filter_var($this->ptbr_dubbed, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false,
             'gallery_urls' => $gallery,
+            'hours_to_finish' => ($this->input('hours_to_finish') === '' || $this->input('hours_to_finish') === null) ? null : (int) $this->input('hours_to_finish'),
         ]);
     }
 

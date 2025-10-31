@@ -32,6 +32,7 @@ type FormData = {
   overall_score?: number | '';
   difficulty?: number | '';
   gameplay_hours?: number | '';
+  hours_to_finish?: number | '';
   age_rating?: string;
   description?: string;
 };
@@ -54,6 +55,7 @@ export default function GamesCreate({ studios, platforms, tags, flash }: Props) 
     overall_score: '',
     difficulty: '',
     gameplay_hours: '',
+    hours_to_finish: '',
     age_rating: '',
     description: '',
   });
@@ -263,6 +265,7 @@ export default function GamesCreate({ studios, platforms, tags, flash }: Props) 
                 {errors.studio_id && <p className="mt-1 text-sm text-red-600">{errors.studio_id}</p>}
               </div>
             </div>
+            {/* Horas para Finalizar movido para ao lado de Classificação indicativa */}
 
             <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
               <div>
@@ -274,6 +277,13 @@ export default function GamesCreate({ studios, platforms, tags, flash }: Props) 
               <div>
                 <label htmlFor="age_rating" className="block text-sm font-medium text-gray-700">Classificação indicativa</label>
                 <input id="age_rating" placeholder="ESRB: T / PEGI: 16 / BR: 12+" value={data.age_rating || ''} onChange={(e) => setData('age_rating', e.target.value)} className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+                <div className="mt-3 grid grid-cols-1 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Horas para Finalizar</label>
+                    <input type="number" inputMode="numeric" min={0} step={1} value={(data as any).hours_to_finish === '' ? '' : Number((data as any).hours_to_finish)} onChange={(e) => { const raw = e.target.value; setData('hours_to_finish', raw === '' ? '' : Number(raw)); }} className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+                    {(errors as any).hours_to_finish && <p className="mt-1 text-sm text-red-600">{(errors as any).hours_to_finish}</p>}
+                  </div>
+                </div>
               </div>
             </div>
 

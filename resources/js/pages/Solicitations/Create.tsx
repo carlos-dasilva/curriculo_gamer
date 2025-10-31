@@ -22,6 +22,7 @@ type FormData = {
   platform_releases: Record<number, string>;
   cover_url: string;
   gallery_urls: string[];
+  hours_to_finish?: number | '';
   ptbr_subtitled: boolean;
   ptbr_dubbed: boolean;
   age_rating?: string;
@@ -40,6 +41,7 @@ export default function SolicitationCreate({ studios, platforms, tags }: Props) 
     platform_releases: {},
     cover_url: '',
     gallery_urls: [''],
+    hours_to_finish: '',
     ptbr_subtitled: false,
     ptbr_dubbed: false,
     age_rating: '',
@@ -199,6 +201,11 @@ export default function SolicitationCreate({ studios, platforms, tags }: Props) 
                 <label className="block text-sm font-medium text-gray-700">Classificação etária</label>
                 <input value={data.age_rating} onChange={(e) => setData('age_rating', e.target.value)} className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-500" maxLength={50} />
                 {errors.age_rating && <p className="mt-1 text-sm text-red-600">{errors.age_rating}</p>}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Horas para Finalizar</label>
+                <input type="number" inputMode="numeric" min={0} step={1} value={data.hours_to_finish === '' ? '' : Number(data.hours_to_finish)} onChange={(e) => { const raw = e.target.value; setData('hours_to_finish', raw === '' ? '' : Number(raw)); }} className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-sky-500 focus:ring-2 focus:ring-sky-500" />
+                {(errors as any).hours_to_finish && <p className="mt-1 text-sm text-red-600">{(errors as any).hours_to_finish}</p>}
               </div>
             </div>
           </section>

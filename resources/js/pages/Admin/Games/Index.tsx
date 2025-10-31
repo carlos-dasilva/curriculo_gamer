@@ -85,7 +85,28 @@ export default function GamesIndex({ games, filters, flash }: Props) {
             <tbody className="divide-y divide-gray-200">
               {games.data.map((g) => (
                 <tr key={g.id}>
-                  <td className="px-4 py-3 text-sm text-gray-900">{g.name}</td>
+                  <td className="px-4 py-3 text-sm text-gray-900">
+                    <div className="flex items-center gap-3 min-w-0">
+                      {((g as any).cover_url ? (
+                        <img
+                          src={(g as any).cover_url as string}
+                          alt=""
+                          className="hidden md:block h-10 w-8 flex-none rounded object-cover"
+                          loading="lazy"
+                          decoding="async"
+                          fetchPriority="low"
+                          width={32}
+                          height={40}
+                        />
+                      ) : (
+                        <div className="hidden md:block h-10 w-8 flex-none rounded bg-gray-200" aria-hidden="true" />
+                      ))}
+                      <div className="flex min-w-0 flex-col">
+                        <span className="truncate font-medium">{g.name}</span>
+                        <span className="text-xs text-gray-500">{((g as any).status === 'liberado') ? 'Liberado' : 'Em avaliação'}</span>
+                      </div>
+                    </div>
+                  </td>
                   <td className="px-4 py-3 text-sm text-gray-700">{g.studio?.name || '-'}</td>
                   <td className="px-4 py-3 text-sm text-gray-700">{g.platforms_count}</td>
                   <td className="px-4 py-3 text-sm text-gray-700">{g.tags_count}</td>

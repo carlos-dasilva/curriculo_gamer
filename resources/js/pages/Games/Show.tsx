@@ -20,6 +20,7 @@ type GameDto = {
   metacritic_user_score?: number | null;
   difficulty?: number | null;
   gameplay_hours?: number | null;
+  hours_to_finish?: number | null;
   ptbr_subtitled: boolean;
   ptbr_dubbed: boolean;
   studio: Studio;
@@ -31,7 +32,7 @@ type GameDto = {
 
 type AuthInfo = {
   isAuthenticated: boolean;
-  user?: { name: string; email: string } | null;
+  user?: { name: string; email: string; currentlyPlayingGameId?: number | null } | null;
   loginUrl?: string;
   logoutUrl?: string;
   abilities?: { manageUsers?: boolean };
@@ -48,6 +49,9 @@ type Props = {
 
 export default function GameShow({ game, auth, myInfo, myPlatformStatuses }: Props) {
   const placeholder = '/img/sem-imagem.svg';
+  const [isPlayingThis, setIsPlayingThis] = React.useState<boolean>(
+    !!(auth?.user && (auth.user as any).currentlyPlayingGameId === game.id)
+  );
   const [gallery, setGallery] = React.useState<{ id: number; url: string }[]>([...((game as any).gallery || [])]);
   const imagesMap = React.useMemo(() => new Map(gallery.map((g) => [g.url, g.id])), [gallery]);
   const allImages = React.useMemo(() => {
@@ -215,7 +219,9 @@ export default function GameShow({ game, auth, myInfo, myPlatformStatuses }: Pro
                 {communityScore != null && (
                   <CommunityBadge label="Nota desta comunidade" value={Number(communityScore)} max={10} decimals={2} />
                 )}
-                <MetacriticBadge label="Metascore" value={game.metacritic_metascore} suffix="/100" max={100} decimals={0} />
+                {(game.metacritic_metascore != null && Number(game.metacritic_metascore) > 0) && (
+                  <MetacriticBadge label="Metascore" value={game.metacritic_metascore} suffix="/100" max={100} decimals={0} />
+                )}
                 {(game.metacritic_user_score != null && Number(game.metacritic_user_score) > 0) && (
                   <MetacriticBadge label="User Score" value={game.metacritic_user_score} suffix="/10.00" max={10} decimals={2} />
                 )}
@@ -352,15 +358,18 @@ export default function GameShow({ game, auth, myInfo, myPlatformStatuses }: Pro
             </div>
 
             {/* Metas adicionais */}
-            {(game.difficulty != null || game.gameplay_hours != null) && (
+            {(game.difficulty != null || game.gameplay_hours != null || ((game as any).hours_to_finish != null && Number((game as any).hours_to_finish) > 0)) && (
             <div className="mt-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
               <h3 className="text-sm font-semibold text-gray-900">Detalhes</h3>
               <dl className="mt-2 space-y-1 text-sm text-gray-800">
                 {game.difficulty != null && (
                   <div className="flex items-center justify-between"><dt>Dificuldade</dt><dd>{`${Number(communityDifficulty).toFixed(2)} / 10.00`}</dd></div>
                 )}
+                {(game as any).hours_to_finish != null && Number((game as any).hours_to_finish) > 0 && (
+                  <div className="flex items-center justify-between"><dt>Horas para Finalizar</dt><dd>{Number((game as any).hours_to_finish).toFixed(0)} h</dd></div>
+                )}
                 {game.gameplay_hours != null && (
-                  <div className="flex items-center justify-between"><dt>Gameplay médio</dt><dd>{Number(game.gameplay_hours).toFixed(1)} h</dd></div>
+                  <div className="flex items-center justify-between"><dt>Média de horas jogadas</dt><dd>{Number(game.gameplay_hours).toFixed(1)} h</dd></div>
                 )}
               </dl>
             </div>
@@ -527,6 +536,26 @@ export default function GameShow({ game, auth, myInfo, myPlatformStatuses }: Pro
                     </button>
                   ) : (
                     <a href={auth?.loginUrl || '#'} className="text-sm text-sky-700 underline-offset-2 hover:underline">Entre para salvar suas informações</a>
+                  )}
+                  {auth?.isAuthenticated && !isPlayingThis && (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          // @ts-ignore
+                          await window.axios.post(`/jogos/${game.id}/estou-jogando`);
+                          setIsPlayingThis(true);
+                        } catch (e) {
+                          // silencioso conforme solicitado: sem mensagens visuais
+                        } finally {
+                          // nada a fazer
+                        }
+                      }}
+                      className="ml-auto inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900 cursor-pointer"
+                      title="Definir este jogo como Estou Jogando"
+                    >
+                      Estou Jogando
+                    </button>
                   )}
                   {saveState && (
                     <span

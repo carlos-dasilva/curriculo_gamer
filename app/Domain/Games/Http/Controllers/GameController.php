@@ -85,6 +85,7 @@ class GameController extends Controller
                 'overall_score' => $data['overall_score'] ?? null,
                 'difficulty' => $data['difficulty'] ?? null,
                 'gameplay_hours' => $data['gameplay_hours'] ?? null,
+                'hours_to_finish' => $data['hours_to_finish'] ?? null,
                 'ptbr_subtitled' => (bool) ($data['ptbr_subtitled'] ?? false),
                 'ptbr_dubbed' => (bool) ($data['ptbr_dubbed'] ?? false),
             ]);
@@ -276,6 +277,7 @@ class GameController extends Controller
                 'overall_score' => $game->overall_score,
                 'difficulty' => $game->difficulty,
                 'gameplay_hours' => $game->gameplay_hours,
+                'hours_to_finish' => $game->hours_to_finish,
                 'ptbr_subtitled' => (bool) $game->ptbr_subtitled,
                 'ptbr_dubbed' => (bool) $game->ptbr_dubbed,
                 'tag_ids' => $game->tags->pluck('id'),
@@ -488,6 +490,7 @@ class GameController extends Controller
                 'overall_score' => $data['overall_score'] ?? null,
                 'difficulty' => $data['difficulty'] ?? null,
                 'gameplay_hours' => $data['gameplay_hours'] ?? null,
+                'hours_to_finish' => $data['hours_to_finish'] ?? null,
                 'ptbr_subtitled' => (bool) ($data['ptbr_subtitled'] ?? false),
                 'ptbr_dubbed' => (bool) ($data['ptbr_dubbed'] ?? false),
             ]);

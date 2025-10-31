@@ -42,6 +42,7 @@ class StoreGameRequest extends FormRequest
             'overall_score' => ['nullable','numeric','min:0','max:10'],
             'difficulty' => ['nullable','numeric','min:0','max:10'],
             'gameplay_hours' => ['nullable','numeric','min:0'],
+            'hours_to_finish' => ['nullable','integer','min:0'],
             'ptbr_subtitled' => ['boolean'],
             'ptbr_dubbed' => ['boolean'],
         ];
@@ -85,6 +86,7 @@ class StoreGameRequest extends FormRequest
             'overall_score' => $normalizeNum('overall_score'),
             'difficulty' => $normalizeNum('difficulty'),
             'gameplay_hours' => $normalizeNum('gameplay_hours'),
+            'hours_to_finish' => $normalizeNum('hours_to_finish', 'int'),
         ]);
     }
 

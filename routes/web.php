@@ -35,6 +35,7 @@ Route::get('/termos-uso', [TermsController::class, 'index'])->name('terms');
 // Página de jogo (restrita a usuários autenticados)
 Route::middleware('auth')->get('/jogos/{game}', [PublicGameController::class, 'show'])->name('games.show');
 Route::middleware('auth')->post('/jogos/{game}/minhas-informacoes', [UserGameInfoController::class, 'save'])->name('games.mine.save');
+Route::middleware('auth')->post('/jogos/{game}/estou-jogando', [UserGameInfoController::class, 'setPlaying'])->name('games.mine.playing');
 Route::middleware('auth')->post('/jogos/{game}/plataformas/{platform}/status', [GameProgressController::class, 'update'])->name('games.platform.status');
 // Comentários da Comunidade (público para listar; ações autenticadas)
 Route::get('/jogos/{game}/comentarios', [GameCommentsController::class, 'index'])->name('games.comments.index');

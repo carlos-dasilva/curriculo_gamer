@@ -252,6 +252,7 @@ class SolicitationController extends Controller
                 'description' => $data['description'] ?? null,
                 'metacritic_metascore' => $data['metacritic_metascore'] ?? null,
                 'metacritic_user_score' => $data['metacritic_user_score'] ?? null,
+                'hours_to_finish' => $data['hours_to_finish'] ?? null,
                 'ptbr_subtitled' => (bool) ($data['ptbr_subtitled'] ?? false),
                 'ptbr_dubbed' => (bool) ($data['ptbr_dubbed'] ?? false),
             ]);
@@ -302,6 +303,7 @@ class SolicitationController extends Controller
                 'cover_url' => $game->cover_url,
                 'age_rating' => $game->age_rating,
                 'status' => $game->status,
+                'hours_to_finish' => $game->hours_to_finish,
                 'description' => $game->description,
                 'ptbr_subtitled' => (bool) $game->ptbr_subtitled,
                 'ptbr_dubbed' => (bool) $game->ptbr_dubbed,
@@ -467,6 +469,7 @@ class SolicitationController extends Controller
                 'description' => $data['description'] ?? null,
                 'metacritic_metascore' => $data['metacritic_metascore'] ?? $game->metacritic_metascore,
                 'metacritic_user_score' => $data['metacritic_user_score'] ?? $game->metacritic_user_score,
+                'hours_to_finish' => $data['hours_to_finish'] ?? $game->hours_to_finish,
                 'ptbr_subtitled' => (bool) ($data['ptbr_subtitled'] ?? false),
                 'ptbr_dubbed' => (bool) ($data['ptbr_dubbed'] ?? false),
             ]);

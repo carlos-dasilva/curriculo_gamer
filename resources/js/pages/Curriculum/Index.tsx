@@ -99,7 +99,7 @@ export default function CurriculumIndex({ mode, summary, byPlatform, selected, g
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Head title={subject?.isMe ? 'Meu CurrÃ­culo' : `CurrÃ­culo do ${subject?.name || ''}`} />
+      <Head title={subject?.isMe ? 'Meu Currí­culo' : `Currí­culo do ${subject?.name || ''}`} />
       <Header auth={auth} />
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {nowPlaying && (
@@ -165,7 +165,7 @@ export default function CurriculumIndex({ mode, summary, byPlatform, selected, g
         <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
           {/* Sidebar esquerda (ou bloco superior no mobile) */}
           <aside className="lg:sticky lg:top-20 self-start">
-            {/* Modo de visualizaÃ§Ã£o */}
+            {/* Modo de visualização */}
             <fieldset className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm" aria-labelledby="filtro-modo-label">
               <legend id="filtro-modo-label" className="text-sm font-semibold text-gray-900">Filtrar por</legend>
               <div className="mt-3 flex items-center gap-4">
@@ -249,7 +249,7 @@ export default function CurriculumIndex({ mode, summary, byPlatform, selected, g
             </div>
           </aside>
 
-          {/* ConteÃºdo principal: cards */}
+          {/* Conteúdo principal: cards */}
           <section className="lg:col-start-2 min-w-0">
             <form onSubmit={applyFilters} className="mb-4 rounded-lg border border-gray-200 bg-white p-3 shadow-sm">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
@@ -290,7 +290,7 @@ export default function CurriculumIndex({ mode, summary, byPlatform, selected, g
               <>
                 <GameCards games={games.data} subjectName={subject?.name} disableLocalFilters />
                 {Array.isArray(games?.links) && games.links.length > 0 && (
-                  <nav className="mt-8 flex justify-center" aria-label="PaginaÃ§Ã£o">
+                  <nav className="mt-8 flex justify-center" aria-label="Paginação">
                     <ul className="inline-flex items-center gap-1">
                       {games.links.map((l, idx) => {
                         const label = l.label.replace('&laquo;', '<').replace('&raquo;', '>');
@@ -300,7 +300,7 @@ export default function CurriculumIndex({ mode, summary, byPlatform, selected, g
                         if (!l.url) {
                           return (
                             <li key={idx}>
-                              <span className={`${common} cursor-not-allowed bg-gray-100 text-gray-400`} aria-hidden={isPrev || isNext} aria-label={isPrev ? 'Anterior' : isNext ? 'PrÃ³xima' : undefined}>
+                              <span className={`${common} cursor-not-allowed bg-gray-100 text-gray-400`} aria-hidden={isPrev || isNext} aria-label={isPrev ? 'Anterior' : isNext ? 'Próxima' : undefined}>
                                 {isPrev ? '<' : isNext ? '>' : label}
                               </span>
                             </li>
@@ -311,7 +311,7 @@ export default function CurriculumIndex({ mode, summary, byPlatform, selected, g
                             <Link
                               href={l.url}
                               className={`${common} ${l.active ? 'bg-gray-900 text-white' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-200 hover:bg-gray-50'}`}
-                              aria-label={isPrev ? 'Anterior' : isNext ? 'PrÃ³xima' : undefined}
+                              aria-label={isPrev ? 'Anterior' : isNext ? 'Próxima' : undefined}
                               preserveScroll
                             >
                               {isPrev ? '<' : isNext ? '>' : label}
@@ -399,10 +399,10 @@ function ShareMyCurriculum({ userId }: { userId: number }) {
   const url = `${origin}/curriculo/${userId}`;
 
   const enc = encodeURIComponent;
-  const wa = `https://wa.me/?text=${enc('Meu CurrÃ­culo Gamer: ' + url)}`;
+  const wa = `https://wa.me/?text=${enc('Meu Currí­culo Gamer: ' + url)}`;
   const ig = `https://www.instagram.com/?url=${enc(url)}`;
-  const x = `https://twitter.com/intent/tweet?text=${enc('Meu CurrÃ­culo Gamer')}&url=${enc(url)}`;
-  const mail = `mailto:?subject=${enc('Meu CurrÃ­culo Gamer')}&body=${enc('Acesse meu currÃ­culo gamer: ' + url)}`;
+  const x = `https://twitter.com/intent/tweet?text=${enc('Meu Currículo Gamer')}&url=${enc(url)}`;
+  const mail = `mailto:?subject=${enc('Meu Currí­culo Gamer')}&body=${enc('Acesse meu currículo gamer: ' + url)}`;
 
   const legacyCopy = (text: string) => {
     try {
@@ -449,7 +449,7 @@ function ShareMyCurriculum({ userId }: { userId: number }) {
         onClick={() => setOpen(true)}
         className="inline-flex items-center gap-2 rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
       >
-        Compartilhar meu currÃ­culo
+        Compartilhar meu currí­culo
       </button>
       {copied && <span className="ml-2 text-xs text-gray-600 align-middle">Link copiado!</span>}
 
@@ -459,7 +459,7 @@ function ShareMyCurriculum({ userId }: { userId: number }) {
           <div role="dialog" aria-modal="true" className="absolute inset-0 flex items-center justify-center p-4">
             <div className="w-full max-w-sm rounded-lg border border-gray-200 bg-white p-4 shadow-xl">
               <div className="mb-3 flex items-center justify-between">
-                <h3 className="text-base font-semibold text-gray-900">Compartilhar meu currÃ­culo</h3>
+                <h3 className="text-base font-semibold text-gray-900">Compartilhar meu currí­culo</h3>
                 <button onClick={() => setOpen(false)} className="rounded-md p-1 text-gray-500 hover:bg-gray-100" aria-label="Fechar">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 011.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
                 </button>
@@ -476,17 +476,17 @@ function ShareMyCurriculum({ userId }: { userId: number }) {
                 <button
                   type="button"
                   onClick={async () => {
-                    // Tenta compartilhar nativamente se disponÃ­vel
+                    // Tenta compartilhar nativamente se disponí­vel
                     // @ts-ignore
                     if (navigator.share) {
                       try {
                         // @ts-ignore
-                        await navigator.share({ title: 'Meu CurrÃ­culo Gamer', text: 'Acesse meu currÃ­culo gamer:', url });
+                        await navigator.share({ title: 'Meu Currí­culo Gamer', text: 'Acesse meu currí­culo gamer:', url });
                         setOpen(false);
                         return;
                       } catch {}
                     }
-                    // Fallback: copia o link e abre Instagram para o usuÃ¡rio colar
+                    // Fallback: copia o link e abre Instagram para o usuário colar
                     await copy();
                     window.open('https://www.instagram.com/', '_blank', 'noopener,noreferrer');
                     setOpen(false);

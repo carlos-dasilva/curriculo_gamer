@@ -22,6 +22,10 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        // Permitir criação via Socialite e atualização do avatar
+        'email_verified_at',
+        'role',
+        'avatar_url',
     ];
 
     /**

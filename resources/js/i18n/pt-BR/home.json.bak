@@ -1,0 +1,35 @@
+﻿{
+  "header": {
+    "inicio": "InÃ­cio",
+    "clientes": "Clientes",
+    "contato": "Contato",
+    "entrarGoogle": "Entrar com Google",
+    "sair": "Sair"
+  },
+  "hero": {
+    "titulo": "Bem-vindo ao CurrÃ­culo Gamer",
+    "subtitulo": "Sua plataforma para jogos, conquistas e CurrÃ­culo Gamer.",
+    "cta": "Acessar meu CurrÃ­culo",
+    "altImagem": "Banner ilustrativo"
+  },
+  "cards": {
+    "buscaPlaceholder": "Buscar por nome, estÃºdio, plataforma ou marcadores...",
+    "categoria": "Categoria",
+    "botaoAcessar": "Acessar",
+    "semResultados": "Nenhum resultado encontrado."
+  },
+  "footer": {
+    "direitos": "Â© 2025 CurrÃ­culo Gamer â€” Todos os direitos reservados.",
+    "sobreTitulo": "Sobre o CurrÃ­culo Gamer",
+    "sobreTexto": "Seu hub gamer para jogos, conquistas e projetos â€” acesso rÃ¡pido e organizado.",
+    "contatoTitulo": "Contato",
+    "email": "E-mail",
+    "telefone": "Telefone",
+    "endereco": "EndereÃ§o",
+    "linksTitulo": "Links Ãºteis",
+    "politicaPrivacidade": "PolÃ­tica de Privacidade",
+    "termosUso": "Termos de Uso",
+    "sigaNos": "Acompanhe",
+    "redesSociais": "Redes sociais"
+  }
+}

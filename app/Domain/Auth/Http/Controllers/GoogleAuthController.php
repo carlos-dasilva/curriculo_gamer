@@ -29,7 +29,7 @@ class GoogleAuthController extends Controller
                 $request->session()->put('url.intended', $intended);
             }
         } else {
-            // fallback: página anterior interna
+            // fallback: pÃ¡gina anterior interna
             $previous = url()->previous();
             $host = parse_url($previous, PHP_URL_HOST);
             $appHost = parse_url(config('app.url'), PHP_URL_HOST);
@@ -44,7 +44,10 @@ class GoogleAuthController extends Controller
             }
         }
 
-        return Socialite::driver('google')->redirect();
+        // Solicita escopos OIDC para obter o claim `picture` (avatar)
+        return Socialite::driver('google')
+            ->scopes(['openid','email','profile'])
+            ->redirect();
     }
 
     public function callback(): RedirectResponse
@@ -53,35 +56,43 @@ class GoogleAuthController extends Controller
             $googleUser = Socialite::driver('google')->user();
 
             $email = $googleUser->getEmail();
-            $name = $googleUser->getName() ?: ($googleUser->getNickname() ?: 'Usuário');
+            $name = $googleUser->getName() ?: ($googleUser->getNickname() ?: 'UsuÃ¡rio');
 
             $user = User::firstOrCreate(
                 ['email' => $email],
                 [
                     'name' => $name,
-                    // Gera senha randômica pois login será sempre via Google
+                    // Gera senha randÃ´mica pois login serÃ¡ sempre via Google
                     'password' => Hash::make(Str::random(32)),
                     'email_verified_at' => now(),
-                    // Define role padrão na criação
+                    // Define role padrÃ£o na criaÃ§Ã£o
                     'role' => Role::CO_MUM->value,
                 ]
             );
 
-            // Se usuário estiver bloqueado, impede login
+            // Se usuÃ¡rio estiver bloqueado, impede login
             if ((bool) ($user->is_blocked ?? false)) {
-                return redirect()->route('home')->with('error', 'Seu usuário está bloqueado. Entre em contato com o suporte.');
+                return redirect()->route('home')->with('error', 'Seu usuÃ¡rio estÃ¡ bloqueado. Entre em contato com o suporte.');
             }
 
-            // Não sobrescrever o nome customizado do usuário em re-logins.
+            // NÃ£o sobrescrever o nome customizado do usuÃ¡rio em re-logins.
             // Apenas definir/ajustar no primeiro login ou se estiver vazio.
             if ($user->wasRecentlyCreated || empty(trim((string) $user->name))) {
                 $user->name = $name;
                 $user->save();
             }
 
+            // Atualiza a URL da foto de perfil a cada login (claim `picture`)
+            // Socialite popula getAvatar() com a URL do provedor (Google)
+            $avatarUrl = (string) ($googleUser->getAvatar() ?? '');
+            if ($avatarUrl !== '' && $user->avatar_url !== $avatarUrl) {
+                $user->avatar_url = $avatarUrl;
+                $user->save();
+            }
+
             Auth::login($user, true);
 
-            // Redireciona para a URL pretendida (se existir), senão home
+            // Redireciona para a URL pretendida (se existir), senÃ£o home
             return redirect()->intended(route('home'))
                 ->with('success', 'Login realizado com sucesso.');
         } catch (\Throwable $e) {
@@ -92,4 +103,3 @@ class GoogleAuthController extends Controller
         }
     }
 }
-

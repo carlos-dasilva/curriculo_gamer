@@ -51,7 +51,7 @@ export default function CardsGrid({ sites }: Props) {
         ) : (
           <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3" role="list">
             {filtered.map((s, idx) => (
-              <li key={`${s.path}-${idx}`} className="group rounded-lg border border-gray-200 bg-white p-5 shadow-sm transition hover:shadow-md focus-within:ring-2 focus-within:ring-sky-500">
+              <li key={`${s.path}-${idx}`} className="group rounded-2xl border border-gray-200/80 bg-white/95 p-5 shadow-md ring-1 ring-gray-100/80 transition duration-200 hover:shadow-lg hover:-translate-y-0.5 supports-[backdrop-filter]:bg-white/80 focus-within:ring-2 focus-within:ring-sky-500">
                 <div className="mb-3 flex items-center justify-between">
                   <span className="inline-flex items-center rounded-full bg-sky-50 px-2 py-1 text-xs font-medium text-sky-700 ring-1 ring-inset ring-sky-200">
                     {s.category}
@@ -87,4 +87,3 @@ export default function CardsGrid({ sites }: Props) {
     </section>
   );
 }
-

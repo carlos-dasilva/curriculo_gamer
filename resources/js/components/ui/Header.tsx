@@ -1,10 +1,10 @@
-import React from 'react';
+﻿import React from 'react';
 import { Link } from '@inertiajs/react';
 import strings from '@/i18n/pt-BR/home.json';
 
 type AuthInfo = {
   isAuthenticated: boolean;
-  user?: { name: string; email: string } | null;
+  user?: { name: string; email: string; avatar_url?: string | null } | null;
   loginUrl?: string;
   logoutUrl?: string;
   abilities?: { manageUsers?: boolean };
@@ -34,7 +34,7 @@ export default function Header({ auth }: Props) {
   };
 
   const handleNameError = () => {
-    // Fallback SVG para nome da marca caso não exista nome.png
+    // Fallback SVG para nome da marca caso nÃ£o exista nome.png
     const svg = encodeURIComponent(
       `<svg xmlns='http://www.w3.org/2000/svg' width='200' height='28' viewBox='0 0 200 28'>
          <rect width='200' height='28' rx='4' fill='transparent'/>
@@ -133,7 +133,7 @@ export default function Header({ auth }: Props) {
           {auth?.abilities?.manageUsers && (
             <a
               href="/admin/dashboard"
-              className="inline-flex items-center gap-2 rounded-md bg-gray-900 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
+              className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
             >
               <DashboardIcon className="h-4 w-4" />
               <span>Dashboard</span>
@@ -160,11 +160,21 @@ export default function Header({ auth }: Props) {
             <div className="flex items-center gap-3">
               <a
                 href="/opcoes"
+                className="inline-flex items-center"
                 aria-label="Abrir opções"
-                className="inline-flex items-center rounded-md bg-gray-900 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
                 title="Opções"
               >
-                Opções
+                <img
+                  src={auth.user?.avatar_url || '/img/sem-imagem.svg'}
+                  alt={auth.user?.name || 'Usuário'}
+                  referrerPolicy="no-referrer"
+                  onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/img/sem-imagem.svg'; }}
+                  className="h-9 w-9 rounded-full object-cover ring-1 ring-gray-300"
+                  width={36}
+                  height={36}
+                  loading="lazy"
+                  decoding="async"
+                />
               </a>
               <form method="POST" action={auth.logoutUrl || '#'}>
                 <input type="hidden" name="_token" value={document.querySelector('meta[name=csrf-token]')?.getAttribute('content') || ''} />
@@ -182,7 +192,7 @@ export default function Header({ auth }: Props) {
           )}
         </div>
 
-        {/* Menu mobile (hambúrguer) */}
+        {/* Menu mobile (hambÃºrguer) */}
                 {/* Mobile actions: Google login (guest) or hamburger (auth) */}
         <div className="md:hidden ml-auto">
           {!auth.isAuthenticated ? (
@@ -200,9 +210,19 @@ export default function Header({ auth }: Props) {
               aria-label="Abrir menu"
               aria-expanded={menuOpen}
               onClick={() => setMenuOpen((v) => !v)}
-              className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white p-2 text-gray-700 shadow-sm hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600"
+              className="inline-flex items-center justify-center rounded-full border border-gray-300 bg-white p-0.5 text-gray-700 shadow-sm hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600"
             >
-              <HamburgerIcon className="h-5 w-5" />
+              <img
+                src={auth.user?.avatar_url || '/img/sem-imagem.svg'}
+                alt={auth.user?.name || 'Usuário'}
+                referrerPolicy="no-referrer"
+                onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/img/sem-imagem.svg'; }}
+                className="h-9 w-9 rounded-full object-cover"
+                width={36}
+                height={36}
+                loading="lazy"
+                decoding="async"
+              />
             </button>
           )}
         </div>
@@ -309,3 +329,4 @@ function UserIcon({ className }: { className?: string }) {
     </svg>
   );
 }
+

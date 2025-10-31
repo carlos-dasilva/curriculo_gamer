@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
     <head>
         <meta charset="utf-8" />
@@ -6,7 +6,7 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <link rel="icon" type="image/png" href="/img/favicon.png" />
         <link rel="shortcut icon" href="/favicon.ico" />
-        <title inertia>{{ config('app.name', 'Aplicação') }}</title>
+        <title inertia>{{ config('app.name', 'AplicaÃ§Ã£o') }}</title>
         @inertiaHead
         @env('testing')
             
@@ -19,4 +19,5 @@
         @inertia
     </body>
     </html>
+
 

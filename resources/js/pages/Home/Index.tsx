@@ -1,10 +1,10 @@
-import React from 'react';
+﻿import React from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import Header from '@/components/ui/Header';
 import Hero from '@/components/ui/Hero';
 import GameCards, { type GameCard } from '@/components/ui/GameCards';
 import Footer from '@/components/ui/Footer';
-
+import strings from '@/i18n/pt-BR/home.json';
 type AuthInfo = {
   isAuthenticated: boolean;
   user?: { name: string; email: string } | null;
@@ -48,7 +48,7 @@ export default function HomeIndex({ games, auth, flash, filters }: Props) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Head title="Início" />
+      <Head title={strings.header.inicio} />
       <Header auth={auth} />
       <main>
         {flash?.error && (
@@ -65,7 +65,7 @@ export default function HomeIndex({ games, auth, flash, filters }: Props) {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
               <div className="sm:flex-1">
                 <label htmlFor="q" className="block text-sm font-medium text-gray-700">Buscar</label>
-                <input id="q" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Nome, estúdio, plataforma ou marcador"
+                <input id="q" value={q} onChange={(e) => setQ(e.target.value)} placeholder={strings.cards.buscaPlaceholder}
                   className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500" />
               </div>
               <div className="flex flex-wrap items-center gap-2">
@@ -98,7 +98,7 @@ export default function HomeIndex({ games, auth, flash, filters }: Props) {
         <div className="mx-auto max-w-5xl">
           <GameCards games={games.data} disableLocalFilters />
           {Array.isArray(games?.links) && games.links.length > 0 && (
-            <nav className="mt-8 flex justify-center" aria-label="Paginação">
+                        <nav className="mt-8 flex justify-center" aria-label="Paginação">
               <ul className="inline-flex items-center gap-1">
                 {games.links.map((l, idx) => {
                   const label = l.label.replace('&laquo;', '«').replace('&raquo;', '»');
@@ -136,3 +136,5 @@ export default function HomeIndex({ games, auth, flash, filters }: Props) {
     </div>
   );
 }
+
+

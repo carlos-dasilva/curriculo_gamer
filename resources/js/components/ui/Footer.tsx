@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { usePage } from '@inertiajs/react';
 import strings from '@/i18n/pt-BR/home.json';
 

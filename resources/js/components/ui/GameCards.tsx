@@ -110,13 +110,13 @@ export default function GameCards({ games, subjectName, disableLocalFilters }: P
         ) : (
           <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3" role="list">
             {filtered.map((g) => (
-              <li key={g.id} className="group rounded-lg border border-gray-200 bg-white shadow-sm transition hover:shadow-md">
+              <li key={g.id} className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white/95 shadow-sm ring-1 ring-gray-100 transition duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:ring-sky-100 supports-[backdrop-filter]:bg-white/70 supports-[backdrop-filter]:backdrop-blur-sm">
                 {/* Card quadrado com imagem de fundo */}
-                <div className="relative aspect-square w-full overflow-hidden rounded-lg">
+                <div className="relative aspect-[4/5] w-full overflow-hidden rounded-xl">
                   <a
                     href={`/jogos/${g.id}`}
                     aria-label={`Ver detalhes de ${g.name}`}
-                    className="absolute inset-0 z-20 block"
+                    className="absolute inset-0 z-20 block focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-500"
                   >
                     <span className="sr-only">Ver detalhes de {g.name}</span>
                   </a>
@@ -126,7 +126,7 @@ export default function GameCards({ games, subjectName, disableLocalFilters }: P
                       const t = e.currentTarget; t.onerror = null; t.src = placeholder;
                     }}
                     alt={g.cover_url ? `Capa: ${g.name}` : 'Sem imagem'}
-                    className="absolute inset-0 h-full w-full object-cover"
+                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out will-change-transform group-hover:scale-110"
                     loading="lazy"
                     decoding="async"
                     fetchPriority="low"
@@ -142,7 +142,7 @@ export default function GameCards({ games, subjectName, disableLocalFilters }: P
                         const color = percent >= 75 ? 'bg-green-500' : percent >= 50 ? 'bg-yellow-400' : 'bg-red-500';
                         const label = `Nota geral: ${val.toFixed(2)} de 10`;
                         return (
-                          <span className="inline-flex items-center rounded-lg bg-white/90 px-2.5 py-1 text-xs font-semibold text-gray-900 ring-1 ring-inset ring-gray-200 drop-shadow-md" aria-label={label} title={label}>
+                          <span className="inline-flex items-center rounded-xl bg-white/90 px-2.5 py-1 text-xs font-semibold text-gray-900 ring-1 ring-inset ring-gray-200 drop-shadow-md" aria-label={label} title={label}>
                             <span className="text-[10px] font-medium text-gray-700">Nota Geral</span>
                             <span className={`ml-1 inline-flex h-5 min-w-6 items-center justify-center rounded ${color} px-1.5 text-white`}>{val.toFixed(2)}</span>
                           </span>
@@ -157,7 +157,7 @@ export default function GameCards({ games, subjectName, disableLocalFilters }: P
                         const who = subjectName && subjectName.trim() ? subjectName.trim() : 'Usuário';
                         const label = `Nota de ${who}: ${val.toFixed(2)} de 10`;
                         return (
-                          <span className="inline-flex items-center rounded-lg bg-white/90 px-2.5 py-1 text-xs font-semibold text-gray-900 ring-1 ring-inset ring-gray-200 drop-shadow-md" aria-label={label} title={label}>
+                          <span className="inline-flex items-center rounded-xl bg-white/90 px-2.5 py-1 text-xs font-semibold text-gray-900 ring-1 ring-inset ring-gray-200 drop-shadow-md" aria-label={label} title={label}>
                             <span className="text-[10px] font-medium text-gray-700">{who}</span>
                             <span className={`ml-1 inline-flex h-5 min-w-6 items-center justify-center rounded ${color} px-1.5 text-white`}>{val.toFixed(2)}</span>
                           </span>
@@ -166,7 +166,7 @@ export default function GameCards({ games, subjectName, disableLocalFilters }: P
                     )}
                   </div>
                   {/* Gradiente para legibilidade */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" aria-hidden="true" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" aria-hidden="true" />
                   {/* Nome + descrição no rodapé (ellipsis) */}
                   <div className="absolute bottom-0 left-0 right-0 p-3">
                     <GameTitle as="h3" text={g.name} className="line-clamp-2 text-base font-semibold text-white" />

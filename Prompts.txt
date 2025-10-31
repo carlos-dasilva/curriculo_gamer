@@ -5,6 +5,16 @@ INICIAR BACKEND
 INICIAR FRONTEND
 npm run dev
 
+=========COMMIT===============
+git add .
+git commit --allow-empty -m "ajuste de atualização de dados na rota /admin/jogos/novo"
+git push origin main
+
+
+
+
+
+
 
 ===sempre execute antes de entregar uma tarefa=========
 php artisan optimize:clear
@@ -15,16 +25,28 @@ criar as histórias de usuario por funcionalidades
 criar tarefa para criar testes referentes a ultima história depois de testada pelo desenvolvedor
 adicionar funcionalidade no "manual"
 
-
 Vero o q é e como usar no CODEX:  Semantical Commits, esteira de CI no Github Actions
 
+=============================================
+
+
+
+=============================================
+Estou desenvolvendo no vsCode com o "CODEX (com gpt-5 high) ".
+Minha aplicação é basicamente em laravel+react
+utilizo o github como repositório
+hospedo meu site no "hostinger"
+
+Me ajude a criar uma esteira CD da forma mais automatizada possível.
+Dê prioridade para aquilo que o CODEX puder fazer por mim
+
 =========Ajustes de caracteres================
-Quero que normalize os arquivos para UTF‑8 com BOM e corrija textos com acentuação visivelmente quebrados (ex.: “Usu�rio”, “p�gina”) em controllers/rotas
+Quero que normalize os arquivos para UTF-8 com BOM e corrija textos com acentuação visivelmente quebrados (ex.: “Usu�rio”, “p�gina”) em controllers/rotas
 
 ============PASSOS INICIAIS=================
 ====LARAVEL====
 php artisan migrate
-php artisan migrate:[REMOVER_PARA_FUNCIONAR]fresh --seed
+php artisan migrate:fresh --seed
 ====FRONT====
 rm -rf node_modules
 npm ci
@@ -47,8 +69,20 @@ Crie um favicon inspirado na imagem em anexo
 ========================================
 =========COMMIT===============
 git add .
-git commit -m "ajuste utf8"
+git commit -m "Atualização 002"
 git push origin main
+
+
+git commit --allow-empty -m "Atualização 004"
+
+
+php artisan optimize:clear
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+
+
+
 
 =======RESTAURAR BACKUP DO GIT=================
 git fetch origin --prune
@@ -335,23 +369,34 @@ Nas contas de usuário faça o seguinte:
 ========================================================================================================
 
 ========================================================================================================
-
+Os filtros das rotas abaixo, só filtra o que está sendo mostrado na tela naquele momento, quero que filtre tudo da base.
+Se necessario adicione um botão de aplicar filtros
+home
+/meu-curriculo
+/curriculo/{id}
 ========================================================================================================
 
 ========================================================================================================
 
 ========================================================================================================
-
+ainda vindo numeros no console pelo rawg ????
 ========================================================================================================
 
 ========================================================================================================
-
+colocar no curriculo a informação: Assim como em um curriculo normal aqui as informações são de responsabilidades de quem adicionou as informações
 ========================================================================================================
-
+nota do cara que fez o comentário no jogo e plataforma e maior status de 100% finalizou, zerou
 ========================================================================================================
-
+criar memoria.mem e sempre gravar o que eu pedi e o resumo do que ele fez
 ========================================================================================================
-
+Na rota /jogos/{id}
+Nos comentários, ao lado do nome do usuario que criou o comentário quero que mostre qual plataforma ele jogou e qual a nota ele deu para o jogo.
+Só mostre uma plataforma escolha pela seguinte ordem:
+1- Que fez 100%
+2- Que Finalizou
+3- Que jogou
+4- A plataforma que tiver o ano de lançamento menor
+5- Por ordem alfabetica da plataforma
 ========================================================================================================
 SOMENTE SE PRECISAR(aparentemente tudo já está contemplado)
 faça uma varredura nas rotas do site e adicione o "Logs do Sistema" que é definido em /admin/configuracao no campo "Habilitar logs detalhados do sistema" os logs nas rotas que ainda não tiverem os logs
@@ -360,12 +405,11 @@ faça uma varredura nas rotas do site e adicione o "Logs do Sistema" que é defi
 ========================================================================================================
 remover o item da lista "Dashboard"
 ========================================================================================================
-
+excluir imagem não deve ser por alert() que tenha um modal bonito
 ========================================================================================================
 
-
 ========================================================================================================
-
+aparecer no google
 ========================================================================================================
 
 ========================================================================================================
@@ -376,11 +420,38 @@ Os joguei devem somar/mostrar tbm os finalizei e os Fiz 100%
 ========================================================================================================
 
 ========================================================================================================
+Agora você é um especialista conhecedor da história dos video-games.  
+Vou te falar o nome de um jogo e você me dirá as seguintes informações sobre este jogo:
+- **Classificação indicativa**
+- **Data de lançamento de cada plataforma lançada**
+- **Uma Descrição/Sinopse do jogo**
+- **A nota Metascore e User Score no Metacritic**
+- **Se este jogo veio Legendado em PT-BR**
+- **Se este jogo veio Dublado em PT-BR**
+- **Links de alguns sites/vídeos com informações/curiosidades sobre este jogo (somente em pt-br)**
+- **Link do YouTube com o Trailer deste jogo**
+
+### Exemplo de resposta:
+- **Classificação indicativa:** 12+  
+- **Super Nintendo:** 12/12/1998  
+- **Mega-drive:** 08/08/1999  
+- **Playstation 1:** 09/09/2000  
+- **Metascore:** 9,5  
+- **User Score:** Não definido  
+- **Legendado:** Sim  
+- **Dublado:** Não  
+- **Curiosidade 1:** [https://site.com](https://site.com)  
+- **Curiosidade 2:** [https://site2.com](https://site2.com)  
+- **Trailer:** [https://www.youtube.com/watch?v=TColhbfwg2o](https://www.youtube.com/watch?v=TColhbfwg2o)
+- Descrição/Sinopse: Em 1200 os deuses eram...
+
+Se entendeu responda apenas "Sim."
 
 ========================================================================================================
 
 ========================================================================================================
-
+Ajuste o manual da rota /admin/manual e os testes automatizados com as alterações que fizemos hoje.
+Tbm crie novos testes automatizados para as novas funcionalidades que criamos hoje.
 ========================================================================================================
 
 ========================================================================================================
@@ -470,6 +541,37 @@ Resident Evil 0
 Undertale
 Yooka-Laylee
 
+
+Que sei q zerei
+
+xbox one
+resident 2
+resident 3
+steet of rage 4
+battletoads
+
+
+ps5
+final fantasy 16
+
+ps4
+spiderman
+miles morales
+
+pc
+southpark 1
+southpark 2
+chrono trigger
+
+ps1
+resident 1
+resident 3
+alundra
+
+n64
+pokémon stadium
+
+snes
 
 
 https://media.gamestop.com/i/gamestop/20001188_SCR02/The-Legend-of-Zelda-Tears-of-the-Kingdom---Nintendo-Switch?w=1256&h=664&fmt=auto

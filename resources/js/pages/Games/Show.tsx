@@ -185,6 +185,11 @@ export default function GameShow({ game, auth, myInfo, myPlatformStatuses }: Pro
             }}
             alt={game.cover_url ? `Capa: ${game.name}` : 'Sem imagem'}
             className="absolute inset-0 h-full w-full object-cover"
+            loading="lazy"
+            decoding="async"
+            fetchPriority="low"
+            width={1600}
+            height={900}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" aria-hidden="true" />
 
@@ -261,6 +266,11 @@ export default function GameShow({ game, auth, myInfo, myPlatformStatuses }: Pro
                           onError={(e) => { const t = e.currentTarget; t.onerror = null; t.src = placeholder; }}
                           alt={`Imagem ${i + 1} de ${game.name}`}
                           className="h-24 w-24 sm:h-28 sm:w-28 md:h-36 md:w-36 object-cover transition group-hover:scale-[1.03]"
+                          loading="lazy"
+                          decoding="async"
+                          fetchPriority="low"
+                          width={144}
+                          height={144}
                         />
                       </button>
                       {null}
@@ -577,6 +587,11 @@ export default function GameShow({ game, auth, myInfo, myPlatformStatuses }: Pro
                 src={allImages[index]}
                 alt={`Imagem ${index + 1} de ${game.name}`}
                 className="max-h-[80vh] max-w-full rounded-md object-contain shadow"
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
+                width={1600}
+                height={900}
               />
               <button
                 onClick={(e) => { e.stopPropagation(); next(); }}

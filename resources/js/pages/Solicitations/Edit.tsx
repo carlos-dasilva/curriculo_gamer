@@ -226,7 +226,16 @@ export default function SolicitationEdit({ game, studios, platforms, tags }: Pro
               </div>
               <div className="flex items-center justify-center">
                 {data.cover_url ? (
-                  <img src={data.cover_url} alt="Prévia da capa" className="h-40 w-32 rounded object-cover ring-1 ring-gray-200" />
+                  <img
+                    src={data.cover_url}
+                    alt="Prévia da capa"
+                    className="h-40 w-32 rounded object-cover ring-1 ring-gray-200"
+                    loading="lazy"
+                    decoding="async"
+                    fetchPriority="low"
+                    width={128}
+                    height={160}
+                  />
                 ) : (
                   <div className="h-40 w-32 rounded bg-gray-100 ring-1 ring-gray-200" aria-hidden="true" />
                 )}

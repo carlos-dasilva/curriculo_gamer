@@ -213,7 +213,20 @@ export default function OptionsIndex() {
                         <tr key={g.id} className="hover:bg-gray-50">
                           <td className="px-4 py-2 text-sm text-gray-900">
                             <div className="flex items-center gap-3 min-w-0">
-                              {g.cover_url ? (<img src={g.cover_url} alt="" className="hidden md:block h-10 w-8 flex-none rounded object-cover" />) : (<div className="hidden md:block h-10 w-8 flex-none rounded bg-gray-200" aria-hidden="true" />)}
+                              {g.cover_url ? (
+                                <img
+                                  src={g.cover_url}
+                                  alt=""
+                                  className="hidden md:block h-10 w-8 flex-none rounded object-cover"
+                                  loading="lazy"
+                                  decoding="async"
+                                  fetchPriority="low"
+                                  width={32}
+                                  height={40}
+                                />
+                              ) : (
+                                <div className="hidden md:block h-10 w-8 flex-none rounded bg-gray-200" aria-hidden="true" />
+                              )}
                               <div className="flex min-w-0 flex-col">
                                 <span className="truncate font-medium">{g.name}</span>
                                 <span className="text-xs text-gray-500">Em avaliação</span>

@@ -21,7 +21,17 @@ export default function Hero({ onCtaClick }: Props) {
       {/* Imagem responsiva */}
       <picture className="pointer-events-none absolute inset-0 -z-10">
         <source media="(min-width: 768px)" srcSet="/img/hero.png" />
-        <img src="/img/hero.png" alt={strings.hero.altImagem} className="h-full w-full object-cover" />
+        <img
+          src="/img/hero.png"
+          alt={strings.hero.altImagem}
+          className="h-full w-full object-cover"
+          loading="lazy"
+          decoding="async"
+          fetchPriority="low"
+          width={1600}
+          height={900}
+          /* TODO: Ajustar dimensões para o arquivo real e variações responsivas se disponíveis */
+        />
       </picture>
 
       {/* Overlay de gradiente para contraste e legibilidade (opacidade reduzida de 75% -> 60%) */}

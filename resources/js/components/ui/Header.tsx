@@ -50,15 +50,53 @@ export default function Header({ auth }: Props) {
         <Link href="/" className="flex items-center gap-2" aria-label="Ir para a página inicial">
           {/* Logo */}
           {logoFallback ? (
-            <img src={logoFallback} alt="Logo" className="h-16 w-auto" />
+            <img
+              src={logoFallback}
+              alt="Logo"
+              className="h-16 w-auto"
+              loading="lazy"
+              decoding="async"
+              fetchPriority="low"
+              width={64}
+              height={64}
+            />
           ) : (
-            <img src={logoSrc} alt="Logo" className="h-16 w-auto" onError={handleLogoError} />
+            <img
+              src={logoSrc}
+              alt="Logo"
+              className="h-16 w-auto"
+              onError={handleLogoError}
+              loading="lazy"
+              decoding="async"
+              fetchPriority="low"
+              width={64}
+              height={64}
+            />
           )}
           {/* Nome ao lado da logo */}
           {nameFallback ? (
-            <img src={nameFallback} alt="Currículo Gamer" className="hidden h-8 w-auto md:block" />
+            <img
+              src={nameFallback}
+              alt="Currículo Gamer"
+              className="hidden h-8 w-auto md:block"
+              loading="lazy"
+              decoding="async"
+              fetchPriority="low"
+              width={160}
+              height={32}
+            />
           ) : (
-            <img src={nameSrc} alt="Currículo Gamer" className="hidden h-8 w-auto md:block" onError={handleNameError} />
+            <img
+              src={nameSrc}
+              alt="Currículo Gamer"
+              className="hidden h-8 w-auto md:block"
+              onError={handleNameError}
+              loading="lazy"
+              decoding="async"
+              fetchPriority="low"
+              width={160}
+              height={32}
+            />
           )}
           <span className="sr-only">Início</span>
         </Link>
@@ -66,9 +104,27 @@ export default function Header({ auth }: Props) {
         {/* Nome centralizado no mobile */}
         <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 md:hidden" aria-hidden="true" role="presentation">
           {nameFallback ? (
-            <img src={nameFallback} alt="Currículo Gamer" className="h-9 w-auto" />
+            <img
+              src={nameFallback}
+              alt="Currículo Gamer"
+              className="h-9 w-auto"
+              loading="lazy"
+              decoding="async"
+              fetchPriority="low"
+              width={160}
+              height={36}
+            />
           ) : (
-            <img src={nameSrc} alt="Currículo Gamer" className="h-9 w-auto" />
+            <img
+              src={nameSrc}
+              alt="Currículo Gamer"
+              className="h-9 w-auto"
+              loading="lazy"
+              decoding="async"
+              fetchPriority="low"
+              width={160}
+              height={36}
+            />
           )}
         </div>
 

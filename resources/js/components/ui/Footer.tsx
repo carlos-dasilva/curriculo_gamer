@@ -46,13 +46,42 @@ export default function Footer() {
           {/* Coluna da marca (à esquerda dos itens) */}
           <div className="flex items-center justify-center sm:justify-start">
             {logoFallback ? (
-              <img src={logoFallback} alt="Logo" className="h-32 w-auto" />
+              <img
+                src={logoFallback}
+                alt="Logo"
+                className="h-32 w-auto"
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
+                width={128}
+                height={128}
+              />
             ) : (
-              <img src="/img/logo.png" alt="Logo" className="h-32 w-auto" onError={handleLogoError} />
+              <img
+                src="/img/logo.png"
+                alt="Logo"
+                className="h-32 w-auto"
+                onError={handleLogoError}
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
+                width={128}
+                height={128}
+              />
             )}
           </div>
           <div className="flex items-center justify-center sm:justify-start">
-            <img src="/img/nome.png" alt="Currículo Gamer" className="h-16 md:h-20 w-auto" />
+            <img
+              src="/img/nome.png"
+              alt="Currículo Gamer"
+              className="h-16 md:h-20 w-auto"
+              loading="lazy"
+              decoding="async"
+              fetchPriority="low"
+              width={256}
+              height={64}
+              /* TODO: Ajustar width/height para dimensões reais do arquivo */
+            />
           </div>
           <div className="text-center sm:text-left">
             <h2 className="text-sm font-semibold text-gray-900">{strings.footer.sobreTitulo}</h2>

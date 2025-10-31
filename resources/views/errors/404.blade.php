@@ -26,8 +26,8 @@
 
       <!-- Marca -->
       <div class="mb-8 flex flex-col items-center gap-3">
-        <img src="/img/logo.png" alt="Logo" class="brand-shadow h-20 w-auto" />
-        <img src="/img/nome.png" alt="Currículo Gamer" class="h-10 w-auto opacity-90" />
+        <img src="/img/logo.png" alt="Logo" class="brand-shadow h-20 w-auto" loading="lazy" decoding="async" fetchpriority="low" width="80" height="80" />
+        <img src="/img/nome.png" alt="Currículo Gamer" class="h-10 w-auto opacity-90" loading="lazy" decoding="async" fetchpriority="low" width="160" height="40" />
       </div>
 
       <!-- Conteúdo -->
@@ -70,4 +70,3 @@
     </noscript>
   </body>
   </html>
-

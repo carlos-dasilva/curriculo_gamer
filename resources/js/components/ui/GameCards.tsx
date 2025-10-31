@@ -127,6 +127,11 @@ export default function GameCards({ games, subjectName, disableLocalFilters }: P
                     }}
                     alt={g.cover_url ? `Capa: ${g.name}` : 'Sem imagem'}
                     className="absolute inset-0 h-full w-full object-cover"
+                    loading="lazy"
+                    decoding="async"
+                    fetchPriority="low"
+                    width={800}
+                    height={800}
                   />
                   {/* Notas: empilhadas no canto superior direito */}
                   <div className="absolute right-3 top-3 flex flex-col items-end gap-2">

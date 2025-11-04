@@ -21,7 +21,7 @@ type Counts = {
 };
 
 type PlatformCounts = {
-  platform: { id: number; name: string };
+  platform: { id: number; name: string; release_year?: number | null };
   counts: Counts;
 };
 
@@ -81,8 +81,9 @@ export default function CurriculumIndex({ mode, summary, byPlatform, selected, g
   };
 
   const onPick = (s: StatusKey, platformId?: number) => {
-    const params: Record<string, string | number> = { mode: currentMode, status: s };
-    if (currentMode === 'platform' && platformId) params.platform = platformId;
+    const isPlatform = typeof platformId === 'number' && platformId > 0;
+    const params: Record<string, string | number> = { mode: isPlatform ? 'platform' : 'all', status: s };
+    if (isPlatform) params.platform = platformId as number;
     if (q.trim()) params.q = q.trim();
     if (sub) params.sub = 1;
     if (dub) params.dub = 1;
@@ -153,7 +154,7 @@ export default function CurriculumIndex({ mode, summary, byPlatform, selected, g
             </div>
           </div>
           {subject?.isMe ? (
-            <ShareMyCurriculum userId={subject.id} />
+            <ShareMyCurriculum userId={subject.id} selected={selected} />
           ) : (auth?.isAuthenticated ? (
             <FollowButton subjectId={subject.id} initialFollowing={!!subject?.isFollowed} />
           ) : null)}
@@ -166,87 +167,69 @@ export default function CurriculumIndex({ mode, summary, byPlatform, selected, g
         <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
           {/* Sidebar esquerda (ou bloco superior no mobile) */}
           <aside className="lg:sticky lg:top-20 self-start">
-            {/* Modo de visualização */}
-            <fieldset className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm" aria-labelledby="filtro-modo-label">
-              <legend id="filtro-modo-label" className="text-sm font-semibold text-gray-900">Filtrar por</legend>
-              <div className="mt-3 flex items-center gap-4">
-                <label className="inline-flex items-center gap-2 text-sm text-gray-800">
-                  <input
-                    type="radio"
-                    name="modo"
-                    value="all"
-                    checked={currentMode === 'all'}
-                    onChange={() => changeMode('all')}
-                    className="h-4 w-4 border-gray-300 text-sky-600 focus:ring-sky-600"
-                  />
-                  <span>Todos</span>
-                </label>
-                <label className="inline-flex items-center gap-2 text-sm text-gray-800">
-                  <input
-                    type="radio"
-                    name="modo"
-                    value="platform"
-                    checked={currentMode === 'platform'}
-                    onChange={() => changeMode('platform')}
-                    className="h-4 w-4 border-gray-300 text-sky-600 focus:ring-sky-600"
-                  />
-                  <span>Plataforma</span>
-                </label>
-              </div>
-            </fieldset>
-
             {/* Lista de filtros */}
             <div className="mt-4">
-              {currentMode === 'all' ? (
-                <ul className="space-y-1" role="list" aria-label="Status gerais">
-                  {(['cem_por_cento','finalizei','joguei','quero_jogar'] as StatusKey[]).map((key) => {
-                    const active = selected.mode === 'all' && selected.status === key;
-                    return (
-                      <li key={key}>
-                        <button
-                          onClick={() => onPick(key)}
-                          className={`${active ? 'bg-gray-900 text-white' : 'bg-white text-gray-800 hover:bg-gray-50'} flex w-full items-center justify-between gap-3 rounded-md px-3 py-2 text-left text-sm font-medium ring-1 ring-inset ring-gray-200`}
-                          aria-current={active ? 'true' : undefined}
-                        >
-                          <span>{STATUS_LABELS[key]}</span>
-                          <Badge value={summary[key]} inverted={active} />
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-              ) : (
-                <div className="space-y-4" aria-label="Status por plataforma">
-                  {byPlatform.length === 0 && (
-                    <p className="text-sm text-gray-600">Nenhuma plataforma com progresso registrado.</p>
-                  )}
-                  {byPlatform.map((group) => (
-                    <div key={group.platform.id} className="rounded-lg border border-gray-200 bg-white p-3 shadow-sm">
-                      <div className="mb-2 flex items-center justify-between">
-                        <h3 className="text-sm font-semibold text-gray-900">{group.platform.name}</h3>
-                        <span className="text-xs text-gray-500">Selecione um status</span>
-                      </div>
-                      <ul className="space-y-1" role="list">
-                        {(['cem_por_cento','finalizei','joguei','quero_jogar'] as StatusKey[]).map((key) => {
-                          const active = selected.mode === 'platform' && selected.status === key && selected.platformId === group.platform.id;
-                          return (
-                            <li key={`${group.platform.id}-${key}`}>
+              <ul className="space-y-1" role="list" aria-label="Status gerais">
+                {(['cem_por_cento','finalizei','joguei','quero_jogar'] as StatusKey[]).map((key) => {
+                  const active = selected.status === key; // mantém destaque no status atual
+                  return (
+                    <li key={key}>
+                      <button
+                        onClick={() => onPick(key)}
+                        className={`${active ? 'bg-gray-900 text-white' : 'bg-white text-gray-800 hover:bg-gray-50'} cursor-pointer flex w-full items-center justify-between gap-3 rounded-md px-3 py-2 text-left text-sm font-medium ring-1 ring-inset ring-gray-200`}
+                        aria-current={active ? 'true' : undefined}
+                      >
+                        <span>{STATUS_LABELS[key]}</span>
+                        <Badge value={summary[key]} inverted={active} />
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+                {(() => {
+                  const s = selected?.status as StatusKey;
+                  const label = STATUS_LABELS[s];
+                  const list = (byPlatform || [])
+                    .filter((g) => (g?.counts?.[s] || 0) > 0)
+                    .slice()
+                    .sort((a, b) => {
+                      const ca = a.counts[s] || 0;
+                      const cb = b.counts[s] || 0;
+                      if (cb !== ca) return cb - ca; // 1) maior quantidade primeiro
+                      const ya = a.platform.release_year ?? -Infinity;
+                      const yb = b.platform.release_year ?? -Infinity;
+                      if (yb !== ya) return yb - ya; // 2) ano lançamento (mais novo primeiro)
+                      return a.platform.name.localeCompare(b.platform.name, 'pt-BR', { sensitivity: 'base' }); // 3) nome
+                    });
+                if (!list || list.length === 0) return null;
+                return (
+                  <section className="mt-4" aria-labelledby="plat-summary-title">
+                    <h3 id="plat-summary-title" className="text-sm font-semibold text-gray-900">Plataformas com {label}</h3>
+                    <ul className="mt-2 space-y-1" role="list">
+                      {list.map((group) => (
+                        <li key={group.platform.id}>
+                          {(() => {
+                            const activePlat = (selected.platformId ?? 0) === group.platform.id;
+                            const base = activePlat ? 'bg-gray-900 text-white' : 'bg-white text-gray-800 hover:bg-gray-50';
+                            return (
                               <button
-                                onClick={() => onPick(key, group.platform.id)}
-                                className={`${active ? 'bg-gray-900 text-white' : 'bg-white text-gray-800 hover:bg-gray-50'} flex w-full items-center justify-between gap-3 rounded-md px-3 py-2 text-left text-sm font-medium ring-1 ring-inset ring-gray-200`}
-                                aria-current={active ? 'true' : undefined}
+                                type="button"
+                                onClick={() => onPick(s, group.platform.id)}
+                                className={`${base} w-full cursor-pointer rounded-md px-3 py-2 text-left text-sm shadow-sm ring-1 ring-inset ring-gray-200 flex items-center justify-between`}
+                                aria-current={activePlat ? 'true' : undefined}
+                                aria-label={`Ver jogos ${label} na plataforma ${group.platform.name}`}
                               >
-                                <span>{STATUS_LABELS[key]}</span>
-                                <Badge value={group.counts[key]} inverted={active} />
+                                <span>{group.platform.name}</span>
+                                <Badge value={group.counts[s]} inverted={activePlat} />
                               </button>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    </div>
-                  ))}
-                </div>
-              )}
+                            );
+                          })()}
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                );
+              })()}
             </div>
           </aside>
 
@@ -293,6 +276,7 @@ export default function CurriculumIndex({ mode, summary, byPlatform, selected, g
                 {Array.isArray(games?.links) && games.links.length > 0 && (
                   <Pagination links={games.links} />
                 )}
+                
               </>
             )}
           </section>
@@ -363,11 +347,20 @@ function CheckIcon({ className }: { className?: string }) {
   );
 }
 
-function ShareMyCurriculum({ userId }: { userId: number }) {
+function ShareMyCurriculum({ userId, selected }: { userId: number; selected: Selected }) {
   const [copied, setCopied] = React.useState(false);
   const [open, setOpen] = React.useState(false);
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
-  const url = `${origin}/curriculo/${userId}`;
+  const base = `${origin}/curriculo/${userId}`;
+  const qs = new URLSearchParams();
+  const mode = selected?.mode || 'all';
+  const status = selected?.status || 'cem_por_cento';
+  qs.set('mode', mode);
+  qs.set('status', status);
+  if (mode === 'platform' && selected?.platformId) {
+    qs.set('platform', String(selected.platformId));
+  }
+  const url = `${base}?${qs.toString()}`;
 
   const enc = encodeURIComponent;
   const wa = `https://wa.me/?text=${enc('Meu Currí­culo Gamer: ' + url)}`;
@@ -418,7 +411,7 @@ function ShareMyCurriculum({ userId }: { userId: number }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
+        className="inline-flex items-center gap-2 rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
       >
         Compartilhar meu currí­culo
       </button>

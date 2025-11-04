@@ -62,8 +62,8 @@ class CurriculumController extends Controller
             ->where('ugps.user_id', $userId)
             ->where('games.status', 'liberado')
             ->whereIn('ugps.status', $allowedStatuses)
-            ->select('p.id as platform_id', 'p.name as platform_name', 'ugps.status', DB::raw('COUNT(DISTINCT ugps.game_id) as total'))
-            ->groupBy('p.id', 'p.name', 'ugps.status')
+            ->select('p.id as platform_id', 'p.name as platform_name', 'p.release_year as platform_release_year', 'ugps.status', DB::raw('COUNT(DISTINCT ugps.game_id) as total'))
+            ->groupBy('p.id', 'p.name', 'p.release_year', 'ugps.status')
             ->get();
 
         $byPlatformMap = [];
@@ -71,7 +71,7 @@ class CurriculumController extends Controller
             $pid = (int) $r->platform_id;
             if (!isset($byPlatformMap[$pid])) {
                 $byPlatformMap[$pid] = [
-                    'platform' => ['id' => $pid, 'name' => (string) $r->platform_name],
+                    'platform' => ['id' => $pid, 'name' => (string) $r->platform_name, 'release_year' => $r->platform_release_year !== null ? (int) $r->platform_release_year : null],
                     'counts' => [
                         'cem_por_cento' => 0,
                         'finalizei' => 0,
@@ -145,7 +145,7 @@ class CurriculumController extends Controller
                     $q->where('ug.platform_id', (int) $platformId);
                 }
             })
-            ->whereNotExists(function ($q) use ($userId, $status) {
+            ->whereNotExists(function ($q) use ($userId, $status, $platformId) {
                 $q->select(DB::raw(1))
                     ->from('user_game_platform_statuses as ug2')
                     ->whereColumn('ug2.game_id', 'games.id')
@@ -157,6 +157,10 @@ class CurriculumController extends Controller
                         'quero_jogar' => ['cem_por_cento','finalizei','joguei'],
                         default => ['__none__'],
                     });
+                // No modo plataforma, a precedência deve considerar a MESMA plataforma
+                if ($platformId) {
+                    $q->where('ug2.platform_id', (int) $platformId);
+                }
             })
             ->addSelect([
                 'user_score' => DB::table('user_game_infos')
@@ -252,8 +256,8 @@ class CurriculumController extends Controller
             ->where('ugps.user_id', $userId)
             ->where('games.status', 'liberado')
             ->whereIn('ugps.status', $allowedStatuses)
-            ->select('p.id as platform_id', 'p.name as platform_name', 'ugps.status', DB::raw('COUNT(DISTINCT ugps.game_id) as total'))
-            ->groupBy('p.id', 'p.name', 'ugps.status')
+            ->select('p.id as platform_id', 'p.name as platform_name', 'p.release_year as platform_release_year', 'ugps.status', DB::raw('COUNT(DISTINCT ugps.game_id) as total'))
+            ->groupBy('p.id', 'p.name', 'p.release_year', 'ugps.status')
             ->get();
 
         $byPlatformMap = [];
@@ -261,7 +265,7 @@ class CurriculumController extends Controller
             $pid = (int) $r->platform_id;
             if (!isset($byPlatformMap[$pid])) {
                 $byPlatformMap[$pid] = [
-                    'platform' => ['id' => $pid, 'name' => (string) $r->platform_name],
+                    'platform' => ['id' => $pid, 'name' => (string) $r->platform_name, 'release_year' => $r->platform_release_year !== null ? (int) $r->platform_release_year : null],
                     'counts' => [
                         'cem_por_cento' => 0,
                         'finalizei' => 0,
@@ -332,7 +336,7 @@ class CurriculumController extends Controller
                     $q->where('ug.platform_id', (int) $platformId);
                 }
             })
-            ->whereNotExists(function ($q) use ($userId, $status) {
+            ->whereNotExists(function ($q) use ($userId, $status, $platformId) {
                 $q->select(DB::raw(1))
                     ->from('user_game_platform_statuses as ug2')
                     ->whereColumn('ug2.game_id', 'games.id')
@@ -344,6 +348,7 @@ class CurriculumController extends Controller
                         'quero_jogar' => ['cem_por_cento','finalizei','joguei'],
                         default => ['__none__'],
                     });
+                if ($platformId) { $q->where('ug2.platform_id', (int) $platformId); }
             })
             ->addSelect([
                 'user_score' => DB::table('user_game_infos')

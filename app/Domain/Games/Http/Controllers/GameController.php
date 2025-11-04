@@ -213,6 +213,11 @@ class GameController extends Controller
                                 foreach ($plats as $p) {
                                     $pname = null; if (is_array($p)) { $platObj = $p['platform'] ?? null; if (is_array($platObj)) { $pname = $platObj['name'] ?? null; } }
                                     if (!is_string($pname) || $pname === '') continue;
+                                    // De-para de plataformas (normalização RAWG)
+                                    $norm = mb_strtolower(trim($pname));
+                                    if ($norm === 'genesis') { $pname = 'Mega Drive'; }
+                                    elseif ($norm === 'nes') { $pname = 'Nintendo 8bits'; }
+                                    elseif ($norm === 'snes') { $pname = 'Super Nintendo'; }
                                     $platform = Platform::query()->whereRaw('LOWER(name) = ?', [mb_strtolower($pname)])->first();
                                     if (!$platform) { try { $platform = Platform::create(['name' => $pname]); } catch (\Throwable $e) { $platform = Platform::query()->where('name', $pname)->first(); } }
                                     if ($platform) { $platIds[] = $platform->id; if (empty($platReleases[$platform->id] ?? null)) { $platReleased = $p['released_at'] ?? ($det['released'] ?? ($first['released'] ?? null)); if ($platReleased) { $platReleases[$platform->id] = $platReleased; } } }
@@ -440,6 +445,11 @@ class GameController extends Controller
                                     // Ignore numeric-only platform names
                                     $ptrim = trim($pname);
                                     if ($ptrim !== '' && preg_match('/^\d+$/', $ptrim)) { continue; }
+                                    // De-para de plataformas (normalização RAWG)
+                                    $norm = mb_strtolower($ptrim);
+                                    if ($norm === 'genesis') { $pname = 'Mega Drive'; }
+                                    elseif ($norm === 'nes') { $pname = 'Nintendo 8bits'; }
+                                    elseif ($norm === 'snes') { $pname = 'Super Nintendo'; }
                                     $platform = Platform::query()->whereRaw('LOWER(name) = ?', [mb_strtolower($pname)])->first();
                                     if (!$platform) {
                                         try {

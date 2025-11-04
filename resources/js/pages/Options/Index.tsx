@@ -26,6 +26,8 @@ export default function OptionsIndex() {
     } catch (_) { /* ignore */ }
   }, []);
   const { data, setData, put, processing, errors, recentlySuccessful } = useForm({ name: user?.name || '' });
+  const [confirmDelete, setConfirmDelete] = React.useState<null | { id: number; name?: string }>(null);
+  const [deleting, setDeleting] = React.useState(false);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -241,10 +243,10 @@ export default function OptionsIndex() {
                           <td className="px-4 py-2 text-sm text-gray-800">
                             <div className="flex items-center justify-end gap-2">
                               <a href={`/opcoes/solicitacoes/${g.id}/editar`} className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50">Editar</a>
-                              <form action={`/opcoes/solicitacoes/${g.id}`} method="POST" onSubmit={(e) => { if (!confirm('Tem certeza que deseja excluir?')) { e.preventDefault(); } }}>
+                              <form id={`sol-del-${g.id}`} action={`/opcoes/solicitacoes/${g.id}`} method="POST">
                                 <input type="hidden" name="_method" value="DELETE" />
                                 <input type="hidden" name="_token" value={(document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || ''} />
-                                <button type="submit" className="inline-flex items-center rounded-md bg-red-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-red-500">Excluir</button>
+                                <button type="button" onClick={() => setConfirmDelete({ id: g.id, name: g.name })} className="inline-flex items-center rounded-md bg-red-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-red-500">Excluir</button>
                               </form>
                             </div>
                           </td>
@@ -264,6 +266,29 @@ export default function OptionsIndex() {
         </div>
       </main>
       <Footer />
+      {confirmDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60" aria-hidden="true" onClick={() => (!deleting ? setConfirmDelete(null) : null)} />
+          <div role="dialog" aria-modal="true" aria-labelledby="confirm-title" className="relative z-10 w-full max-w-md rounded-lg bg-white p-6 shadow-2xl ring-1 ring-gray-200">
+            <h4 id="confirm-title" className="text-base font-semibold text-gray-900">Excluir solicitação</h4>
+            <p className="mt-2 text-sm text-gray-700">Tem certeza que deseja excluir {confirmDelete.name ? (<strong>{confirmDelete.name}</strong>) : 'esta solicitação'}?</p>
+            <div className="mt-6 flex items-center justify-end gap-3">
+              <button type="button" onClick={() => setConfirmDelete(null)} disabled={deleting} className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50">Cancelar</button>
+              <button type="button" onClick={() => {
+                try {
+                  setDeleting(true);
+                  const form = document.getElementById(`sol-del-${confirmDelete.id}`) as HTMLFormElement | null;
+                  if (form) form.submit();
+                } finally {
+                  // a navegação deve ocorrer; fallback fecha modal
+                  setDeleting(false);
+                  setConfirmDelete(null);
+                }
+              }} disabled={deleting} className="inline-flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 disabled:cursor-not-allowed disabled:opacity-50">{deleting ? 'Excluindo…' : 'Excluir'}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

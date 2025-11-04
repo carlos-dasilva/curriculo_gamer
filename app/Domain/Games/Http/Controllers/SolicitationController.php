@@ -241,7 +241,20 @@ class SolicitationController extends Controller
         }
 
         return DB::transaction(function () use ($data) {
-            $game = Game::create([
+            // Guarda de duplicidade (studio_id + name)
+            $__studioId = $data['studio_id'] ?? null;
+            $__name = trim((string) ($data['name'] ?? ''));
+            if ($__name !== '') {
+                $__q = \App\Models\Game::query()->whereRaw('LOWER(name) = ?', [mb_strtolower($__name)]);
+                if ($__studioId === null) { $__q->whereNull('studio_id'); } else { $__q->where('studio_id', $__studioId); }
+                if ($__q->exists()) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'name' => 'Já existe um jogo com este nome para o estúdio selecionado.',
+                    ]);
+                }
+            }
+            try {
+                $game = Game::create([
                 'studio_id' => $data['studio_id'] ?? null,
                 'name' => $data['name'],
                 'cover_url' => $data['cover_url'] ?? null,
@@ -255,7 +268,15 @@ class SolicitationController extends Controller
                 'hours_to_finish' => $data['hours_to_finish'] ?? null,
                 'ptbr_subtitled' => (bool) ($data['ptbr_subtitled'] ?? false),
                 'ptbr_dubbed' => (bool) ($data['ptbr_dubbed'] ?? false),
-            ]);
+                ]);
+            } catch (\Illuminate\Database\QueryException $e) {
+                if ((int) ($e->getCode()) === 23000 || str_contains(strtolower($e->getMessage()), 'unique')) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'name' => 'Já existe um jogo com este nome para o estúdio selecionado.',
+                    ]);
+                }
+                throw $e;
+            }
 
             $game->tags()->sync($data['tag_ids'] ?? []);
 
@@ -461,6 +482,19 @@ class SolicitationController extends Controller
         }
 
         return DB::transaction(function () use ($data, $game) {
+            // Guarda de duplicidade na atualização (studio_id + name, ignorando o próprio registro)
+            $__studioId = $data['studio_id'] ?? null;
+            $__name = trim((string) ($data['name'] ?? ''));
+            if ($__name !== '') {
+                $__q = \App\Models\Game::query()->whereRaw('LOWER(name) = ?', [mb_strtolower($__name)]);
+                if ($__studioId === null) { $__q->whereNull('studio_id'); } else { $__q->where('studio_id', $__studioId); }
+                $__q->where('id', '!=', $game->id);
+                if ($__q->exists()) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'name' => 'Já existe um jogo com este nome para o estúdio selecionado.',
+                    ]);
+                }
+            }
             $game->update([
                 'studio_id' => $data['studio_id'] ?? null,
                 'name' => $data['name'],

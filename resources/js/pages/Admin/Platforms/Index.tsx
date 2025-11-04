@@ -1,5 +1,6 @@
 import React from 'react';
 import { Head, Link, router } from '@inertiajs/react';
+import Pagination from '@/components/ui/Pagination';
 import AdminLayout from '@/components/layouts/AdminLayout';
 
 type Platform = {
@@ -26,15 +27,22 @@ type Props = {
 
 export default function PlatformsIndex({ platforms, filters, flash }: Props) {
   const [name, setName] = React.useState(filters?.name ?? '');
+  const [confirmDelete, setConfirmDelete] = React.useState<null | { id: number; name?: string }>(null);
+  const [deleting, setDeleting] = React.useState(false);
 
   const applyFilters = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     router.get('/admin/plataformas', { name }, { preserveScroll: true, replace: true });
   };
 
-  const remove = (id: number) => {
-    if (!confirm('Remover esta plataforma?')) return;
-    router.delete(`/admin/plataformas/${id}`, { preserveScroll: true });
+  const remove = async (id: number) => {
+    try {
+      setDeleting(true);
+      await router.delete(`/admin/plataformas/${id}`, { preserveScroll: true });
+    } finally {
+      setDeleting(false);
+      setConfirmDelete(null);
+    }
   };
 
   return (
@@ -90,7 +98,7 @@ export default function PlatformsIndex({ platforms, filters, flash }: Props) {
                         <span className="sr-only">Editar</span>
                       </Link>
                       <button
-                        onClick={() => remove(p.id)}
+                        onClick={() => setConfirmDelete({ id: p.id, name: p.name })}
                         aria-label="Remover"
                         title="Remover"
                         className="inline-flex items-center justify-center rounded-md bg-red-600 p-2 text-white shadow-sm hover:bg-red-500 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
@@ -106,37 +114,21 @@ export default function PlatformsIndex({ platforms, filters, flash }: Props) {
           </table>
         </div>
 
-        <nav className="mt-6 flex justify-center" aria-label="Paginação">
-          <ul className="inline-flex items-center gap-1">
-            {platforms.links.map((l, idx) => {
-              const label = l.label.replace('&laquo;', '«').replace('&raquo;', '»');
-              const isPrev = idx === 0;
-              const isNext = idx === platforms.links.length - 1;
-              const common = 'min-w-9 select-none rounded-md px-3 py-2 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900';
-              if (!l.url) {
-                return (
-                  <li key={idx}>
-                    <span className={`${common} cursor-not-allowed bg-gray-100 text-gray-400`} aria-hidden={isPrev || isNext} aria-label={isPrev ? 'Anterior' : isNext ? 'Próxima' : undefined}>
-                      {isPrev ? '‹' : isNext ? '›' : label}
-                    </span>
-                  </li>
-                );
-              }
-              return (
-                <li key={idx}>
-                  <Link
-                    href={l.url}
-                    className={`${common} ${l.active ? 'bg-gray-900 text-white' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-200 hover:bg-gray-50'}`}
-                    preserveScroll
-                    aria-label={isPrev ? 'Anterior' : isNext ? 'Próxima' : undefined}
-                  >
-                    {isPrev ? '‹' : isNext ? '›' : label}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
+        <Pagination links={platforms.links} />
+
+        {confirmDelete && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/60" aria-hidden="true" onClick={() => (!deleting ? setConfirmDelete(null) : null)} />
+            <div role="dialog" aria-modal="true" aria-labelledby="confirm-title" className="relative z-10 w-full max-w-md rounded-lg bg-white p-6 shadow-2xl ring-1 ring-gray-200">
+              <h4 id="confirm-title" className="text-base font-semibold text-gray-900">Remover plataforma</h4>
+              <p className="mt-2 text-sm text-gray-700">Tem certeza que deseja remover {confirmDelete.name ? (<strong>{confirmDelete.name}</strong>) : 'esta plataforma'}?</p>
+              <div className="mt-6 flex items-center justify-end gap-3">
+                <button type="button" onClick={() => setConfirmDelete(null)} disabled={deleting} className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50">Cancelar</button>
+                <button type="button" onClick={() => remove(confirmDelete.id)} disabled={deleting} className="inline-flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 disabled:cursor-not-allowed disabled:opacity-50">{deleting ? 'Removendo…' : 'Remover'}</button>
+              </div>
+            </div>
+          </div>
+        )}
       </AdminLayout>
     </div>
   );

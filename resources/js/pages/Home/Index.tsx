@@ -4,6 +4,7 @@ import Header from '@/components/ui/Header';
 import Hero from '@/components/ui/Hero';
 import GameCards, { type GameCard } from '@/components/ui/GameCards';
 import Footer from '@/components/ui/Footer';
+import Pagination from '@/components/ui/Pagination';
 import strings from '@/i18n/pt-BR/home.json';
 type AuthInfo = {
   isAuthenticated: boolean;
@@ -98,6 +99,9 @@ export default function HomeIndex({ games, auth, flash, filters }: Props) {
         <div className="mx-auto max-w-5xl">
           <GameCards games={games.data} disableLocalFilters />
           {Array.isArray(games?.links) && games.links.length > 0 && (
+            <Pagination links={games.links} />
+          )}
+          {false && Array.isArray(games?.links) && games.links.length > 0 && (
                         <nav className="mt-8 flex justify-center" aria-label="Paginação">
               <ul className="inline-flex items-center gap-1">
                 {games.links.map((l, idx) => {

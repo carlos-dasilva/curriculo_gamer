@@ -130,10 +130,12 @@ export default function GameShow({ game, auth, myInfo, myPlatformStatuses }: Pro
   const prev = () => setIndex((i) => (i > 0 ? i - 1 : allImages.length - 1));
   const next = () => setIndex((i) => (i + 1) % allImages.length);
   const canManage = !!auth?.abilities?.manageUsers;
+  const [confirmImageDelete, setConfirmImageDelete] = React.useState<null | { id: number; url: string }>(null);
+  const [deletingImage, setDeletingImage] = React.useState(false);
   const removeImage = async (imageId: number, url: string) => {
     if (!canManage || !imageId) return;
-    if (!confirm('Remover esta imagem da galeria?')) return;
     try {
+      setDeletingImage(true);
       // @ts-ignore
       await window.axios.delete(`/admin/jogos/${game.id}/imagens/${imageId}`);
       setGallery((prev) => prev.filter((g) => g.id !== imageId));
@@ -146,6 +148,10 @@ export default function GameShow({ game, auth, myInfo, myPlatformStatuses }: Pro
         return i;
       });
     } catch {}
+    finally {
+      setDeletingImage(false);
+      setConfirmImageDelete(null);
+    }
   };
 
   React.useEffect(() => {
@@ -487,6 +493,10 @@ export default function GameShow({ game, auth, myInfo, myPlatformStatuses }: Pro
                   placeholder="Compartilhe suas impressões sobre o jogo..."
                   className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
                 />
+                {/* Observação sobre Estou Jogando */}
+                <p className="mt-3 text-xs text-gray-500" role="note">
+                  OBS: Somente um jogo poderá estar marcado como "Estou Jogando".
+                </p>
                 {/* Ações */}
                 <div className="mt-4 flex items-center gap-3">
                   {auth?.isAuthenticated ? (
@@ -522,7 +532,7 @@ export default function GameShow({ game, auth, myInfo, myPlatformStatuses }: Pro
                             const agh = resp.data.avg_gameplay_hours;
                             setCommunityGameplay(agh === null ? null : Number(agh));
                           }
-                          setSaveState({ type: 'success', message: 'Informações salvas.' });
+                          // Sucesso silencioso: não exibir mensagem visual
                         } catch (e: any) {
                           setSaveState({ type: 'error', message: 'Não foi possível salvar.' });
                         } finally {
@@ -530,7 +540,7 @@ export default function GameShow({ game, auth, myInfo, myPlatformStatuses }: Pro
                           window.setTimeout(() => setSaveState(null), 3000);
                         }
                       }}
-                      className="inline-flex items-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex items-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {saving ? 'Salvando…' : 'Salvar'}
                     </button>
@@ -557,12 +567,12 @@ export default function GameShow({ game, auth, myInfo, myPlatformStatuses }: Pro
                       Estou Jogando
                     </button>
                   )}
-                  {saveState && (
+                  {saveState?.type === 'error' && (
                     <span
                       role="status"
-                      className={`inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm shadow-sm ring-1 ring-inset ${saveState.type === 'success' ? 'bg-green-50 text-green-800 ring-green-200' : 'bg-red-50 text-red-800 ring-red-200'}`}
+                      className={`inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm shadow-sm ring-1 ring-inset bg-red-50 text-red-800 ring-red-200`}
                     >
-                      {saveState.type === 'success' ? <CheckIcon className="h-4 w-4" /> : <AlertIcon className="h-4 w-4" />}
+                      <AlertIcon className="h-4 w-4" />
                       <span>{saveState.message}</span>
                     </span>
                   )}
@@ -597,7 +607,7 @@ export default function GameShow({ game, auth, myInfo, myPlatformStatuses }: Pro
                 onClick={() => {
                   const url = allImages[index] || '';
                   const id = imagesMap.get(url || '');
-                  if (id) removeImage(id, url);
+                  if (id) setConfirmImageDelete({ id, url });
                 }}
                 aria-label="Excluir imagem atual"
                 className="absolute right-14 top-2 z-10 rounded bg-red-600/90 px-2 py-1 text-sm font-semibold text-white shadow hover:bg-red-600"
@@ -640,6 +650,35 @@ export default function GameShow({ game, auth, myInfo, myPlatformStatuses }: Pro
                     className={`h-2 w-2 rounded-full ${i === index ? 'bg-white' : 'bg-white/50'}`}
                   />
                 ))}
+              </div>
+            )}
+
+            {/* Modal de confirmação para remover imagem da galeria */}
+            {confirmImageDelete && (
+              <div className="absolute inset-0 z-20 flex items-center justify-center">
+                <div className="absolute inset-0 bg-black/40" aria-hidden="true" onClick={() => (!deletingImage ? setConfirmImageDelete(null) : null)} />
+                <div role="dialog" aria-modal="true" aria-labelledby="confirm-image-title" className="relative z-10 w-full max-w-sm rounded-lg bg-white p-6 shadow-2xl ring-1 ring-gray-200">
+                  <h4 id="confirm-image-title" className="text-base font-semibold text-gray-900">Remover imagem</h4>
+                  <p className="mt-2 text-sm text-gray-700">Tem certeza que deseja remover esta imagem da galeria?</p>
+                  <div className="mt-6 flex items-center justify-end gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setConfirmImageDelete(null)}
+                      disabled={deletingImage}
+                      className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => confirmImageDelete && removeImage(confirmImageDelete.id, confirmImageDelete.url)}
+                      disabled={deletingImage}
+                      className="inline-flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {deletingImage ? 'Excluindo…' : 'Excluir'}
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
           </div>

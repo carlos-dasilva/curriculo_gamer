@@ -1,5 +1,6 @@
 import React from 'react';
 import { Head, Link, router } from '@inertiajs/react';
+import Pagination from '@/components/ui/Pagination';
 import AdminLayout from '@/components/layouts/AdminLayout';
 import roleLabels from '@/i18n/pt-BR/roles.json';
 
@@ -108,37 +109,7 @@ export default function UsersIndex({ users, filters, auth, flash, roles }: Props
         </div>
 
         {/* Paginação */}
-        <nav className="mt-6 flex justify-center" aria-label="Paginação">
-          <ul className="inline-flex items-center gap-1">
-            {users.links.map((l, idx) => {
-              const label = l.label.replace('&laquo;', '«').replace('&raquo;', '»');
-              const isPrev = idx === 0;
-              const isNext = idx === users.links.length - 1;
-              const common = 'min-w-9 select-none rounded-md px-3 py-2 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600';
-              if (!l.url) {
-                return (
-                  <li key={idx}>
-                    <span className={`${common} cursor-not-allowed bg-gray-100 text-gray-400`} aria-hidden={isPrev || isNext} aria-label={isPrev ? 'Anterior' : isNext ? 'Próxima' : undefined}>
-                      {isPrev ? <ChevronLeftIcon className="h-4 w-4" /> : isNext ? <ChevronRightIcon className="h-4 w-4" /> : label}
-                    </span>
-                  </li>
-                );
-              }
-              return (
-                <li key={idx}>
-                  <Link
-                    href={l.url}
-                    className={`${common} ${l.active ? 'bg-gray-900 text-white' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-200 hover:bg-gray-50'}`}
-                    preserveScroll
-                    aria-label={isPrev ? 'Anterior' : isNext ? 'Próxima' : undefined}
-                  >
-                    {isPrev ? <ChevronLeftIcon className="h-4 w-4" /> : isNext ? <ChevronRightIcon className="h-4 w-4" /> : label}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
+        <Pagination links={users.links} />
       </AdminLayout>
     </div>
   );

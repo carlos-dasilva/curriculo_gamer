@@ -1,5 +1,5 @@
 ﻿import React from 'react';
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, useForm, usePage, router } from '@inertiajs/react';
 import Header from '@/components/ui/Header';
 import Footer from '@/components/ui/Footer';
 import OptionsSidebar from '@/components/layouts/OptionsSidebar';
@@ -109,7 +109,12 @@ export default function SolicitationCreate({ studios, platforms, tags }: Props) 
       if (v) platformReleases[id] = v;
     });
     const payload: any = { ...data, gallery_urls: gallery, platform_releases: platformReleases, no_enrich: true };
-    post('/opcoes/solicitacoes', { preserveScroll: true, data: payload });
+    post('/opcoes/solicitacoes', {
+      data: payload,
+      onSuccess: () => {
+        router.visit('/opcoes?tab=solicitacoes', { replace: true });
+      },
+    });
   };
 
   const [selectedTagId, setSelectedTagId] = React.useState<string>('');
@@ -172,8 +177,20 @@ export default function SolicitationCreate({ studios, platforms, tags }: Props) 
             <h1 className="text-2xl font-semibold text-gray-900">Nova Solicitação de Jogo</h1>
             <p className="mt-1 text-sm text-gray-600">Preencha os dados para sugerir um novo jogo. Ele ficará com status "Em avaliação" até aprovação.</p>
           </div>
-          <Link href="/opcoes" className="text-sm text-gray-700 underline-offset-2 hover:underline">Voltar</Link>
+          <Link href="/opcoes?tab=solicitacoes" className="text-sm text-gray-700 underline-offset-2 hover:underline">Voltar</Link>
         </div>
+
+        {(errors.name || (page.props as any)?.flash?.error) && (
+          <div role="alert" className="mb-4 flex items-start gap-3 rounded-md border border-red-200 bg-red-50 p-4 text-red-800">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5 flex-none" aria-hidden="true">
+              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.72-1.36 3.485 0l6.518 11.586c.75 1.333-.21 2.99-1.742 2.99H3.48c-1.532 0-2.492-1.657-1.742-2.99L8.257 3.1zM11 14a1 1 0 10-2 0 1 1 0 002 0zm-1-2a1 1 0 01-1-1V8a1 1 0 112 0v3a1 1 0 01-1 1z" clipRule="evenodd" />
+            </svg>
+            <div>
+              <p className="text-sm font-semibold">Este jogo já existe</p>
+              <p className="mt-1 text-sm">Já há um jogo com este nome para o estúdio selecionado. Ajuste o nome ou selecione outro estúdio.</p>
+            </div>
+          </div>
+        )}
 
         <form onSubmit={submit} className="space-y-8">
           <section>

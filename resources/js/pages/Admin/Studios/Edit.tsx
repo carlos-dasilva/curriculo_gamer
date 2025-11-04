@@ -17,15 +17,22 @@ export default function StudiosEdit({ studio }: Props) {
   const { data, setData, put, processing, errors } = useForm<Studio>({
     ...studio,
   });
+  const [confirmDelete, setConfirmDelete] = React.useState(false);
+  const [deleting, setDeleting] = React.useState(false);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     put(`/admin/estudios/${studio.id}`);
   };
 
-  const remove = () => {
-    if (!confirm('Remover este estúdio?')) return;
-    router.delete(`/admin/estudios/${studio.id}`);
+  const remove = async () => {
+    try {
+      setDeleting(true);
+      await router.delete(`/admin/estudios/${studio.id}`);
+    } finally {
+      setDeleting(false);
+      setConfirmDelete(false);
+    }
   };
 
   return (
@@ -63,13 +70,26 @@ export default function StudiosEdit({ studio }: Props) {
           <div className="flex items-center justify-between">
             <Link href="/admin/estudios" className="text-sm text-gray-600 underline-offset-2 hover:underline">Voltar</Link>
             <div className="space-x-2">
-              <button type="button" onClick={remove} className="inline-flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 cursor-pointer">Remover</button>
+              <button type="button" onClick={() => setConfirmDelete(true)} className="inline-flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 cursor-pointer">Remover</button>
               <button type="submit" disabled={processing} className="inline-flex items-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900 disabled:cursor-not-allowed disabled:opacity-50">
                 Salvar
               </button>
             </div>
           </div>
         </form>
+        {confirmDelete && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/60" aria-hidden="true" onClick={() => (!deleting ? setConfirmDelete(false) : null)} />
+            <div role="dialog" aria-modal="true" aria-labelledby="confirm-title" className="relative z-10 w-full max-w-md rounded-lg bg-white p-6 shadow-2xl ring-1 ring-gray-200">
+              <h4 id="confirm-title" className="text-base font-semibold text-gray-900">Remover estúdio</h4>
+              <p className="mt-2 text-sm text-gray-700">Tem certeza que deseja remover <strong>{studio.name}</strong>?</p>
+              <div className="mt-6 flex items-center justify-end gap-3">
+                <button type="button" onClick={() => setConfirmDelete(false)} disabled={deleting} className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50">Cancelar</button>
+                <button type="button" onClick={remove} disabled={deleting} className="inline-flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 disabled:cursor-not-allowed disabled:opacity-50">{deleting ? 'Removendo…' : 'Remover'}</button>
+              </div>
+            </div>
+          </div>
+        )}
       </AdminLayout>
     </div>
   );

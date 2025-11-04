@@ -404,7 +404,7 @@ export default function GamesEdit({ game, studios, platforms, tags, flash }: Pro
           </section>
 
           {/* Links externos */}
-          <section className="hidden">
+          <section>
             <h2 className="text-lg font-semibold text-gray-900">Links externos</h2>
             <div className="mt-3 space-y-3">
               {(data.external_links || []).map((l: ExternalLink, idx: number) => (

@@ -3,6 +3,7 @@ import { Head, router, Link } from '@inertiajs/react';
 import Header from '@/components/ui/Header';
 import Footer from '@/components/ui/Footer';
 import GameCards, { type GameCard } from '@/components/ui/GameCards';
+import Pagination from '@/components/ui/Pagination';
 
 type AuthInfo = {
   isAuthenticated: boolean;
@@ -119,7 +120,7 @@ export default function CurriculumIndex({ mode, summary, byPlatform, selected, g
             </div>
             <div className="relative flex min-h-[160px] items-center px-6 py-6 sm:min-h-[200px] sm:px-8 sm:py-7">
               <div>
-                <span className="inline-flex items-center rounded-full bg-white/90 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-gray-900 ring-1 ring-inset ring-gray-200">Jogando agora</span>
+                <span className="inline-flex items-center rounded-full bg-white/90 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-gray-900 ring-1 ring-inset ring-gray-200">Jogando atualmente</span>
                 <h2 className="mt-3 text-2xl font-bold text-white drop-shadow-sm sm:text-3xl md:text-4xl">{nowPlaying.name}</h2>
                 <div className="mt-4">
                   <a
@@ -290,37 +291,7 @@ export default function CurriculumIndex({ mode, summary, byPlatform, selected, g
               <>
                 <GameCards games={games.data} subjectName={subject?.name} disableLocalFilters />
                 {Array.isArray(games?.links) && games.links.length > 0 && (
-                  <nav className="mt-8 flex justify-center" aria-label="Paginação">
-                    <ul className="inline-flex items-center gap-1">
-                      {games.links.map((l, idx) => {
-                        const label = l.label.replace('&laquo;', '<').replace('&raquo;', '>');
-                        const isPrev = idx === 0;
-                        const isNext = idx === games.links.length - 1;
-                        const common = 'min-w-9 select-none rounded-md px-3 py-2 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900';
-                        if (!l.url) {
-                          return (
-                            <li key={idx}>
-                              <span className={`${common} cursor-not-allowed bg-gray-100 text-gray-400`} aria-hidden={isPrev || isNext} aria-label={isPrev ? 'Anterior' : isNext ? 'Próxima' : undefined}>
-                                {isPrev ? '<' : isNext ? '>' : label}
-                              </span>
-                            </li>
-                          );
-                        }
-                        return (
-                          <li key={idx}>
-                            <Link
-                              href={l.url}
-                              className={`${common} ${l.active ? 'bg-gray-900 text-white' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-200 hover:bg-gray-50'}`}
-                              aria-label={isPrev ? 'Anterior' : isNext ? 'Próxima' : undefined}
-                              preserveScroll
-                            >
-                              {isPrev ? '<' : isNext ? '>' : label}
-                            </Link>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </nav>
+                  <Pagination links={games.links} />
                 )}
               </>
             )}

@@ -533,6 +533,7 @@ export default function GameShow({ game, auth, myInfo, myPlatformStatuses }: Pro
                             setCommunityGameplay(agh === null ? null : Number(agh));
                           }
                           // Sucesso silencioso: não exibir mensagem visual
+                          setSaveState({ type: 'success', message: 'Informações salvas.' });
                         } catch (e: any) {
                           setSaveState({ type: 'error', message: 'Não foi possível salvar.' });
                         } finally {
@@ -567,16 +568,18 @@ export default function GameShow({ game, auth, myInfo, myPlatformStatuses }: Pro
                       Estou Jogando
                     </button>
                   )}
-                  {saveState?.type === 'error' && (
+                </div>
+                {saveState && (
+                  <div className="mt-3 flex justify-center">
                     <span
                       role="status"
-                      className={`inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm shadow-sm ring-1 ring-inset bg-red-50 text-red-800 ring-red-200`}
+                      className={`inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm shadow-sm ring-1 ring-inset ${saveState.type === 'success' ? 'bg-green-50 text-green-800 ring-green-200' : 'bg-red-50 text-red-800 ring-red-200'}`}
                     >
-                      <AlertIcon className="h-4 w-4" />
+                      {saveState.type === 'success' ? <CheckIcon className="h-4 w-4" /> : <AlertIcon className="h-4 w-4" />}
                       <span>{saveState.message}</span>
                     </span>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             </div>
           </aside>

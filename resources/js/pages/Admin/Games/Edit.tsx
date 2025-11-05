@@ -239,11 +239,6 @@ export default function GamesEdit({ game, studios, platforms, tags, flash }: Pro
                 </select>
                 {errors.studio_id && <p className="mt-1 text-sm text-red-600">{errors.studio_id}</p>}
               </div>
-              <div>
-                <label htmlFor="rawg_id" className="block text-sm font-medium text-gray-700">ID RAWG</label>
-                <input id="rawg_id" type="number" inputMode="numeric" value={(data as any).rawg_id ?? ''} onChange={(e) => setData('rawg_id', e.target.value ? Number(e.target.value) : '')} className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Ex.: 3498" />
-                {(errors as any).rawg_id && <p className="mt-1 text-xs text-red-600">{(errors as any).rawg_id}</p>}
-              </div>
             </div>
 
             <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -256,11 +251,26 @@ export default function GamesEdit({ game, studios, platforms, tags, flash }: Pro
               <div>
                 <label htmlFor="age_rating" className="block text-sm font-medium text-gray-700">Classificação indicativa</label>
                 <input id="age_rating" placeholder="ESRB: T / PEGI: 16 / BR: 12+" value={data.age_rating || ''} onChange={(e) => setData('age_rating', e.target.value)} className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500" />
-                <div className="mt-3 grid grid-cols-1 gap-4">
+                <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Horas para Finalizar</label>
                     <input type="number" inputMode="numeric" min={0} step={1} value={(data as any).hours_to_finish === '' ? '' : Number((data as any).hours_to_finish)} onChange={(e) => { const raw = e.target.value; setData('hours_to_finish', raw === '' ? '' : Number(raw)); }} className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500" />
                     {(errors as any).hours_to_finish && <p className="mt-1 text-sm text-red-600">{(errors as any).hours_to_finish}</p>}
+                  </div>
+                  <div>
+                    <label htmlFor="rawg_id" className="block text-sm font-medium text-gray-700">ID RAWG</label>
+                    <input
+                      id="rawg_id"
+                      type="number"
+                      inputMode="numeric"
+                      value={(data as any).rawg_id ?? ''}
+                      onChange={(e) => setData('rawg_id', e.target.value ? Number(e.target.value) : '')}
+                      className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                      placeholder="Ex.: 3498"
+                    />
+                    {(errors as any).rawg_id && (
+                      <p className="mt-1 text-xs text-red-600">{(errors as any).rawg_id}</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -509,6 +519,7 @@ function MicIcon({ className }: { className?: string }) {
     </svg>
   );
 }
+
 
 
 

@@ -3,7 +3,8 @@
 namespace App\Support;
 
 use App\Models\SiteSetting;
-use Illuminate\Support\Facades\Log;
+use Monolog\Logger as MonologLogger;
+use Monolog\Handler\StreamHandler;
 
 class SystemLog
 {
@@ -23,16 +24,28 @@ class SystemLog
         return self::$enabled;
     }
 
+    protected static function logger(): ?MonologLogger
+    {
+        if (!self::enabled()) return null;
+        $path = storage_path('logs/log-'. now()->format('Ymd') .'.log');
+        $dir = dirname($path);
+        if (!is_dir($dir)) { @mkdir($dir, 0775, true); }
+        $logger = new MonologLogger('system');
+        $logger->pushHandler(new StreamHandler($path, MonologLogger::INFO));
+        return $logger;
+    }
+
     public static function info(string $event, array $context = []): void
     {
-        if (!self::enabled()) return;
-        Log::info($event, $context);
+        $logger = self::logger();
+        if (!$logger) return;
+        $logger->info($event, $context);
     }
 
     public static function debug(string $event, array $context = []): void
     {
-        if (!self::enabled()) return;
-        Log::debug($event, $context);
+        $logger = self::logger();
+        if (!$logger) return;
+        $logger->info($event, array_merge(['level' => 'debug'], $context));
     }
 }
-

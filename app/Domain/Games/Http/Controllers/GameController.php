@@ -311,7 +311,7 @@ class GameController extends Controller
             return redirect()->back()->with('error', 'ID RAWG inválido.');
         }
         try {
-            $res = app(RawgImporter::class)->importById($rawgId);
+            $res = app(RawgImporter::class)->upsertByRawgId($rawgId);
             if (($res['created'] ?? false) && !empty($res['game_id'])) {
                 return redirect()->back()->with('success', 'Jogo importado com sucesso.');
             }

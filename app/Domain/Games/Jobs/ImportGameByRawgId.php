@@ -24,7 +24,7 @@ class ImportGameByRawgId implements ShouldQueue
 
     public function handle(RawgImporter $importer): void
     {
-        $res = $importer->importById($this->rawgId);
-        SystemLog::info('RAWG.game.importById.done', ['rawg_id' => $this->rawgId, 'result' => $res]);
+        $res = $importer->upsertByRawgId($this->rawgId);
+        SystemLog::info('RAWG.game.upsertById.done', ['rawg_id' => $this->rawgId, 'result' => $res]);
     }
 }

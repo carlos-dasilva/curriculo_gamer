@@ -18,6 +18,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\RedirectResponse;
 use App\Domain\Games\Http\Requests\StoreGameRequest;
+use App\Domain\Games\Services\RawgImporter;
 
 class GameController extends Controller
 {
@@ -72,6 +73,7 @@ class GameController extends Controller
             $releasedBy = $status === 'liberado' ? (auth()->id() ?: null) : null;
 
             $game = Game::create([
+                'rawg_id' => $data['rawg_id'] ?? null,
                 'studio_id' => $data['studio_id'] ?? null,
                 'name' => $data['name'],
                 'cover_url' => $data['cover_url'] ?? null,
@@ -267,6 +269,7 @@ class GameController extends Controller
         return Inertia::render('Admin/Games/Edit', [
             'game' => [
                 'id' => $game->id,
+                'rawg_id' => $game->rawg_id,
                 'name' => $game->name,
                 'studio_id' => $game->studio_id,
                 'cover_url' => $game->cover_url,
@@ -295,6 +298,31 @@ class GameController extends Controller
             'platforms' => Platform::query()->select(['id','name'])->orderBy('name')->get(),
             'tags'      => Tag::query()->select(['id','name','slug'])->orderBy('name')->get(),
         ]);
+    }
+
+    /**
+     * Captura e persiste informações de um jogo pelo ID do RAWG.
+     * Não atualiza registros existentes; apenas cria se ainda não existir (por rawg_id ou por nome).
+     */
+    public function captureById(Request $request, Game $game): RedirectResponse
+    {
+        $rawgId = (int) $request->input('rawg_id');
+        if ($rawgId <= 0) {
+            return redirect()->back()->with('error', 'ID RAWG inválido.');
+        }
+        try {
+            $res = app(RawgImporter::class)->importById($rawgId);
+            if (($res['created'] ?? false) && !empty($res['game_id'])) {
+                return redirect()->back()->with('success', 'Jogo importado com sucesso.');
+            }
+            return redirect()->back()->with('success', 'Nenhuma ação necessária (jogo já existente).');
+        } catch (\Throwable $e) {
+            Log::error('ADMIN.GAMES.captureById.error', [
+                'rawg_id' => $rawgId,
+                'message' => $e->getMessage(),
+            ]);
+            return redirect()->back()->with('error', 'Falha ao importar jogo pelo ID RAWG.');
+        }
     }
 
     public function update(\App\Domain\Games\Http\Requests\StoreGameRequest $request, Game $game): RedirectResponse
@@ -488,6 +516,7 @@ class GameController extends Controller
             }
 
             $game->update([
+                'rawg_id' => $data['rawg_id'] ?? null,
                 'studio_id' => $data['studio_id'] ?? null,
                 'name' => $data['name'],
                 'cover_url' => $data['cover_url'] ?? null,

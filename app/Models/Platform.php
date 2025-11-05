@@ -11,9 +11,9 @@ class Platform extends Model
 
     protected $fillable = [
         'name',
+        'rawg_id',
         'manufacturer',
         'release_year',
         'description',
     ];
 }
-

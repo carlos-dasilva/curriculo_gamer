@@ -14,7 +14,9 @@ class StoreGameRequest extends FormRequest
 
     public function rules(): array
     {
+        $gameId = $this->route('game')?->id ?? null;
         return [
+            'rawg_id' => ['nullable','integer','min:1', Rule::unique('games','rawg_id')->ignore($gameId)],
             'name' => ['required','string','max:255'],
             'studio_id' => ['nullable','integer', Rule::exists('studios','id')],
             'cover_url' => ['nullable','url','max:2048'],
@@ -53,6 +55,8 @@ class StoreGameRequest extends FormRequest
         // Normalize studio_id and optional numeric fields
         $studio = $this->input('studio_id');
         $studioId = ($studio === '' || $studio === null) ? null : (int) $studio;
+        $rawg = $this->input('rawg_id');
+        $rawgId = ($rawg === '' || $rawg === null) ? null : (int) $rawg;
 
         $normalizeNum = function ($key, $cast = 'float') {
             $val = $this->input($key);
@@ -76,6 +80,7 @@ class StoreGameRequest extends FormRequest
             ->all();
 
         $this->merge([
+            'rawg_id' => $rawgId,
             'studio_id' => $studioId,
             'ptbr_subtitled' => filter_var($this->ptbr_subtitled, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false,
             'ptbr_dubbed' => filter_var($this->ptbr_dubbed, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false,

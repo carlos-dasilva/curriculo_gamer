@@ -12,6 +12,7 @@ class Game extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
+        'rawg_id',
         'studio_id',
         'name',
         'cover_url',
@@ -31,6 +32,7 @@ class Game extends Model
     ];
 
     protected $casts = [
+        'rawg_id' => 'integer',
         'ptbr_subtitled' => 'boolean',
         'ptbr_dubbed' => 'boolean',
         'metacritic_user_score' => 'decimal:2',

@@ -9,6 +9,7 @@ type ExternalLink = { label: string; url: string };
 
 type GameDto = {
   id: number;
+  rawg_id?: number | null;
   name: string;
   studio_id: number;
   cover_url: string;
@@ -43,6 +44,7 @@ type Props = {
 export default function GamesEdit({ game, studios, platforms, tags, flash }: Props) {
   const { data, setData, put, processing, errors } = useForm<any>({
     name: game.name,
+    rawg_id: (game as any).rawg_id ?? '',
     studio_id: game.studio_id,
     tag_ids: [...game.tag_ids],
     platform_ids: [...game.platform_ids],
@@ -236,6 +238,11 @@ export default function GamesEdit({ game, studios, platforms, tags, flash }: Pro
                   ))}
                 </select>
                 {errors.studio_id && <p className="mt-1 text-sm text-red-600">{errors.studio_id}</p>}
+              </div>
+              <div>
+                <label htmlFor="rawg_id" className="block text-sm font-medium text-gray-700">ID RAWG</label>
+                <input id="rawg_id" type="number" inputMode="numeric" value={(data as any).rawg_id ?? ''} onChange={(e) => setData('rawg_id', e.target.value ? Number(e.target.value) : '')} className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Ex.: 3498" />
+                {(errors as any).rawg_id && <p className="mt-1 text-xs text-red-600">{(errors as any).rawg_id}</p>}
               </div>
             </div>
 
@@ -502,6 +509,7 @@ function MicIcon({ className }: { className?: string }) {
     </svg>
   );
 }
+
 
 
 

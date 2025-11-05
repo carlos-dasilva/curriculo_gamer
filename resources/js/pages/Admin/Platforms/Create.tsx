@@ -4,6 +4,7 @@ import AdminLayout from '@/components/layouts/AdminLayout';
 
 type FormData = {
   name: string;
+  rawg_id?: number | null;
   manufacturer?: string | null;
   release_year?: number | null;
   description?: string | null;
@@ -12,6 +13,7 @@ type FormData = {
 export default function PlatformsCreate() {
   const { data, setData, post, processing, errors } = useForm<FormData>({
     name: '',
+    rawg_id: undefined,
     manufacturer: '',
     release_year: undefined,
     description: '',
@@ -32,6 +34,11 @@ export default function PlatformsCreate() {
               <label htmlFor="name" className="block text-sm font-medium text-gray-700">Nome *</label>
               <input id="name" required value={data.name} onChange={(e) => setData('name', e.target.value)} className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900" />
               {errors.name && <p className="mt-1 text-xs text-red-600">{errors.name}</p>}
+            </div>
+            <div>
+              <label htmlFor="rawg_id" className="block text-sm font-medium text-gray-700">ID RAWG</label>
+              <input id="rawg_id" type="number" inputMode="numeric" value={data.rawg_id ?? ''} onChange={(e) => setData('rawg_id', e.target.value ? parseInt(e.target.value, 10) : undefined)} className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900" placeholder="Ex.: 187" />
+              {errors.rawg_id && <p className="mt-1 text-xs text-red-600">{errors.rawg_id}</p>}
             </div>
             <div>
               <label htmlFor="manufacturer" className="block text-sm font-medium text-gray-700">Fabricante</label>

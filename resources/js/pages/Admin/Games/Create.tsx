@@ -17,6 +17,7 @@ type Props = {
 
 type FormData = {
   name: string;
+  rawg_id?: number | '';
   studio_id: number | '';
   tag_ids: number[];
   platform_ids: number[];
@@ -24,7 +25,7 @@ type FormData = {
   cover_url: string;
   gallery_urls: string[];
   external_links: ExternalLink[];
-  status?: 'avaliacao' | 'liberado';
+  status?: 'avaliação' | 'liberado';
   metacritic_metascore?: number | '';
   metacritic_user_score?: number | '';
   ptbr_subtitled: boolean;
@@ -40,6 +41,7 @@ type FormData = {
 export default function GamesCreate({ studios, platforms, tags, flash }: Props) {
   const { data, setData, post, processing, errors } = useForm<FormData>({
     name: '',
+    rawg_id: '',
     studio_id: '',
     tag_ids: [],
     platform_ids: [],
@@ -47,7 +49,7 @@ export default function GamesCreate({ studios, platforms, tags, flash }: Props) 
     cover_url: '',
     gallery_urls: [''],
     external_links: [{ label: '', url: '' }],
-    status: 'avaliacao',
+    status: 'avaliação',
     metacritic_metascore: '',
     metacritic_user_score: '',
     ptbr_subtitled: false,
@@ -264,6 +266,21 @@ export default function GamesCreate({ studios, platforms, tags, flash }: Props) 
                 </select>
                 {errors.studio_id && <p className="mt-1 text-sm text-red-600">{errors.studio_id}</p>}
               </div>
+              <div>
+                <label htmlFor="rawg_id" className="block text-sm font-medium text-gray-700">ID RAWG</label>
+                <input
+                  id="rawg_id"
+                  type="number"
+                  inputMode="numeric"
+                  value={(data as any).rawg_id ?? ''}
+                  onChange={(e) => setData('rawg_id', e.target.value ? Number(e.target.value) : '')}
+                  className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  placeholder="Ex.: 3498"
+                />
+                {(errors as any).rawg_id && (
+                  <p className="mt-1 text-xs text-red-600">{(errors as any).rawg_id}</p>
+                )}
+              </div>
             </div>
             {/* Horas para Finalizar movido para ao lado de Classificação indicativa */}
 
@@ -299,8 +316,8 @@ export default function GamesCreate({ studios, platforms, tags, flash }: Props) 
             <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label htmlFor="status" className="block text-sm font-medium text-gray-700">Status</label>
-                <select id="status" value={data.status || 'avaliacao'} onChange={(e) => setData('status', (e.target.value as 'avaliacao' | 'liberado'))} className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500">
-                  <option value="avaliacao">Em avaliação</option>
+                <select id="status" value={data.status || 'avaliação'} onChange={(e) => setData('status', (e.target.value as 'avaliação' | 'liberado'))} className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                  <option value="avaliação">Em avaliação</option>
                   <option value="liberado">Liberado</option>
                 </select>
                 <p className="mt-1 text-xs text-gray-500">Se salvar como "Liberado", o sistema registrará você como responsável pela liberação.</p>
@@ -406,7 +423,7 @@ export default function GamesCreate({ studios, platforms, tags, flash }: Props) 
 
           {/* AvaliaÃ§Ã£o / CaracterÃ­sticas */}
           <section>
-            <h2 className="text-lg font-semibold text-gray-900">Avaliação e características</h2>
+            <h2 className="text-lg font-semibold text-gray-900">avaliação e características</h2>
             <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
               <NumberField id="metacritic_metascore" label="Metascore (0–100)" value={data.metacritic_metascore} onChange={(v) => setData('metacritic_metascore', v)} min={0} max={100} step={1} />
               <NumberField id="metacritic_user_score" label="User Score (0.00–10.00)" value={data.metacritic_user_score} onChange={(v) => setData('metacritic_user_score', v)} min={0} max={10} step={0.01} />

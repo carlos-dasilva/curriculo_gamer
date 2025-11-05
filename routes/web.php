@@ -102,12 +102,13 @@ Route::middleware(['auth','role:moderador,admin'])->prefix('admin')->name('admin
     Route::delete('/estudios/{studio}', [StudioController::class, 'destroy'])->name('studios.destroy');
 
     // Plataformas (moderador e admin)
-    Route::get('/plataformas', [PlatformController::class, 'index'])->name('platforms.index');
-    Route::get('/plataformas/novo', [PlatformController::class, 'create'])->name('platforms.create');
-    Route::post('/plataformas', [PlatformController::class, 'store'])->name('platforms.store');
-    Route::get('/plataformas/{platform}/editar', [PlatformController::class, 'edit'])->name('platforms.edit');
-    Route::put('/plataformas/{platform}', [PlatformController::class, 'update'])->name('platforms.update');
-    Route::delete('/plataformas/{platform}', [PlatformController::class, 'destroy'])->name('platforms.destroy');
+      Route::get('/plataformas', [PlatformController::class, 'index'])->name('platforms.index');
+      Route::get('/plataformas/novo', [PlatformController::class, 'create'])->name('platforms.create');
+      Route::post('/plataformas', [PlatformController::class, 'store'])->name('platforms.store');
+      Route::get('/plataformas/{platform}/editar', [PlatformController::class, 'edit'])->name('platforms.edit');
+      Route::put('/plataformas/{platform}', [PlatformController::class, 'update'])->name('platforms.update');
+      Route::post('/plataformas/{platform}/carregar-jogos', [PlatformController::class, 'loadGames'])->name('platforms.loadGames');
+      Route::delete('/plataformas/{platform}', [PlatformController::class, 'destroy'])->name('platforms.destroy');
 
     // Marcadores (moderador e admin)
     Route::get('/marcadores', [TagController::class, 'index'])->name('tags.index');
@@ -118,12 +119,13 @@ Route::middleware(['auth','role:moderador,admin'])->prefix('admin')->name('admin
     Route::delete('/marcadores/{tag}', [TagController::class, 'destroy'])->name('tags.destroy');
 
     // Jogos (moderador e admin)
-    Route::get('/jogos', [GamesController::class, 'index'])->name('games.index');
-    Route::get('/jogos/novo', [GamesController::class, 'create'])->name('games.create');
-    Route::post('/jogos', [GamesController::class, 'store'])->name('games.store');
-    Route::get('/jogos/{game}/editar', [GamesController::class, 'edit'])->name('games.edit');
-    Route::post('/jogos/capturar', [GamesController::class, 'capture'])->name('games.capture');
-    Route::put('/jogos/{game}', [GamesController::class, 'update'])->name('games.update');
+      Route::get('/jogos', [GamesController::class, 'index'])->name('games.index');
+      Route::get('/jogos/novo', [GamesController::class, 'create'])->name('games.create');
+      Route::post('/jogos', [GamesController::class, 'store'])->name('games.store');
+      Route::get('/jogos/{game}/editar', [GamesController::class, 'edit'])->name('games.edit');
+      Route::post('/jogos/capturar', [GamesController::class, 'capture'])->name('games.capture');
+      Route::post('/jogos/{game}/capturar-id', [GamesController::class, 'captureById'])->name('games.captureById');
+      Route::put('/jogos/{game}', [GamesController::class, 'update'])->name('games.update');
     Route::delete('/jogos/{game}/imagens/{image}', [GamesController::class, 'removeImage'])->name('games.images.destroy');
     Route::delete('/jogos/{game}', [GamesController::class, 'destroy'])->name('games.destroy');
 

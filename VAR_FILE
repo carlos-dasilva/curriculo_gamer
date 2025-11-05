@@ -6,7 +6,6 @@ import AdminLayout from '@/components/layouts/AdminLayout';
 type Platform = {
   id: number;
   name: string;
-  rawg_id?: number | null;
   manufacturer?: string | null;
   release_year?: number | null;
 };

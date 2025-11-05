@@ -8,6 +8,8 @@ use Inertia\Inertia;
 use Illuminate\Http\RedirectResponse;
 use App\Domain\Platforms\Http\Requests\StorePlatformRequest;
 use App\Domain\Platforms\Http\Requests\UpdatePlatformRequest;
+use App\Domain\Platforms\Jobs\ImportPlatformGamesFromRawg;
+use App\Support\SystemLog;
 
 class PlatformController extends Controller
 {
@@ -17,7 +19,7 @@ class PlatformController extends Controller
         $name = trim((string) request('name', ''));
 
         $query = Platform::query()
-            ->select(['id','name','manufacturer','release_year'])
+            ->select(['id','name','rawg_id','manufacturer','release_year'])
             ->when($name !== '', function ($q) use ($name) {
                 $q->where('name', 'like', "%{$name}%");
             })
@@ -45,7 +47,7 @@ class PlatformController extends Controller
     public function edit(Platform $platform)
     {
         return Inertia::render('Admin/Platforms/Edit', [
-            'platform' => $platform->only(['id','name','manufacturer','release_year','description']),
+            'platform' => $platform->only(['id','name','rawg_id','manufacturer','release_year','description']),
         ]);
     }
 
@@ -60,5 +62,23 @@ class PlatformController extends Controller
         $platform->delete();
         return redirect()->route('admin.platforms.index')->with('success', 'Plataforma removida com sucesso.');
     }
-}
 
+    public function loadGames(Platform $platform): RedirectResponse
+    {
+        if (!$platform->id) {
+            return redirect()->back()->with('error', 'Plataforma ainda não foi salva.');
+        }
+        if (empty($platform->rawg_id)) {
+            return redirect()->back()->with('error', 'Informe o ID RAWG da plataforma para carregar jogos.');
+        }
+
+        SystemLog::info('RAWG.platform.load.requested', [
+            'user_id' => auth()->id(),
+            'platform_id' => $platform->id,
+            'rawg_platform_id' => (int) $platform->rawg_id,
+        ]);
+        ImportPlatformGamesFromRawg::dispatch($platform->id, (int) $platform->rawg_id);
+
+        return redirect()->back()->with('success', 'Importação iniciada. Os jogos serão processados em segundo plano.');
+    }
+}

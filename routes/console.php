@@ -30,7 +30,7 @@ Artisan::command('app:logs:purge-custom', function () {
 
 // Lista plataformas da RAWG API usando a chave configurada em env('RAWG_API_KEY')
 Artisan::command('rawg:platforms {--json} {--save=} {--page-size=40}', function () {
-    $apiKey = env('RAWG_API_KEY', '6dd272e717a64ad591eb4ef2889b1572');
+    $apiKey = env('RAWG_API_KEY', 'd0a618dcc9fe4036b7c0a03f8cf75fb0');
     if (!$apiKey) {
         $this->error('RAWG_API_KEY não configurada. Defina no .env.');
         return 1;

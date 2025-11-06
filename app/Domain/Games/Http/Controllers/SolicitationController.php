@@ -79,7 +79,7 @@ class SolicitationController extends Controller
             $hasMeta = isset($data['metacritic_metascore']) && $data['metacritic_metascore'] !== null && $data['metacritic_metascore'] !== '';
             if (!$hasMeta) {
             if ($request->boolean('no_enrich')) { $hasMeta = true; }
-                $apiKey = env('RAWG_API_KEY', '6dd272e717a64ad591eb4ef2889b1572');
+                $apiKey = env('RAWG_API_KEY', 'd0a618dcc9fe4036b7c0a03f8cf75fb0');
                 $name = (string) ($data['name'] ?? '');
                 if ($apiKey && $name !== '') {
                     $base = 'https://api.rawg.io/api/games';
@@ -362,7 +362,7 @@ class SolicitationController extends Controller
             $hasMeta = isset($data['metacritic_metascore']) && $data['metacritic_metascore'] !== null && $data['metacritic_metascore'] !== '';
             if (!$hasMeta) {
             if ($request->boolean('no_enrich')) { $hasMeta = true; }
-                $apiKey = env('RAWG_API_KEY', '6dd272e717a64ad591eb4ef2889b1572');
+                $apiKey = env('RAWG_API_KEY', 'd0a618dcc9fe4036b7c0a03f8cf75fb0');
                 $name = (string) ($data['name'] ?? $game->name ?? '');
                 if ($apiKey && $name !== '') {
                     $base = 'https://api.rawg.io/api/games';

@@ -31,7 +31,7 @@ class RawgImporter
             return ['skipped' => true, 'reason' => 'exists_by_id'];
         }
 
-        $apiKey = env('RAWG_API_KEY', '6dd272e717a64ad591eb4ef2889b1572');
+        $apiKey = env('RAWG_API_KEY', 'd0a618dcc9fe4036b7c0a03f8cf75fb0');
         $base = 'https://api.rawg.io/api/games';
 
         try {
@@ -200,7 +200,7 @@ class RawgImporter
             return ['skipped' => true, 'reason' => 'invalid_id'];
         }
 
-        $apiKey = env('RAWG_API_KEY', '6dd272e717a64ad591eb4ef2889b1572');
+        $apiKey = env('RAWG_API_KEY', 'd0a618dcc9fe4036b7c0a03f8cf75fb0');
         $base = 'https://api.rawg.io/api/games';
 
         try {

@@ -3,6 +3,7 @@
 namespace App\Domain\Platforms\Jobs;
 
 use App\Domain\Games\Jobs\ImportGameByRawgId;
+use App\Models\Game;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -39,6 +40,8 @@ class ImportPlatformGamesFromRawg implements ShouldQueue
         $pageSize = 40;
         $allIds = [];
         $iterations = 0;
+        $totalDispatched = 0;
+        $totalSkippedExisting = 0;
 
         do {
             $iterations++;
@@ -52,16 +55,30 @@ class ImportPlatformGamesFromRawg implements ShouldQueue
             if (!$resp->ok()) { break; }
             $json = $resp->json();
             $results = (array) ($json['results'] ?? []);
+            $idsPage = [];
             foreach ($results as $r) {
                 $id = isset($r['id']) ? (int) $r['id'] : 0;
-                if ($id > 0) { $allIds[] = $id; }
+                if ($id > 0) { $idsPage[] = $id; }
             }
+
+            // Evita chamar detalhe para jogos que já existem por rawg_id
+            $existing = empty($idsPage) ? [] : Game::query()->whereIn('rawg_id', $idsPage)->pluck('rawg_id')->all();
+            $map = array_fill_keys($existing, true);
+            $toDispatch = array_values(array_filter($idsPage, fn($gid) => empty($map[$gid])));
+            foreach ($toDispatch as $gid) {
+                ImportGameByRawgId::dispatch($gid);
+            }
+            $totalDispatched += count($toDispatch);
+            $totalSkippedExisting += count($idsPage) - count($toDispatch);
+            $allIds = array_merge($allIds, $idsPage);
 
             $next = $json['next'] ?? null;
             SystemLog::debug('RAWG.platform.import.page', [
                 'platform_id' => $this->platformId,
                 'page' => $page,
-                'count_results' => count($results),
+                'ids_in_page' => count($idsPage),
+                'skipped_existing_by_id' => count($idsPage) - count($toDispatch),
+                'dispatched' => count($toDispatch),
                 'has_next' => (bool) $next,
             ]);
             $page++;
@@ -77,16 +94,12 @@ class ImportPlatformGamesFromRawg implements ShouldQueue
             // opcional; não falha o job
         }
 
-        // Dispara jobs para cada jogo
-        $allIds = array_values(array_unique($allIds));
-        foreach ($allIds as $gid) {
-            ImportGameByRawgId::dispatch($gid);
-        }
-
         SystemLog::info('RAWG.platform.import.done', [
             'platform_id' => $this->platformId,
             'rawg_platform_id' => $this->rawgPlatformId,
-            'ids_count' => count($allIds),
+            'ids_count' => count(array_unique($allIds)),
+            'dispatched' => $totalDispatched,
+            'skipped_existing_by_id' => $totalSkippedExisting,
             ]);
     }
 }

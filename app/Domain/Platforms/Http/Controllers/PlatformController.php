@@ -3,6 +3,7 @@
 namespace App\Domain\Platforms\Http\Controllers;
 
 use App\Models\Platform;
+use App\Models\Game;
 use Illuminate\Routing\Controller;
 use Inertia\Inertia;
 use Illuminate\Http\RedirectResponse;
@@ -46,8 +47,15 @@ class PlatformController extends Controller
 
     public function edit(Platform $platform)
     {
+        $gamesCount = Game::query()
+            ->whereHas('platforms', function ($q) use ($platform) {
+                $q->where('platforms.id', $platform->id);
+            })
+            ->count();
+
         return Inertia::render('Admin/Platforms/Edit', [
             'platform' => $platform->only(['id','name','rawg_id','manufacturer','release_year','description']),
+            'gamesCount' => $gamesCount,
         ]);
     }
 

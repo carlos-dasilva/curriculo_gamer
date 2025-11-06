@@ -11,9 +11,9 @@ type Platform = {
   description?: string | null;
 };
 
-type Props = { platform: Platform };
+type Props = { platform: Platform; gamesCount: number };
 
-export default function PlatformsEdit({ platform }: Props) {
+export default function PlatformsEdit({ platform, gamesCount }: Props) {
   const { data, setData, put, processing, errors } = useForm<Platform>({
     ...platform,
   });
@@ -55,6 +55,9 @@ export default function PlatformsEdit({ platform }: Props) {
     <div>
       <Head title={`Editar Plataforma: ${platform.name}`} />
       <AdminLayout title={`Editar Plataforma`}>
+        <div className="mb-4 rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 shadow-sm">
+          Existem <strong className="font-semibold text-gray-900">{gamesCount}</strong> jogos cadastrados para esta plataforma.
+        </div>
         {flash?.error && (
           <div className="mb-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">{flash.error}</div>
         )}

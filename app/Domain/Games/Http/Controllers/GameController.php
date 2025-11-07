@@ -140,7 +140,7 @@ class GameController extends Controller
         $data = $request->all();
 
         try {
-            $apiKey = env('RAWG_API_KEY', 'd0a618dcc9fe4036b7c0a03f8cf75fb0');
+            $apiKey = env('RAWG_API_KEY', '795dff3f70a64fc681e00517c530bf17');
             $name = (string) ($data['name'] ?? '');
             if ($apiKey && $name !== '') {
                 $base = 'https://api.rawg.io/api/games';
@@ -342,7 +342,7 @@ class GameController extends Controller
             $hasMeta = isset($data['metacritic_metascore']) && $data['metacritic_metascore'] !== null && $data['metacritic_metascore'] !== '';
             if ($request->boolean('no_enrich')) { $hasMeta = true; }
             if (!$hasMeta) {
-                $apiKey = env('RAWG_API_KEY', 'd0a618dcc9fe4036b7c0a03f8cf75fb0');
+                $apiKey = env('RAWG_API_KEY', '795dff3f70a64fc681e00517c530bf17');
                 $name = (string) ($data['name'] ?? $game->name ?? '');
                 if ($apiKey && $name !== '') {
                     $base = 'https://api.rawg.io/api/games';

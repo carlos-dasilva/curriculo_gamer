@@ -33,7 +33,7 @@ class ImportPlatformGamesFromRawg implements ShouldQueue
             'platform_id' => $this->platformId,
             'rawg_platform_id' => $this->rawgPlatformId,
         ]);
-        $apiKey = env('RAWG_API_KEY', 'd0a618dcc9fe4036b7c0a03f8cf75fb0');
+        $apiKey = env('RAWG_API_KEY', '795dff3f70a64fc681e00517c530bf17');
         $base = 'https://api.rawg.io/api/games';
 
         $page = 1;

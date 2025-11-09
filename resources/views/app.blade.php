@@ -15,7 +15,7 @@
             @vite(['resources/css/app.css','resources/js/app.tsx'])
         @endenv
     </head>
-    <body class="min-h-screen bg-gray-50 text-gray-900">
+    <body class="min-h-screen bg-surface text-gray-900">
         @inertia
     </body>
     </html>

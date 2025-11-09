@@ -101,7 +101,7 @@ export default function CurriculumIndex({ mode, summary, byPlatform, selected, g
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Head title={subject?.isMe ? 'Meu Currí­culo' : `Currí­culo do ${subject?.name || ''}`} />
+      <Head title={subject?.isMe ? 'Meu Currículo' : `Currículo de ${subject?.name || ''}`} />
       <Header auth={auth} />
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {nowPlaying && (
@@ -263,7 +263,7 @@ export default function CurriculumIndex({ mode, summary, byPlatform, selected, g
                   </button>
                 </div>
                 <div>
-                  <button type="submit" className="inline-flex items-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800">Aplicar filtros</button>
+                <button type="submit" className="inline-flex items-center rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-700">Aplicar filtros</button>
                 </div>
               </div>
             </form>
@@ -363,10 +363,10 @@ function ShareMyCurriculum({ userId, selected }: { userId: number; selected: Sel
   const url = `${base}?${qs.toString()}`;
 
   const enc = encodeURIComponent;
-  const wa = `https://wa.me/?text=${enc('Meu Currí­culo Gamer: ' + url)}`;
+  const wa = `https://wa.me/?text=${enc('Meu Currículo Gamer: ' + url)}`;
   const ig = `https://www.instagram.com/?url=${enc(url)}`;
   const x = `https://twitter.com/intent/tweet?text=${enc('Meu Currículo Gamer')}&url=${enc(url)}`;
-  const mail = `mailto:?subject=${enc('Meu Currí­culo Gamer')}&body=${enc('Acesse meu currículo gamer: ' + url)}`;
+  const mail = `mailto:?subject=${enc('Meu Currículo Gamer')}&body=${enc('Acesse meu currículo gamer: ' + url)}`;
 
   const legacyCopy = (text: string) => {
     try {
@@ -413,7 +413,7 @@ function ShareMyCurriculum({ userId, selected }: { userId: number; selected: Sel
         onClick={() => setOpen(true)}
         className="inline-flex items-center gap-2 rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
       >
-        Compartilhar meu currí­culo
+        Compartilhar Meu Currículo
       </button>
       {copied && <span className="ml-2 text-xs text-gray-600 align-middle">Link copiado!</span>}
 
@@ -423,7 +423,7 @@ function ShareMyCurriculum({ userId, selected }: { userId: number; selected: Sel
           <div role="dialog" aria-modal="true" className="absolute inset-0 flex items-center justify-center p-4">
             <div className="w-full max-w-sm rounded-lg border border-gray-200 bg-white p-4 shadow-xl">
               <div className="mb-3 flex items-center justify-between">
-                <h3 className="text-base font-semibold text-gray-900">Compartilhar meu currí­culo</h3>
+                <h3 className="text-base font-semibold text-gray-900">Compartilhar Meu Currículo</h3>
                 <button onClick={() => setOpen(false)} className="rounded-md p-1 text-gray-500 hover:bg-gray-100" aria-label="Fechar">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 011.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
                 </button>
@@ -445,7 +445,7 @@ function ShareMyCurriculum({ userId, selected }: { userId: number; selected: Sel
                     if (navigator.share) {
                       try {
                         // @ts-ignore
-                        await navigator.share({ title: 'Meu Currí­culo Gamer', text: 'Acesse meu currí­culo gamer:', url });
+                        await navigator.share({ title: 'Meu Currículo Gamer', text: 'Acesse Meu Currículo gamer:', url });
                         setOpen(false);
                         return;
                       } catch {}
@@ -520,3 +520,4 @@ function MailIcon({ className }: { className?: string }) {
 }
 
 // removed duplicate ShareMyCurriculum definition
+

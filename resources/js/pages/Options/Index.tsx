@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import Header from '@/components/ui/Header';
 import Footer from '@/components/ui/Footer';
@@ -31,31 +31,33 @@ export default function OptionsIndex() {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Mantém a navegação em /opcoes após salvar
+    // MantÃ©m a navegaÃ§Ã£o em /opcoes apÃ³s salvar
     put('/perfil', { preserveScroll: true, preserveState: true, replace: true });
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Head title="Opções" />
+      <Head title="Opções">
+        <meta name="description" content="Gerencie seu perfil, conexões e solicitações. Atualize nome e preferências, veja quem você segue e acompanhe o status de solicitações." />
+      </Head>
       <Header auth={auth} />
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-4">
-          <h1 className="text-2xl font-semibold text-gray-900">Opções</h1>
-          <p className="mt-1 text-sm text-gray-600">Acesse suas opções de conta e ações rápidas.</p>
+          <h1 className="text-2xl font-semibold text-gray-900">OpÃ§Ãµes</h1>
+          <p className="mt-1 text-sm text-gray-600">Acesse suas opÃ§Ãµes de conta e aÃ§Ãµes rÃ¡pidas.</p>
         </div>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[260px_1fr]">
           {/* Sidebar esquerda */}
           <aside className="lg:sticky lg:top-20 self-start">
-            <nav aria-label="Opções do usuário">
+            <nav aria-label="OpÃ§Ãµes do usuÃ¡rio">
               <ul className="space-y-1">
                 <li>
                   <button
                     type="button"
                     onClick={() => setActive('perfil')}
                     aria-current={active === 'perfil' ? 'true' : undefined}
-                    className={`${active === 'perfil' ? 'bg-gray-900 text-white' : 'bg-white text-gray-800 hover:bg-gray-50'} flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium ring-1 ring-inset ring-gray-200 cursor-pointer`}
+                    className={`${active === 'perfil' ? 'bg-brand-600 text-white' : 'bg-white text-gray-800 hover:bg-gray-50'} flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium ring-1 ring-inset ring-gray-200 cursor-pointer`}
                   >
                     <UserIcon className="h-4 w-4" />
                     <span>Perfil</span>
@@ -66,7 +68,7 @@ export default function OptionsIndex() {
                     type="button"
                     onClick={() => setActive('seguindo')}
                     aria-current={active === 'seguindo' ? 'true' : undefined}
-                    className={`${active === 'seguindo' ? 'bg-gray-900 text-white' : 'bg-white text-gray-800 hover:bg-gray-50'} flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium ring-1 ring-inset ring-gray-200 cursor-pointer`}
+                    className={`${active === 'seguindo' ? 'bg-brand-600 text-white' : 'bg-white text-gray-800 hover:bg-gray-50'} flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium ring-1 ring-inset ring-gray-200 cursor-pointer`}
                   >
                     <UsersIcon className="h-4 w-4" />
                     <span>Seguindo</span>
@@ -77,24 +79,24 @@ export default function OptionsIndex() {
                     type="button"
                     onClick={() => setActive('solicitacoes')}
                     aria-current={active === 'solicitacoes' ? 'true' : undefined}
-                    className={`${active === 'solicitacoes' ? 'bg-gray-900 text-white' : 'bg-white text-gray-800 hover:bg-gray-50'} flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium ring-1 ring-inset ring-gray-200 cursor-pointer`}
+                    className={`${active === 'solicitacoes' ? 'bg-brand-600 text-white' : 'bg-white text-gray-800 hover:bg-gray-50'} flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium ring-1 ring-inset ring-gray-200 cursor-pointer`}
                   >
                     <PlusIcon className="h-4 w-4" />
-                    <span>Solicitações</span>
+                    <span>SolicitaÃ§Ãµes</span>
                   </button>
                 </li>
               </ul>
             </nav>
           </aside>
 
-          {/* Conteúdo à direita */}
+          {/* ConteÃºdo Ã  direita */}
           <section>
             {active === 'perfil' ? (
               <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
                 <h2 className="text-lg font-semibold text-gray-900">Meu Perfil</h2>
-                <p className="mt-1 text-sm text-gray-600">Gerencie seus dados pessoais. O e-mail é somente leitura pois o login é feito via {authProvider}.</p>
+                <p className="mt-1 text-sm text-gray-600">Gerencie seus dados pessoais. O e-mail Ã© somente leitura pois o login Ã© feito via {authProvider}.</p>
 
-                <form onSubmit={submit} className="mt-6 space-y-6" aria-label="Formulário de atualização de perfil">
+                <form onSubmit={submit} className="mt-6 space-y-6" aria-label="FormulÃ¡rio de atualizaÃ§Ã£o de perfil">
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium text-gray-700">Nome</label>
                     <input
@@ -118,19 +120,19 @@ export default function OptionsIndex() {
                       className="mt-1 block w-full cursor-not-allowed rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-gray-600 sm:text-sm"
                       aria-readonly="true"
                     />
-                    <p className="mt-1 text-xs text-gray-500">O e-mail é vinculado ao {authProvider} e não pode ser alterado.</p>
+                    <p className="mt-1 text-xs text-gray-500">O e-mail Ã© vinculado ao {authProvider} e nÃ£o pode ser alterado.</p>
                   </div>
 
                   <div className="flex items-center gap-3">
                     <button
                       type="submit"
                       disabled={processing}
-                      className="inline-flex items-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex items-center rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      {processing ? 'Salvando...' : 'Salvar alterações'}
+                      {processing ? 'Salvando...' : 'Salvar alteraÃ§Ãµes'}
                     </button>
                     {recentlySuccessful && (
-                      <span className="text-sm text-green-700">Alterações salvas.</span>
+                      <span className="text-sm text-green-700">AlteraÃ§Ãµes salvas.</span>
                     )}
                   </div>
                 </form>
@@ -138,9 +140,9 @@ export default function OptionsIndex() {
             ) : active === 'seguindo' ? (
               <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
                 <h2 className="text-lg font-semibold text-gray-900">Seguindo</h2>
-                <p className="mt-1 text-sm text-gray-600">Resumo do currículo das pessoas que você segue.</p>
+                <p className="mt-1 text-sm text-gray-600">Resumo do currÃ­culo das pessoas que vocÃª segue.</p>
                 {(!meSummary && (!followingSummary || followingSummary.length === 0)) ? (
-                  <p className="mt-3 text-sm text-gray-600">Você ainda não segue ninguém.</p>
+                  <p className="mt-3 text-sm text-gray-600">VocÃª ainda nÃ£o segue ninguÃ©m.</p>
                 ) : (
                   <div className="mt-4 overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200 overflow-hidden rounded-lg border border-gray-200 bg-white">
@@ -157,7 +159,7 @@ export default function OptionsIndex() {
                         {meSummary && (
                           <tr key={`me-${meSummary.id}`} className="hover:bg-gray-50">
                             <td className="px-4 py-2 text-sm font-medium text-gray-900">
-                              <a href={`/curriculo/${meSummary.id}`} className="text-gray-900 hover:underline">{meSummary.name} (Você)</a>
+                              <a href={`/curriculo/${meSummary.id}`} className="text-gray-900 hover:underline">{meSummary.name} (VocÃª)</a>
                             </td>
                             <td className="px-4 py-2 text-sm text-gray-800">{meSummary.counts.cem_por_cento}</td>
                             <td className="px-4 py-2 text-sm text-gray-800">{meSummary.counts.finalizei}</td>
@@ -184,18 +186,18 @@ export default function OptionsIndex() {
             ) : active === 'solicitacoes' ? (
               <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <h2 className="text-lg font-semibold text-gray-900">Solicitações de Jogos</h2>
+                  <h2 className="text-lg font-semibold text-gray-900">SolicitaÃ§Ãµes de Jogos</h2>
                   <a
                     href="/opcoes/solicitacoes/novo"
                     className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-gray-900 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900 sm:w-auto"
                   >
                     <PlusIcon className="h-4 w-4" />
-                    Nova solicitação
+                    Nova solicitaÃ§Ã£o
                   </a>
                 </div>
 
                 <p className="mt-1 text-sm text-gray-600">
-                  {abilities?.canModerate ? 'Você pode gerenciar todas as solicitações em avaliação.' : 'Você pode gerenciar apenas as solicitações criadas por você.'}
+                  {abilities?.canModerate ? 'VocÃª pode gerenciar todas as solicitaÃ§Ãµes em avaliaÃ§Ã£o.' : 'VocÃª pode gerenciar apenas as solicitaÃ§Ãµes criadas por vocÃª.'}
                 </p>
 
                 <div className="mt-4 overflow-x-auto">
@@ -203,12 +205,12 @@ export default function OptionsIndex() {
                     <thead className="bg-gray-50">
                       <tr>
                         <th scope="col" className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700">Jogo</th>
-                        <th scope="col" className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700">Estúdio</th>
+                        <th scope="col" className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700">EstÃºdio</th>
                         {abilities?.canModerate && (
                           <th scope="col" className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700">Criado por</th>
                         )}
                         <th scope="col" className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700">Criado em</th>
-                        <th scope="col" className="px-4 py-2 text-right text-xs font-semibold uppercase tracking-wider text-gray-700">Ações</th>
+                        <th scope="col" className="px-4 py-2 text-right text-xs font-semibold uppercase tracking-wider text-gray-700">AÃ§Ãµes</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
@@ -232,7 +234,7 @@ export default function OptionsIndex() {
                               )}
                               <div className="flex min-w-0 flex-col">
                                 <span className="truncate font-medium">{g.name}</span>
-                                <span className="text-xs text-gray-500">Em avaliação</span>
+                                <span className="text-xs text-gray-500">Em avaliaÃ§Ã£o</span>
                               </div>
                             </div>
                           </td>
@@ -255,7 +257,7 @@ export default function OptionsIndex() {
                       ))}
                       {(solicitations || []).length === 0 && (
                         <tr>
-                          <td colSpan={abilities?.canModerate ? 5 : 4} className="px-4 py-6 text-center text-sm text-gray-600">Nenhuma solicitação encontrada.</td>
+                          <td colSpan={abilities?.canModerate ? 5 : 4} className="px-4 py-6 text-center text-sm text-gray-600">Nenhuma solicitaÃ§Ã£o encontrada.</td>
                         </tr>
                       )}
                     </tbody>
@@ -271,8 +273,8 @@ export default function OptionsIndex() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60" aria-hidden="true" onClick={() => (!deleting ? setConfirmDelete(null) : null)} />
           <div role="dialog" aria-modal="true" aria-labelledby="confirm-title" className="relative z-10 w-full max-w-md rounded-lg bg-white p-6 shadow-2xl ring-1 ring-gray-200">
-            <h4 id="confirm-title" className="text-base font-semibold text-gray-900">Excluir solicitação</h4>
-            <p className="mt-2 text-sm text-gray-700">Tem certeza que deseja excluir {confirmDelete.name ? (<strong>{confirmDelete.name}</strong>) : 'esta solicitação'}?</p>
+            <h4 id="confirm-title" className="text-base font-semibold text-gray-900">Excluir solicitaÃ§Ã£o</h4>
+            <p className="mt-2 text-sm text-gray-700">Tem certeza que deseja excluir {confirmDelete.name ? (<strong>{confirmDelete.name}</strong>) : 'esta solicitaÃ§Ã£o'}?</p>
             <div className="mt-6 flex items-center justify-end gap-3">
               <button type="button" onClick={() => setConfirmDelete(null)} disabled={deleting} className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50">Cancelar</button>
               <button type="button" onClick={() => {
@@ -281,11 +283,11 @@ export default function OptionsIndex() {
                   const form = document.getElementById(`sol-del-${confirmDelete.id}`) as HTMLFormElement | null;
                   if (form) form.submit();
                 } finally {
-                  // a navegação deve ocorrer; fallback fecha modal
+                  // a navegaÃ§Ã£o deve ocorrer; fallback fecha modal
                   setDeleting(false);
                   setConfirmDelete(null);
                 }
-              }} disabled={deleting} className="inline-flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 disabled:cursor-not-allowed disabled:opacity-50">{deleting ? 'Excluindo…' : 'Excluir'}</button>
+              }} disabled={deleting} className="inline-flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 disabled:cursor-not-allowed disabled:opacity-50">{deleting ? 'Excluindoâ€¦' : 'Excluir'}</button>
             </div>
           </div>
         </div>
@@ -317,3 +319,6 @@ function PlusIcon({ className }: { className?: string }) {
     </svg>
   );
 }
+
+
+

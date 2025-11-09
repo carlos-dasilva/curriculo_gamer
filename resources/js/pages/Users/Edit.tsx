@@ -28,7 +28,9 @@ export default function UsersEdit({ user, allowedRoles, readOnly, abilities, ui,
 
   return (
     <div>
-      <Head title={`Editar: ${user.name}`} />
+      <Head title={`Editar: ${user.name}`}>
+        <meta name="description" content={`Editar usuário ${user.name}: atualizar nome e nível de acesso.`} />
+      </Head>
       <AdminLayout title="Usuários">
         <h2 className="text-xl font-semibold text-gray-900">Editar usuário</h2>
         <p className="mt-1 text-sm text-gray-600">Somente nome e nível podem ser alterados. E-mail é somente leitura (login Google).</p>

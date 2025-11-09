@@ -34,15 +34,15 @@ export default function Hero({ onCtaClick }: Props) {
         />
       </picture>
 
-      {/* Overlay de gradiente para contraste e legibilidade (opacidade reduzida de 75% -> 60%) */}
-      <div className="absolute inset-0 -z-0 bg-black/70" aria-hidden="true" />
+      {/* Overlay gamer: degrade escuro com acento brand */}
+      <div className="absolute inset-0 -z-0 bg-gradient-to-b from-black/70 via-brand-900/40 to-black/60" aria-hidden="true" />
 
       <div className="relative mx-auto max-w-7xl px-4 py-[4.5rem] sm:py-[5.25rem] sm:px-6 lg:px-8">
         <div className="max-w-2xl">
           <h1 className="text-4xl font-bold tracking-tight text-white sm:text-6xl">
             {strings.hero.titulo}
           </h1>
-          <p className="mt-6 text-lg leading-8 text-sky-50">
+          <p className="mt-6 text-lg leading-8 text-brand-100">
             {strings.hero.subtitulo}
           </p>
           <div className="mt-10 flex items-center gap-x-6">
@@ -52,7 +52,7 @@ export default function Hero({ onCtaClick }: Props) {
                 const sep = base.indexOf('?') >= 0 ? '&' : '?';
                 return `${base}${sep}intended=${encodeURIComponent('/meu-curriculo')}`;
               })()}
-              className="rounded-md bg-white px-5 py-3 text-sm font-semibold text-sky-700 shadow-sm hover:bg-sky-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="rounded-md bg-white px-5 py-3 text-sm font-semibold text-brand-600 shadow-sm ring-1 ring-inset ring-brand-600 hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
             >
               {strings.hero.cta}
             </a>

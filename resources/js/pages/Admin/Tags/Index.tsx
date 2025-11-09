@@ -42,7 +42,9 @@ export default function TagsIndex({ tags, filters, flash }: Props) {
 
   return (
     <div>
-      <Head title="Marcadores" />
+      <Head title="Marcadores">
+        <meta name="description" content="Gerencie marcadores: filtrar por nome ou slug, visualizar listagem e acessar edição." />
+      </Head>
       <AdminLayout title="Marcadores">
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end">
           <form onSubmit={applyFilters} className="flex flex-col gap-3 sm:flex-row sm:items-end">

@@ -36,10 +36,12 @@ export default function UsersIndex({ users, filters, auth, flash, roles }: Props
 
   return (
     <div>
-      <Head title="Usu\u00E1rios" />
-      <AdminLayout title="Usu\u00E1rios">
+      <Head title="Usuários">
+        <meta name="description" content="Administração de usuários: filtro por nome, e-mail e nível, listagem e acesso a edição." />
+      </Head>
+      <AdminLayout title="Usuários">
         <div className="mb-6">
-          <h1 className="mb-3 text-2xl font-semibold text-gray-900">{'Usu\u00E1rios'}</h1>
+          <h2 className="mb-3 text-2xl font-semibold text-gray-900">{'Usuários'}</h2>
           <form onSubmit={applyFilters} className="flex flex-col gap-3 sm:flex-row sm:items-end">
             <div className="w-full sm:max-w-xs">
               <label htmlFor="name" className="block text-sm font-medium text-gray-700">Nome</label>
@@ -59,7 +61,7 @@ export default function UsersIndex({ users, filters, auth, flash, roles }: Props
               </select>
             </div>
             <div>
-              <button type="submit" className="inline-flex items-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900">
+              <button type="submit" className="inline-flex items-center rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">
                 Aplicar filtros
               </button>
             </div>
@@ -105,7 +107,7 @@ export default function UsersIndex({ users, filters, auth, flash, roles }: Props
                   <td className="px-4 py-3 text-right">
                     <Link
                       href={`/admin/usuarios/${u.id}/editar`}
-                      className="inline-flex items-center whitespace-nowrap rounded-md bg-gray-900 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
+                      className="inline-flex items-center whitespace-nowrap rounded-md bg-brand-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
                     >
                       Editar
                     </Link>

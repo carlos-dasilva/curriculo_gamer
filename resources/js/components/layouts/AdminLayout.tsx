@@ -44,7 +44,7 @@ export default function AdminLayout({ title, children }: Props) {
           {currentPath.startsWith('/admin/jogos') && (
             <Link
               href="/admin/jogos/novo"
-              className="hidden sm:inline-flex items-center justify-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
+              className="hidden sm:inline-flex items-center justify-center rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
             >
               Novo jogo
             </Link>
@@ -52,7 +52,7 @@ export default function AdminLayout({ title, children }: Props) {
           {currentPath.startsWith('/admin/estudios') && (
             <Link
               href="/admin/estudios/novo"
-              className="hidden sm:inline-flex items-center justify-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
+              className="hidden sm:inline-flex items-center justify-center rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
             >
               Novo estúdio
             </Link>
@@ -60,7 +60,7 @@ export default function AdminLayout({ title, children }: Props) {
           {currentPath.startsWith('/admin/plataformas') && (
             <Link
               href="/admin/plataformas/novo"
-              className="hidden sm:inline-flex items-center justify-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
+              className="hidden sm:inline-flex items-center justify-center rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
             >
               Nova plataforma
             </Link>
@@ -68,7 +68,7 @@ export default function AdminLayout({ title, children }: Props) {
           {currentPath.startsWith('/admin/marcadores') && (
             <Link
               href="/admin/marcadores/novo"
-              className="hidden sm:inline-flex items-center justify-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
+              className="hidden sm:inline-flex items-center justify-center rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
             >
               Novo marcador
             </Link>
@@ -86,7 +86,7 @@ export default function AdminLayout({ title, children }: Props) {
                     <li key={s.href}>
                       <Link
                         href={s.href}
-                        className={`${active ? 'bg-gray-900 text-white' : 'bg-white text-gray-800 hover:bg-gray-50'} flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium ring-1 ring-inset ring-gray-200`}
+                        className={`${active ? 'bg-brand-600 text-white' : 'bg-white text-gray-800 hover:bg-gray-50'} flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium ring-1 ring-inset ring-gray-200`}
                         onClick={() => setOpen(false)}
                       >
                         {renderIcon(s.href)}
@@ -210,4 +210,3 @@ function BookIcon({ className }: { className?: string }) {
     </svg>
   );
 }
-

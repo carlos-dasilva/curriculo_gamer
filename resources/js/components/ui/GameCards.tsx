@@ -63,7 +63,7 @@ export default function GameCards({ games, subjectName, disableLocalFilters }: P
                     type="button"
                     aria-pressed={onlySubtitled}
                     onClick={() => setOnlySubtitled((v) => !v)}
-                    className={`${onlySubtitled ? 'bg-gray-900 text-white ring-gray-900' : 'bg-white text-gray-800 ring-gray-300 hover:bg-gray-50'} inline-flex items-center justify-center gap-2 rounded-full px-3 py-1.5 text-sm ring-1 ring-inset shadow-sm transition cursor-pointer`}
+                    className={`${onlySubtitled ? 'bg-brand-600 text-white ring-brand-600' : 'bg-white text-gray-800 ring-gray-300 hover:bg-gray-50'} inline-flex items-center justify-center gap-2 rounded-full px-3 py-1.5 text-sm ring-1 ring-inset shadow-sm transition cursor-pointer`}
                   >
                     <SubtitleIcon className="h-4 w-4" />
                     <span className="sm:hidden">Legendado</span>
@@ -73,7 +73,7 @@ export default function GameCards({ games, subjectName, disableLocalFilters }: P
                     type="button"
                     aria-pressed={onlyDubbed}
                     onClick={() => setOnlyDubbed((v) => !v)}
-                    className={`${onlyDubbed ? 'bg-gray-900 text-white ring-gray-900' : 'bg-white text-gray-800 ring-gray-300 hover:bg-gray-50'} inline-flex items-center justify-center gap-2 rounded-full px-3 py-1.5 text-sm ring-1 ring-inset shadow-sm transition cursor-pointer`}
+                    className={`${onlyDubbed ? 'bg-brand-600 text-white ring-brand-600' : 'bg-white text-gray-800 ring-gray-300 hover:bg-gray-50'} inline-flex items-center justify-center gap-2 rounded-full px-3 py-1.5 text-sm ring-1 ring-inset shadow-sm transition cursor-pointer`}
                   >
                     <MicIcon className="h-4 w-4" />
                     <span className="sm:hidden">Dublado</span>
@@ -98,7 +98,7 @@ export default function GameCards({ games, subjectName, disableLocalFilters }: P
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={SEARCH_PLACEHOLDER}
-              className="w-full rounded-md border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500 sm:text-sm"
+              className="w-full rounded-md border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder:text-gray-400 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500 sm:text-sm"
               aria-describedby="resultado-contagem"
             />
             <p id="resultado-contagem" className="mt-2 text-sm text-gray-600">{filtered.length} resultado(s)</p>

@@ -167,7 +167,9 @@ export default function GameShow({ game, auth, myInfo, myPlatformStatuses }: Pro
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Head title={game.name} />
+      <Head title={game.name}>
+        <meta name="description" content={`Detalhes de ${game.name}: notas, plataformas, status em PT-BR (legendado/dublado), imagens e informações gerais.`} />
+      </Head>
       <Header auth={auth} />
 
       <main>
@@ -237,7 +239,7 @@ export default function GameShow({ game, auth, myInfo, myPlatformStatuses }: Pro
               {auth?.abilities?.manageUsers && (
                 <Link
                   href={`/admin/jogos/${game.id}/editar`}
-                  className="mt-4 inline-flex w-full items-center justify-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900 sm:absolute sm:bottom-6 sm:right-8 sm:w-auto"
+                  className="mt-4 inline-flex w-full items-center justify-center rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 sm:absolute sm:bottom-6 sm:right-8 sm:w-auto"
                 >
                   Editar
                 </Link>
@@ -541,7 +543,7 @@ export default function GameShow({ game, auth, myInfo, myPlatformStatuses }: Pro
                           window.setTimeout(() => setSaveState(null), 3000);
                         }
                       }}
-                      className="inline-flex items-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex items-center rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {saving ? 'Salvando…' : 'Salvar'}
                     </button>
@@ -562,7 +564,7 @@ export default function GameShow({ game, auth, myInfo, myPlatformStatuses }: Pro
                           // nada a fazer
                         }
                       }}
-                      className="ml-auto inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900 cursor-pointer"
+                      className="ml-auto inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 cursor-pointer"
                       title="Definir este jogo como Estou Jogando"
                     >
                       Estou Jogando

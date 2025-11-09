@@ -31,7 +31,7 @@ export default function Pagination({ links, className = 'mt-8 flex justify-cente
           {normalized.map((l, idx) => {
             const isPrev = idx === 0;
             const isNext = idx === normalized.length - 1;
-            const common = 'min-w-9 select-none rounded-md px-3 py-2 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900';
+            const common = 'min-w-9 select-none rounded-md px-3 py-2 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600';
             if (!l.url) {
               return (
                 <li key={idx}>
@@ -45,7 +45,7 @@ export default function Pagination({ links, className = 'mt-8 flex justify-cente
               <li key={idx}>
                 <Link
                   href={l.url}
-                  className={`${common} ${l.active ? 'bg-gray-900 text-white' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-200 hover:bg-gray-50'}`}
+                  className={`${common} ${l.active ? 'bg-brand-600 text-white' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-200 hover:bg-gray-50'}`}
                   aria-label={isPrev ? 'Anterior' : isNext ? 'Próxima' : undefined}
                 >
                   {l.label}
@@ -96,7 +96,7 @@ export default function Pagination({ links, className = 'mt-8 flex justify-cente
   // Next
   items.push({ key: 'next', type: 'next', label: '>', url: next?.url || null, active: false });
 
-  const common = 'min-w-9 select-none rounded-md px-3 py-2 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900';
+  const common = 'min-w-9 select-none rounded-md px-3 py-2 text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600';
 
   return (
     <nav className={className} aria-label="Paginação">
@@ -124,7 +124,7 @@ export default function Pagination({ links, className = 'mt-8 flex justify-cente
             <li key={it.key}>
               <Link
                 href={it.url}
-                className={`${common} ${it.active ? 'bg-gray-900 text-white' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-200 hover:bg-gray-50'}`}
+                className={`${common} ${it.active ? 'bg-brand-600 text-white' : 'bg-white text-gray-700 ring-1 ring-inset ring-gray-200 hover:bg-gray-50'}`}
                 aria-current={it.active ? 'page' : undefined}
                 aria-label={it.type === 'prev' ? 'Anterior' : it.type === 'next' ? 'Próxima' : undefined}
               >

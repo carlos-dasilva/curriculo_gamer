@@ -23,7 +23,9 @@ export default function TermsOfUse() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Head title="Termos de Uso" />
+      <Head title="Termos de Uso">
+        <meta name="description" content="Termos de Uso: condições para acesso e utilização do Currículo Gamer." />
+      </Head>
       <Header auth={auth} />
       <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
         <h1 className="text-3xl font-bold text-gray-900">Termos de Uso</h1>

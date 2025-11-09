@@ -1,0 +1,19 @@
+/* Design tokens and theme overrides */
+@theme {
+  /* Neutral brand (black/white) */
+  --color-brand-50:  #f9fafb; /* near white */
+  --color-brand-100: #f3f4f6; /* gray-100 */
+  --color-brand-200: #e5e7eb; /* gray-200 */
+  --color-brand-300: #d1d5db; /* gray-300 */
+  --color-brand-400: #9ca3af; /* gray-400 */
+  --color-brand-500: #374151; /* gray-700 (for outlines) */
+  --color-brand-600: #111827; /* gray-900 (primary buttons) */
+  --color-brand-700: #1f2937; /* gray-800 (hover) */
+  --color-brand-800: #111827; /* keep deep neutral */
+  --color-brand-900: #0b0f19; /* very dark slate */
+
+  /* Surface + text tokens used across app */
+  --color-surface:   #f9fafb; /* light gray background */
+  --color-content:   #0f172a; /* slate-900 */
+  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.05);
+}

@@ -43,7 +43,9 @@ export default function GamesIndex({ games, filters, flash }: Props) {
 
   return (
     <div>
-      <Head title="Jogos" />
+      <Head title="Jogos">
+        <meta name="description" content="Gerencie jogos: filtrar por nome e status, visualizar estúdio, plataformas e marcadores, e acessar edição." />
+      </Head>
       <AdminLayout title="Jogos">
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end">
           <form onSubmit={applyFilters} className="flex flex-col gap-3 sm:flex-row sm:items-end">

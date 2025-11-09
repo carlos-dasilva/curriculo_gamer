@@ -166,7 +166,7 @@ export default function SolicitationCreate({ studios, platforms, tags }: Props) 
       <Header auth={auth} />
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-4">
-          <h1 className="text-2xl font-semibold text-gray-900">Opções</h1>
+          <h2 className="text-2xl font-semibold text-gray-900">Opções</h2>
           <p className="mt-1 text-sm text-gray-600">Acesse suas opções de conta e ações rápidas.</p>
         </div>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[260px_1fr]">

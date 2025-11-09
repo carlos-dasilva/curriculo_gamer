@@ -48,7 +48,9 @@ export default function PlatformsIndex({ platforms, filters, flash }: Props) {
 
   return (
     <div>
-      <Head title="Plataformas" />
+      <Head title="Plataformas">
+        <meta name="description" content="Gerencie plataformas: filtrar por nome, visualizar fabricante e ano de lançamento e acessar edição." />
+      </Head>
       <AdminLayout title="Plataformas">
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end">
           <form onSubmit={applyFilters} className="flex flex-col gap-3 sm:flex-row sm:items-end">

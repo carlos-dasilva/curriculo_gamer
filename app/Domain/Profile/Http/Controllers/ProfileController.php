@@ -93,6 +93,12 @@ class ProfileController extends Controller
         $user->name = $data['name'];
         $user->save();
 
+        // Redireciona de forma contextual: se o referer era /opcoes, mantém lá; caso contrário volta ao /perfil
+        $referer = (string) request()->headers->get('referer', '');
+        $path = parse_url($referer, PHP_URL_PATH) ?: '';
+        if (str_contains($path, '/opcoes')) {
+            return redirect()->route('options.index', ['tab' => 'perfil'])->with('success', 'Perfil atualizado com sucesso.');
+        }
         return redirect()->route('profile.index')->with('success', 'Perfil atualizado com sucesso.');
     }
 }

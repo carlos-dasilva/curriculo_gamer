@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Domain\Games\Http\Requests;
 
@@ -16,7 +16,7 @@ class StoreGameRequest extends FormRequest
     {
         $gameId = $this->route('game')?->id ?? null;
         return [
-            'rawg_id' => ['nullable','integer','min:1', Rule::unique('games','rawg_id')->ignore($gameId)],
+            'rawg_id' => ['nullable','integer','min:1'],
             'name' => ['required','string','max:255'],
             'studio_id' => ['nullable','integer', Rule::exists('studios','id')],
             'cover_url' => ['nullable','url','max:2048'],
@@ -102,10 +102,14 @@ class StoreGameRequest extends FormRequest
             $releases = array_keys((array) $this->input('platform_releases', []));
             foreach ($releases as $rid) {
                 if (!in_array((int)$rid, $ids, true)) {
-                    $v->errors()->add('platform_releases', 'Há datas para plataformas não selecionadas.');
+                    $v->errors()->add('platform_releases', 'H\u00E1 datas para plataformas n\u00E3o selecionadas.');
                     break;
                 }
             }
         });
     }
 }
+
+
+
+

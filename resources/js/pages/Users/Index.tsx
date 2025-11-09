@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import Pagination from '@/components/ui/Pagination';
 import AdminLayout from '@/components/layouts/AdminLayout';
@@ -36,10 +36,10 @@ export default function UsersIndex({ users, filters, auth, flash, roles }: Props
 
   return (
     <div>
-      <Head title="Usuários" />
-      <AdminLayout title="Usuários">
+      <Head title="Usu\u00E1rios" />
+      <AdminLayout title="Usu\u00E1rios">
         <div className="mb-6">
-          <h1 className="mb-3 text-2xl font-semibold text-gray-900">Usuários</h1>
+          <h1 className="mb-3 text-2xl font-semibold text-gray-900">{'Usu\u00E1rios'}</h1>
           <form onSubmit={applyFilters} className="flex flex-col gap-3 sm:flex-row sm:items-end">
             <div className="w-full sm:max-w-xs">
               <label htmlFor="name" className="block text-sm font-medium text-gray-700">Nome</label>
@@ -50,7 +50,7 @@ export default function UsersIndex({ users, filters, auth, flash, roles }: Props
               <input id="email" type="text" placeholder="Qualquer parte do e-mail..." value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500" />
             </div>
             <div className="w-full sm:max-w-xs">
-              <label htmlFor="role" className="block text-sm font-medium text-gray-700">Nível</label>
+              <label htmlFor="role" className="block text-sm font-medium text-gray-700">{'N\u00EDvel'}</label>
               <select id="role" value={role} onChange={(e) => setRole(e.target.value)} className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500">
                 <option value="">Todos</option>
                 {roles.map((r) => (
@@ -80,14 +80,22 @@ export default function UsersIndex({ users, filters, auth, flash, roles }: Props
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Nome</th>
                 <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">E-mail</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Nível</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">{'N\u00EDvel'}</th>
                 <th className="px-4 py-3 w-24" />
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {users.data.map((u) => (
                 <tr key={u.id}>
-                  <td className="px-4 py-3 text-sm text-gray-900">{u.name}</td>
+                  <td className="px-4 py-3 text-sm text-gray-900">
+                    <Link
+                      href={`/curriculo/${u.id}`}
+                      aria-label={`Abrir curr\u00EDculo de ${u.name}`}
+                      className="text-gray-900 hover:underline focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
+                    >
+                      {u.name}
+                    </Link>
+                  </td>
                   <td className="px-4 py-3 text-sm text-gray-600">{u.email}</td>
                   <td className="px-4 py-3 text-sm">
                     <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700 ring-1 ring-inset ring-gray-200">
@@ -108,7 +116,7 @@ export default function UsersIndex({ users, filters, auth, flash, roles }: Props
           </table>
         </div>
 
-        {/* Paginação */}
+        {/* PaginaÃ§Ã£o */}
         <Pagination links={users.links} />
       </AdminLayout>
     </div>
@@ -130,3 +138,10 @@ function ChevronRightIcon({ className }: { className?: string }) {
     </svg>
   );
 }
+
+
+
+
+
+
+

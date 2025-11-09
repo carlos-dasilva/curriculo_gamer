@@ -15,5 +15,6 @@ class Platform extends Model
         'manufacturer',
         'release_year',
         'description',
+        'cover_url',
     ];
 }

@@ -20,7 +20,7 @@ class PlatformController extends Controller
         $name = trim((string) request('name', ''));
 
         $query = Platform::query()
-            ->select(['id','name','rawg_id','manufacturer','release_year'])
+            ->select(['id','name','rawg_id','manufacturer','release_year','cover_url'])
             ->when($name !== '', function ($q) use ($name) {
                 $q->where('name', 'like', "%{$name}%");
             })
@@ -54,7 +54,7 @@ class PlatformController extends Controller
             ->count();
 
         return Inertia::render('Admin/Platforms/Edit', [
-            'platform' => $platform->only(['id','name','rawg_id','manufacturer','release_year','description']),
+            'platform' => $platform->only(['id','name','rawg_id','manufacturer','release_year','description','cover_url']),
             'gamesCount' => $gamesCount,
         ]);
     }

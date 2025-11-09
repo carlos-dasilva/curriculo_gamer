@@ -4,6 +4,7 @@ namespace App\Domain\Platforms\Jobs;
 
 use App\Domain\Games\Jobs\ImportGameByRawgId;
 use App\Models\Game;
+use App\Models\Platform;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -33,6 +34,22 @@ class ImportPlatformGamesFromRawg implements ShouldQueue
             'platform_id' => $this->platformId,
             'rawg_platform_id' => $this->rawgPlatformId,
         ]);
+
+        // Garante que a plataforma local esteja vinculada ao ID do RAWG
+        try {
+            $platform = Platform::query()->find($this->platformId);
+            if ($platform) {
+                $alreadyInUse = Platform::query()
+                    ->where('rawg_id', $this->rawgPlatformId)
+                    ->where('id', '<>', $this->platformId)
+                    ->exists();
+                if (!$alreadyInUse && (int)($platform->rawg_id ?? 0) !== $this->rawgPlatformId) {
+                    $platform->update(['rawg_id' => $this->rawgPlatformId]);
+                }
+            }
+        } catch (\Throwable $e) {
+            // Não bloqueia o job por falha ao atualizar metadados
+        }
         $apiKey = env('RAWG_API_KEY', '795dff3f70a64fc681e00517c530bf17');
         $base = 'https://api.rawg.io/api/games';
 

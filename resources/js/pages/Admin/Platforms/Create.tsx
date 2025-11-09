@@ -8,6 +8,7 @@ type FormData = {
   manufacturer?: string | null;
   release_year?: number | null;
   description?: string | null;
+  cover_url?: string | null;
 };
 
 export default function PlatformsCreate() {
@@ -17,6 +18,7 @@ export default function PlatformsCreate() {
     manufacturer: '',
     release_year: undefined,
     description: '',
+    cover_url: '',
   });
 
   const submit = (e: React.FormEvent) => {
@@ -50,6 +52,30 @@ export default function PlatformsCreate() {
               <input id="release_year" type="number" inputMode="numeric" value={data.release_year ?? ''} onChange={(e) => setData('release_year', e.target.value ? parseInt(e.target.value, 10) : undefined)} className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900" />
               {errors.release_year && <p className="mt-1 text-xs text-red-600">{errors.release_year}</p>}
             </div>
+          </div>
+          <div>
+            <label htmlFor="cover_url" className="block text-sm font-medium text-gray-700">Imagem (URL)</label>
+            <input
+              id="cover_url"
+              type="url"
+              placeholder="https://exemplo.com/imagem.jpg"
+              value={data.cover_url ?? ''}
+              onChange={(e) => setData('cover_url', e.target.value)}
+              className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900"
+            />
+            {errors.cover_url && <p className="mt-1 text-xs text-red-600">{errors.cover_url}</p>}
+            {(data.cover_url ?? '').trim() !== '' && (
+              <div className="mt-2 flex items-center gap-3">
+                <img
+                  src={data.cover_url as string}
+                  alt="Pré-visualização da imagem da plataforma"
+                  className="h-16 w-16 rounded object-cover ring-1 ring-gray-200"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <a href={data.cover_url as string} target="_blank" rel="noreferrer" className="text-sm text-gray-700 underline-offset-2 hover:underline">Abrir imagem</a>
+              </div>
+            )}
           </div>
           <div>
             <label htmlFor="description" className="block text-sm font-medium text-gray-700">Descrição</label>

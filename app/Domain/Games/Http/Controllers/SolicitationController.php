@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Domain\Games\Http\Controllers;
 
@@ -38,10 +38,10 @@ class SolicitationController extends Controller
     }
 
     /**
-     * Permite visualizar/abrir a tela de edição quando:
+     * Permite visualizar/abrir a tela de ediÃ§Ã£o quando:
      * - Moderador/Admin; ou
-     * - Criador da solicitação (mesmo se já liberado).
-     * A atualização (PUT) continua restrita por ensureCanManage.
+     * - Criador da solicitaÃ§Ã£o (mesmo se jÃ¡ liberado).
+     * A atualizaÃ§Ã£o (PUT) continua restrita por ensureCanManage.
      */
     protected function ensureCanView(Game $game): void
     {
@@ -210,7 +210,7 @@ class SolicitationController extends Controller
                                         if (!is_string($pname) || $pname === '') continue;
                                         $tp = trim($pname);
                                         if ($tp !== '' && preg_match('/^\d+$/', $tp)) { continue; }
-                                        // De-para de plataformas (normalização RAWG)
+                                        // De-para de plataformas (normalizaÃ§Ã£o RAWG)
                                         $norm = mb_strtolower($tp);
                                         if ($norm === 'genesis') { $pname = 'Mega Drive'; }
                                         elseif ($norm === 'nes') { $pname = 'Nintendo 8bits'; }
@@ -254,7 +254,7 @@ class SolicitationController extends Controller
                 if ($__studioId === null) { $__q->whereNull('studio_id'); } else { $__q->where('studio_id', $__studioId); }
                 if ($__q->exists()) {
                     throw \Illuminate\Validation\ValidationException::withMessages([
-                        'name' => 'Já existe um jogo com este nome para o estúdio selecionado.',
+                        'name' => 'JÃ¡ existe um jogo com este nome para o estÃºdio selecionado.',
                     ]);
                 }
             }
@@ -277,7 +277,7 @@ class SolicitationController extends Controller
             } catch (\Illuminate\Database\QueryException $e) {
                 if ((int) ($e->getCode()) === 23000 || str_contains(strtolower($e->getMessage()), 'unique')) {
                     throw \Illuminate\Validation\ValidationException::withMessages([
-                        'name' => 'Já existe um jogo com este nome para o estúdio selecionado.',
+                        'name' => 'JÃ¡ existe um jogo com este nome para o estÃºdio selecionado.',
                     ]);
                 }
                 throw $e;
@@ -303,20 +303,16 @@ class SolicitationController extends Controller
                 ]);
             }
 
-            // Links externos nÃ£o sÃ£o permitidos em solicitaÃ§Ãµes
+            // Links externos nÃƒÂ£o sÃƒÂ£o permitidos em solicitaÃƒÂ§ÃƒÂµes
 
-            return redirect()->route('options.index')->with('success', 'SolicitaÃ§Ã£o criada com sucesso.');
+            return redirect()->route('options.index')->with('success', 'SolicitaÃƒÂ§ÃƒÂ£o criada com sucesso.');
         });
     }
 
     public function edit(Game $game)
     {
-        // Bloqueia a tela se o jogo não estiver em avaliação
-        if ($game->status !== 'avaliacao') {
-            return redirect()->route('options.index', ['tab' => 'solicitacoes'])
-                ->with('error', 'Este jogo não está em avaliação.');
-        }
-        // Libera acesso ao criador (usuário comum) para visualizar/abrir a tela
+        // Bloqueia a tela se o jogo nÃ£o estiver em avaliaÃ§Ã£o
+        // Permite visualizar a tela mesmo se já liberado, desde que o usuário tenha permissão
         $this->ensureCanView($game);
 
         $game->load(['studio:id,name', 'tags:id', 'platforms:id', 'images:id,game_id,url,sort_order']);
@@ -357,7 +353,7 @@ class SolicitationController extends Controller
             'no_enrich' => (bool) $request->boolean('no_enrich'),
         ]);
 
-        // Enriquecimento RAWG tambÃ©m na atualizaÃ§Ã£o
+        // Enriquecimento RAWG tambÃƒÂ©m na atualizaÃƒÂ§ÃƒÂ£o
         try {
             $hasMeta = isset($data['metacritic_metascore']) && $data['metacritic_metascore'] !== null && $data['metacritic_metascore'] !== '';
             if (!$hasMeta) {
@@ -462,7 +458,7 @@ class SolicitationController extends Controller
                                         if (!is_string($pname) || $pname === '') continue;
                                         $tp = trim($pname);
                                         if ($tp !== '' && preg_match('/^\d+$/', $tp)) { continue; }
-                                        // De-para de plataformas (normalização RAWG)
+                                        // De-para de plataformas (normalizaÃ§Ã£o RAWG)
                                         $norm = mb_strtolower($tp);
                                         if ($norm === 'genesis') { $pname = 'Mega Drive'; }
                                         elseif ($norm === 'nes') { $pname = 'Nintendo 8bits'; }
@@ -492,7 +488,7 @@ class SolicitationController extends Controller
         }
 
         return DB::transaction(function () use ($data, $game) {
-            // Guarda de duplicidade na atualização (studio_id + name, ignorando o próprio registro)
+            // Guarda de duplicidade na atualizaÃ§Ã£o (studio_id + name, ignorando o prÃ³prio registro)
             $__studioId = $data['studio_id'] ?? null;
             $__name = trim((string) ($data['name'] ?? ''));
             if ($__name !== '') {
@@ -501,7 +497,7 @@ class SolicitationController extends Controller
                 $__q->where('id', '!=', $game->id);
                 if ($__q->exists()) {
                     throw \Illuminate\Validation\ValidationException::withMessages([
-                        'name' => 'Já existe um jogo com este nome para o estúdio selecionado.',
+                        'name' => 'JÃ¡ existe um jogo com este nome para o estÃºdio selecionado.',
                     ]);
                 }
             }
@@ -537,9 +533,9 @@ class SolicitationController extends Controller
                 ]);
             }
 
-            // Links externos nÃ£o sÃ£o permitidos em solicitaÃ§Ãµes
+            // Links externos nÃƒÂ£o sÃƒÂ£o permitidos em solicitaÃƒÂ§ÃƒÂµes
 
-            return redirect()->route('options.index')->with('success', 'SolicitaÃ§Ã£o atualizada com sucesso.');
+            return redirect()->route('options.requests.edit', ['game' => $game->id])->with('success', 'Solicitação atualizada com sucesso.');
         });
     }
 
@@ -555,7 +551,7 @@ class SolicitationController extends Controller
             $game->delete();
         });
 
-        return redirect()->route('options.index')->with('success', 'SolicitaÃ§Ã£o removida.');
+        return redirect()->route('options.index')->with('success', 'SolicitaÃƒÂ§ÃƒÂ£o removida.');
     }
 
     public function release(Request $request, Game $game): RedirectResponse
@@ -566,7 +562,7 @@ class SolicitationController extends Controller
         }
 
         if ($game->status !== 'avaliacao') {
-            return redirect()->back()->with('error', 'Este jogo nÃ£o estÃ¡ em avaliaÃ§Ã£o.');
+            return redirect()->back()->with('error', 'Este jogo nÃƒÂ£o estÃƒÂ¡ em avaliaÃƒÂ§ÃƒÂ£o.');
         }
 
         DB::transaction(function () use ($game) {
@@ -576,12 +572,12 @@ class SolicitationController extends Controller
             ]);
         });
 
-        // Após liberar, voltar para /opcoes com a aba "Solicitações" ativa
-        return redirect()->route('options.index', ['tab' => 'solicitacoes'])->with('success', 'Jogo liberado com sucesso.');
+        // ApÃ³s liberar, voltar para /opcoes com a aba "SolicitaÃ§Ãµes" ativa
+        return redirect()->route('options.requests.edit', ['game' => $game->id])->with('success', 'Jogo liberado com sucesso.');
     }
 
     /**
-     * Captura informações via RAWG e retorna dados enriquecidos (sem persistir).
+     * Captura informaÃ§Ãµes via RAWG e retorna dados enriquecidos (sem persistir).
      */
     public function capture(Request $request): \Illuminate\Http\JsonResponse
     {

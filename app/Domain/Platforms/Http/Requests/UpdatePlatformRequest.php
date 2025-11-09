@@ -22,6 +22,7 @@ class UpdatePlatformRequest extends FormRequest
             'manufacturer' => ['nullable','string','max:150'],
             'release_year' => ['nullable','integer','min:1970','max:'.$currentYear],
             'description' => ['nullable','string','max:2000'],
+            'cover_url' => ['nullable','url','max:2048'],
         ];
     }
 }

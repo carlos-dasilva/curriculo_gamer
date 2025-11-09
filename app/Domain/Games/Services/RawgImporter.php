@@ -123,6 +123,9 @@ class RawgImporter
                 if (!$local && $pName !== '') {
                     try { $local = Platform::create(['name' => $pName, 'rawg_id' => $pRawgId]); }
                     catch (\Throwable $e) { $local = Platform::query()->where('name', $pName)->first(); }
+                } else if ($local && $pRawgId && empty($local->rawg_id)) {
+                    // Se encontramos por nome mas sem rawg_id, atualiza para manter o vínculo RAWG
+                    try { $local->update(['rawg_id' => $pRawgId]); } catch (\Throwable $e) { /* ignore if unique or DB error */ }
                 }
                 if ($local) {
                     $relDate = (string) (($p['released_at'] ?? '') ?: $released ?: '');
@@ -285,6 +288,9 @@ class RawgImporter
                 if (!$local && $pName !== '') {
                     try { $local = Platform::create(['name' => $pName, 'rawg_id' => $pRawgId]); }
                     catch (\Throwable $e) { $local = Platform::query()->where('name', $pName)->first(); }
+                } else if ($local && $pRawgId && empty($local->rawg_id)) {
+                    // Se encontrados por nome (ou já existentes) sem rawg_id, atualiza o vínculo RAWG
+                    try { $local->update(['rawg_id' => $pRawgId]); } catch (\Throwable $e) { /* ignore */ }
                 }
                 if ($local) {
                     $relDate = (string) (($p['released_at'] ?? '') ?: $released ?: '');

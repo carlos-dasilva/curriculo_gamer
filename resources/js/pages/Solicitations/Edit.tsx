@@ -103,9 +103,8 @@ export default function SolicitationEdit({ game, studios, platforms, tags }: Pro
     });
     put(`/opcoes/solicitacoes/${game.id}`, {
       data: { ...data, gallery_urls: gallery, platform_releases: platformReleases, no_enrich: true },
-      onSuccess: () => {
-        router.visit('/opcoes?tab=solicitacoes', { replace: true });
-      },
+      preserveScroll: true,
+      replace: true,
     });
   };
 
@@ -183,7 +182,8 @@ export default function SolicitationEdit({ game, studios, platforms, tags }: Pro
                 type="button"
                 onClick={() => {
                   router.put(`/opcoes/solicitacoes/${game.id}/liberar`, undefined, {
-                    onSuccess: () => router.visit('/opcoes?tab=solicitacoes', { replace: true }),
+                    preserveScroll: true,
+                    replace: true,
                   });
                 }}
                 className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-gray-900 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900 sm:w-auto"

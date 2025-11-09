@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 namespace App\Domain\Games\Http\Controllers;
 
@@ -40,8 +40,8 @@ class SolicitationController extends Controller
     /**
      * Permite visualizar/abrir a tela de ediÃ§Ã£o quando:
      * - Moderador/Admin; ou
-     * - Criador da solicitaÃ§Ã£o (mesmo se jÃ¡ liberado).
-     * A atualizaÃ§Ã£o (PUT) continua restrita por ensureCanManage.
+     * - Criador da solicitação (mesmo se jÃ¡ liberado).
+     * A atualização (PUT) continua restrita por ensureCanManage.
      */
     protected function ensureCanView(Game $game): void
     {
@@ -210,7 +210,7 @@ class SolicitationController extends Controller
                                         if (!is_string($pname) || $pname === '') continue;
                                         $tp = trim($pname);
                                         if ($tp !== '' && preg_match('/^\d+$/', $tp)) { continue; }
-                                        // De-para de plataformas (normalizaÃ§Ã£o RAWG)
+                                        // De-para de plataformas (normalização RAWG)
                                         $norm = mb_strtolower($tp);
                                         if ($norm === 'genesis') { $pname = 'Mega Drive'; }
                                         elseif ($norm === 'nes') { $pname = 'Nintendo 8bits'; }
@@ -254,7 +254,7 @@ class SolicitationController extends Controller
                 if ($__studioId === null) { $__q->whereNull('studio_id'); } else { $__q->where('studio_id', $__studioId); }
                 if ($__q->exists()) {
                     throw \Illuminate\Validation\ValidationException::withMessages([
-                        'name' => 'JÃ¡ existe um jogo com este nome para o estÃºdio selecionado.',
+                        'name' => 'JÃ¡ existe um jogo com este nome para o Estúdio selecionado.',
                     ]);
                 }
             }
@@ -277,7 +277,7 @@ class SolicitationController extends Controller
             } catch (\Illuminate\Database\QueryException $e) {
                 if ((int) ($e->getCode()) === 23000 || str_contains(strtolower($e->getMessage()), 'unique')) {
                     throw \Illuminate\Validation\ValidationException::withMessages([
-                        'name' => 'JÃ¡ existe um jogo com este nome para o estÃºdio selecionado.',
+                        'name' => 'JÃ¡ existe um jogo com este nome para o Estúdio selecionado.',
                     ]);
                 }
                 throw $e;
@@ -311,7 +311,7 @@ class SolicitationController extends Controller
 
     public function edit(Game $game)
     {
-        // Bloqueia a tela se o jogo nÃ£o estiver em avaliaÃ§Ã£o
+        // Bloqueia a tela se o jogo não estiver em avaliação
         // Permite visualizar a tela mesmo se já liberado, desde que o usuário tenha permissão
         $this->ensureCanView($game);
 
@@ -458,7 +458,7 @@ class SolicitationController extends Controller
                                         if (!is_string($pname) || $pname === '') continue;
                                         $tp = trim($pname);
                                         if ($tp !== '' && preg_match('/^\d+$/', $tp)) { continue; }
-                                        // De-para de plataformas (normalizaÃ§Ã£o RAWG)
+                                        // De-para de plataformas (normalização RAWG)
                                         $norm = mb_strtolower($tp);
                                         if ($norm === 'genesis') { $pname = 'Mega Drive'; }
                                         elseif ($norm === 'nes') { $pname = 'Nintendo 8bits'; }
@@ -488,7 +488,7 @@ class SolicitationController extends Controller
         }
 
         return DB::transaction(function () use ($data, $game) {
-            // Guarda de duplicidade na atualizaÃ§Ã£o (studio_id + name, ignorando o prÃ³prio registro)
+            // Guarda de duplicidade na atualização (studio_id + name, ignorando o prÃ³prio registro)
             $__studioId = $data['studio_id'] ?? null;
             $__name = trim((string) ($data['name'] ?? ''));
             if ($__name !== '') {
@@ -497,7 +497,7 @@ class SolicitationController extends Controller
                 $__q->where('id', '!=', $game->id);
                 if ($__q->exists()) {
                     throw \Illuminate\Validation\ValidationException::withMessages([
-                        'name' => 'JÃ¡ existe um jogo com este nome para o estÃºdio selecionado.',
+                        'name' => 'JÃ¡ existe um jogo com este nome para o Estúdio selecionado.',
                     ]);
                 }
             }
@@ -572,12 +572,12 @@ class SolicitationController extends Controller
             ]);
         });
 
-        // ApÃ³s liberar, voltar para /opcoes com a aba "SolicitaÃ§Ãµes" ativa
+        // ApÃ³s liberar, voltar para /opcoes com a aba "Solicitações" ativa
         return redirect()->route('options.requests.edit', ['game' => $game->id])->with('success', 'Jogo liberado com sucesso.');
     }
 
     /**
-     * Captura informaÃ§Ãµes via RAWG e retorna dados enriquecidos (sem persistir).
+     * Captura informações via RAWG e retorna dados enriquecidos (sem persistir).
      */
     public function capture(Request $request): \Illuminate\Http\JsonResponse
     {

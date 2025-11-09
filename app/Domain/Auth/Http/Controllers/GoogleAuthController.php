@@ -65,7 +65,7 @@ class GoogleAuthController extends Controller
                     // Gera senha randÃ´mica pois login serÃ¡ sempre via Google
                     'password' => Hash::make(Str::random(32)),
                     'email_verified_at' => now(),
-                    // Define role padrÃ£o na criaÃ§Ã£o
+                    // Define role padrÃ£o na criação
                     'role' => Role::CO_MUM->value,
                 ]
             );
@@ -75,7 +75,7 @@ class GoogleAuthController extends Controller
                 return redirect()->route('home')->with('error', 'Seu usuÃ¡rio estÃ¡ bloqueado. Entre em contato com o suporte.');
             }
 
-            // NÃ£o sobrescrever o nome customizado do usuÃ¡rio em re-logins.
+            // não sobrescrever o nome customizado do usuÃ¡rio em re-logins.
             // Apenas definir/ajustar no primeiro login ou se estiver vazio.
             if ($user->wasRecentlyCreated || empty(trim((string) $user->name))) {
                 $user->name = $name;
@@ -92,7 +92,7 @@ class GoogleAuthController extends Controller
 
             Auth::login($user, true);
 
-            // Redireciona para a URL pretendida (se existir), senÃ£o home
+            // Redireciona para a URL pretendida (se existir), senão home
             return redirect()->intended(route('home'))
                 ->with('success', 'Login realizado com sucesso.');
         } catch (\Throwable $e) {

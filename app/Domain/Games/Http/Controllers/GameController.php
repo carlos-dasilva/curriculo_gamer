@@ -337,7 +337,7 @@ class GameController extends Controller
             'no_enrich' => (bool) $request->boolean('no_enrich'),
         ]);
 
-        // Enriquecimento via RAWG na ediÃ§Ã£o: se metascore nÃ£o informado, tenta buscar
+        // Enriquecimento via RAWG na ediÃ§Ã£o: se metascore não informado, tenta buscar
         try {
             $hasMeta = isset($data['metacritic_metascore']) && $data['metacritic_metascore'] !== null && $data['metacritic_metascore'] !== '';
             if ($request->boolean('no_enrich')) { $hasMeta = true; }

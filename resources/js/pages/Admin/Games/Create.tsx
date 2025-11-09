@@ -163,7 +163,7 @@ export default function GamesCreate({ studios, platforms, tags, flash }: Props) 
     });
 
     const payload: any = { ...data, gallery_urls: gallery, external_links: links, platform_releases: platformReleases, no_enrich: true };
-    // Remover campos agregados (calculados) na criaÃ§Ã£o
+    // Remover campos agregados (calculados) na criação
     delete payload.overall_score;
     delete payload.difficulty;
     delete payload.gameplay_hours;
@@ -421,7 +421,7 @@ export default function GamesCreate({ studios, platforms, tags, flash }: Props) 
             {errors.platform_ids && <p className="mt-1 text-sm text-red-600">{errors.platform_ids}</p>}
           </section>
 
-          {/* AvaliaÃ§Ã£o / CaracterÃ­sticas */}
+          {/* Avaliação / CaracterÃ­sticas */}
           <section>
             <h2 className="text-lg font-semibold text-gray-900">avaliação e características</h2>
             <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
@@ -520,7 +520,7 @@ export default function GamesCreate({ studios, platforms, tags, flash }: Props) 
             </div>
           </section>
 
-          {/* AÃ§Ãµes */}
+          {/* Ações */}
           <div className="flex items-center gap-3">
             <button type="submit" disabled={processing} className="inline-flex items-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900 disabled:cursor-not-allowed disabled:opacity-60">
               {processing ? 'Salvandoâ€¦' : 'Salvar jogo'}

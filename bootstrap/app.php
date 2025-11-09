@@ -23,7 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\EnsureRole::class,
         ]);
 
-        // Exigir autenticaÃ§Ã£o por padrÃ£o em todas as rotas web
+        // Exigir autenticação por padrÃ£o em todas as rotas web
         $middleware->appendToGroup('web', \App\Http\Middleware\RequireAuthentication::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

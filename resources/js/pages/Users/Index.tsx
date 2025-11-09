@@ -118,7 +118,7 @@ export default function UsersIndex({ users, filters, auth, flash, roles }: Props
           </table>
         </div>
 
-        {/* PaginaÃ§Ã£o */}
+        {/* Paginação */}
         <Pagination links={users.links} />
       </AdminLayout>
     </div>

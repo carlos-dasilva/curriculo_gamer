@@ -48,8 +48,8 @@ export default function StudiosIndex({ studios, filters, flash }: Props) {
 
   return (
     <div>
-      <Head title="EstÃºdios" />
-      <AdminLayout title="EstÃºdios">
+      <Head title="Estúdios" />
+      <AdminLayout title="Estúdios">
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end">
           <form onSubmit={applyFilters} className="flex flex-col gap-3 sm:flex-row sm:items-end">
             <div className="w-full sm:max-w-xs">
@@ -78,7 +78,7 @@ export default function StudiosIndex({ studios, filters, flash }: Props) {
                 <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Nome</th>
                 <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Website</th>
                 <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">PaÃ­s</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">FundaÃ§Ã£o</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Fundação</th>
                 <th className="px-4 py-3 w-28 text-right" />
               </tr>
             </thead>
@@ -123,8 +123,8 @@ export default function StudiosIndex({ studios, filters, flash }: Props) {
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/60" aria-hidden="true" onClick={() => (!deleting ? setConfirmDelete(null) : null)} />
             <div role="dialog" aria-modal="true" aria-labelledby="confirm-title" className="relative z-10 w-full max-w-md rounded-lg bg-white p-6 shadow-2xl ring-1 ring-gray-200">
-              <h4 id="confirm-title" className="text-base font-semibold text-gray-900">Remover estÃºdio</h4>
-              <p className="mt-2 text-sm text-gray-700">Tem certeza que deseja remover {confirmDelete.name ? (<strong>{confirmDelete.name}</strong>) : 'este estÃºdio'}?</p>
+              <h4 id="confirm-title" className="text-base font-semibold text-gray-900">Remover Estúdio</h4>
+              <p className="mt-2 text-sm text-gray-700">Tem certeza que deseja remover {confirmDelete.name ? (<strong>{confirmDelete.name}</strong>) : 'este Estúdio'}?</p>
               <div className="mt-6 flex items-center justify-end gap-3">
                 <button type="button" onClick={() => setConfirmDelete(null)} disabled={deleting} className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50">Cancelar</button>
                 <button type="button" onClick={() => remove(confirmDelete.id)} disabled={deleting} className="inline-flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 disabled:cursor-not-allowed disabled:opacity-50">{deleting ? 'Removendoâ€¦' : 'Remover'}</button>

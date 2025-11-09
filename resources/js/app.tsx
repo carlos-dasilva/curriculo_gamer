@@ -16,7 +16,7 @@ createInertiaApp({
     root.render(<App {...props} />);
   },
   progress: {
-    // MantÃ©m UX fluida no carregamento
+    // Mantém UX fluida no carregamento
     color: '#0ea5e9',
   },
 });

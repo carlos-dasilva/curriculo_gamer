@@ -149,7 +149,7 @@ export default function SolicitationEdit({ game, studios, platforms, tags }: Pro
     setData('gallery_urls', copy);
   };
 
-  // Links externos removidos do cadastro de solicitaÃ§Ãµes
+  // Links externos removidos do cadastro de solicitações
 
   return (
     <div className="min-h-screen bg-gray-50">

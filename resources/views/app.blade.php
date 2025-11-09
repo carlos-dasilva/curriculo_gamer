@@ -6,7 +6,7 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <link rel="icon" type="image/png" href="/img/favicon.png" />
         <link rel="shortcut icon" href="/favicon.ico" />
-        <title inertia>{{ config('app.name', 'AplicaÃ§Ã£o') }}</title>
+        <title inertia>{{ config('app.name', 'Aplicação') }}</title>
         @inertiaHead
         @env('testing')
             

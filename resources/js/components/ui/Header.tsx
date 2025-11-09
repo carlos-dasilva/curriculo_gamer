@@ -34,7 +34,7 @@ export default function Header({ auth }: Props) {
   };
 
   const handleNameError = () => {
-    // Fallback SVG para nome da marca caso nÃ£o exista nome.png
+    // Fallback SVG para nome da marca caso não exista nome.png
     const svg = encodeURIComponent(
       `<svg xmlns='http://www.w3.org/2000/svg' width='200' height='28' viewBox='0 0 200 28'>
          <rect width='200' height='28' rx='4' fill='transparent'/>

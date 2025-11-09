@@ -357,7 +357,7 @@ export default function SolicitationCreate({ studios, platforms, tags }: Props) 
             </div>
           </section>
 
-          {/* SeÃ§Ã£o de links externos removida em solicitaÃ§Ãµes */}
+          {/* Seção de links externos removida em solicitações */}
 
           <div className="flex items-center gap-3">
             <button type="submit" disabled={processing} className="inline-flex items-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 cursor-pointer disabled:cursor-not-allowed disabled:opacity-60">{processing ? 'Salvando…' : 'Criar solicitação'}</button>

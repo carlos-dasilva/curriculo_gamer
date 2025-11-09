@@ -205,8 +205,8 @@ export default function GamesEdit({ game, studios, platforms, tags, flash }: Pro
           <Link
             href={`/jogos/${game.id}`}
             className="inline-flex items-center gap-2 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-200 hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
-            aria-label="Abrir visualizaÃ§Ã£o pÃºblica"
-            title="Abrir visualizaÃ§Ã£o pÃºblica"
+            aria-label="Abrir visualização pÃºblica"
+            title="Abrir visualização pÃºblica"
           >
             <EyeIcon className="h-4 w-4" />
             <span>Visualizar</span>
@@ -302,7 +302,7 @@ export default function GamesEdit({ game, studios, platforms, tags, flash }: Pro
             </div>
           </section>
 
-          {/* Marcadores e Plataformas (alinhado ao layout de solicitaÃ§Ãµes) */}
+          {/* Marcadores e Plataformas (alinhado ao layout de solicitações) */}
           <section>
             <h2 className="text-lg font-semibold text-gray-900">Marcadores e Plataformas</h2>
             <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -357,7 +357,7 @@ export default function GamesEdit({ game, studios, platforms, tags, flash }: Pro
             </div>
           </section>
 
-          {/* AvaliaÃ§Ã£o / CaracterÃ­sticas */}
+          {/* Avaliação / CaracterÃ­sticas */}
           <section>
             <h2 className="text-lg font-semibold text-gray-900">Avaliação e características</h2>
             <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
@@ -456,7 +456,7 @@ export default function GamesEdit({ game, studios, platforms, tags, flash }: Pro
 
                     {/* Campo \u0027Horas para Finalizar\u0027 removido daqui (mantido após Classificação indicativa) */}
 
-          {/* AÃ§Ãµes */}
+          {/* Ações */}
           <div className="flex items-center gap-3">
             <button type="submit" disabled={processing} className="inline-flex items-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900 disabled:cursor-not-allowed disabled:opacity-60">
               {processing ? 'Salvando…' : 'Salvar alterações'}

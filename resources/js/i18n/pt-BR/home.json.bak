@@ -7,20 +7,20 @@
     "sair": "Sair"
   },
   "hero": {
-    "titulo": "Bem-vindo ao CurrÃ­culo Gamer",
-    "subtitulo": "Sua plataforma para jogos, conquistas e CurrÃ­culo Gamer.",
-    "cta": "Acessar meu CurrÃ­culo",
+    "titulo": "Bem-vindo ao currí­culo Gamer",
+    "subtitulo": "Sua plataforma para jogos, conquistas e currí­culo Gamer.",
+    "cta": "Acessar meu currí­culo",
     "altImagem": "Banner ilustrativo"
   },
   "cards": {
-    "buscaPlaceholder": "Buscar por nome, estÃºdio, plataforma ou marcadores...",
+    "buscaPlaceholder": "Buscar por nome, Estúdio, plataforma ou marcadores...",
     "categoria": "Categoria",
     "botaoAcessar": "Acessar",
     "semResultados": "Nenhum resultado encontrado."
   },
   "footer": {
-    "direitos": "Â© 2025 CurrÃ­culo Gamer â€” Todos os direitos reservados.",
-    "sobreTitulo": "Sobre o CurrÃ­culo Gamer",
+    "direitos": "Â© 2025 currí­culo Gamer â€” Todos os direitos reservados.",
+    "sobreTitulo": "Sobre o currí­culo Gamer",
     "sobreTexto": "Seu hub gamer para jogos, conquistas e projetos â€” acesso rÃ¡pido e organizado.",
     "contatoTitulo": "Contato",
     "email": "E-mail",

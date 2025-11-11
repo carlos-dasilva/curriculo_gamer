@@ -56,9 +56,10 @@ export default function Hero({ onCtaClick }: Props) {
                 const sep = base.indexOf('?') >= 0 ? '&' : '?';
                 return `${base}${sep}intended=${encodeURIComponent('/meu-curriculo')}`;
               })()}
-              className="rounded-md bg-white px-5 py-3 text-sm font-semibold text-brand-600 shadow-sm ring-1 ring-inset ring-brand-600 hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
+              className="inline-flex items-center gap-2 rounded-md border border-white/30 bg-white/5 px-5 py-3 text-sm font-medium text-white shadow-sm hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
-              {strings.hero.cta}
+              <CurriculumIcon className="h-5 w-5" />
+              <span>Meu Currículo</span>
             </a>
             {fbUrl && (
               <a
@@ -91,6 +92,14 @@ function FacebookIcon({ className }: { className?: string }) {
       focusable="false"
     >
       <path d="M22 12.06C22 6.5 17.52 2 11.94 2 6.37 2 2 6.5 2 12.06 2 17.1 5.66 21.24 10.44 22v-7.03H7.9v-2.91h2.54V9.41c0-2.5 1.49-3.89 3.77-3.89 1.09 0 2.23.2 2.23.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.55v1.87h2.78l-.44 2.91h-2.34V22C18.34 21.24 22 17.1 22 12.06z" />
+    </svg>
+  );
+}
+
+function CurriculumIcon({ className }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+      <path d="M6.75 3A2.25 2.25 0 004.5 5.25v13.5A2.25 2.25 0 006.75 21h10.5A2.25 2.25 0 0019.5 18.75V8.81a2.25 2.25 0 00-.66-1.59l-3.06-3.06A2.25 2.25 0 0013.19 3H6.75zM13.5 4.81c.2 0 .39.08.53.22l3.06 3.06c.14.14.22.33.22.53H13.5V4.81zM8.25 12a.75.75 0 000 1.5h7.5a.75.75 0 000-1.5h-7.5zM8.25 15.75a.75.75 0 000 1.5h7.5a.75.75 0 000-1.5h-7.5zM8.25 8.25a.75.75 0 000 1.5h3a.75.75 0 000-1.5h-3z" />
     </svg>
   );
 }

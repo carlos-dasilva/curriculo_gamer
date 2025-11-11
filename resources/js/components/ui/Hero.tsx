@@ -12,6 +12,10 @@ export default function Hero({ onCtaClick }: Props) {
     isAuthenticated: boolean;
     loginUrl?: string;
   };
+  const site = (page.props as any).site as {
+    socials?: { facebook?: string | null };
+  } | undefined;
+  const fbUrl = (site?.socials?.facebook || '').trim();
   /*
    * Imagens públicas: /img/banner.png (mobile) e /img/bannerWide.png (md+)
    * Usamos <picture> para garantir troca por breakpoint, com overlay por cima.
@@ -56,9 +60,37 @@ export default function Hero({ onCtaClick }: Props) {
             >
               {strings.hero.cta}
             </a>
+            {fbUrl && (
+              <a
+                href={fbUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Siga no Facebook"
+                title="Siga no Facebook"
+                className="inline-flex items-center gap-2 rounded-md border border-white/30 bg-white/5 px-5 py-3 text-sm font-medium text-white shadow-sm hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              >
+                <FacebookIcon className="h-5 w-5" />
+                <span>Siga no Facebook</span>
+              </a>
+            )}
           </div>
         </div>
       </div>
     </section>
+  );
+}
+
+function FacebookIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className={className}
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M22 12.06C22 6.5 17.52 2 11.94 2 6.37 2 2 6.5 2 12.06 2 17.1 5.66 21.24 10.44 22v-7.03H7.9v-2.91h2.54V9.41c0-2.5 1.49-3.89 3.77-3.89 1.09 0 2.23.2 2.23.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.55v1.87h2.78l-.44 2.91h-2.34V22C18.34 21.24 22 17.1 22 12.06z" />
+    </svg>
   );
 }

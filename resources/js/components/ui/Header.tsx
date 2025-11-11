@@ -130,6 +130,25 @@ export default function Header({ auth }: Props) {
 
         {/* Ações alinhadas à direita (desktop) */}
         <div className="hidden md:flex items-center gap-4 ml-auto">
+          {/* Home */}
+          <a
+            href="/"
+            className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
+          >
+            <HomeIcon className="h-4 w-4" />
+            <span>Home</span>
+          </a>
+
+          {/* Meu Currículo (somente autenticado) */}
+          {auth.isAuthenticated && (
+            <a
+              href="/meu-curriculo"
+              className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
+            >
+              <CurriculumIcon className="h-4 w-4" />
+              <span>Meu Currículo</span>
+            </a>
+          )}
           {auth?.abilities?.manageUsers && (
             <a
               href="/admin/dashboard"
@@ -228,16 +247,26 @@ export default function Header({ auth }: Props) {
         </div>
       </div>
 
-      {/* Painel do menu mobile */}
-      {auth.isAuthenticated && menuOpen && (
-        <div className="absolute right-4 top-16 z-50 w-56 rounded-md border border-gray-200 bg-white p-2 shadow-lg md:hidden" role="menu" aria-label="Menu">
-          <div className="flex flex-col gap-1">
-            {auth?.abilities?.manageUsers && (
-              <a href="/admin/dashboard" className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm text-gray-800 hover:bg-gray-50" onClick={() => setMenuOpen(false)}>
-                <DashboardIcon className="h-4 w-4" />
-                <span>Dashboard</span>
+        {/* Painel do menu mobile */}
+        {auth.isAuthenticated && menuOpen && (
+          <div className="absolute right-4 top-16 z-50 w-56 rounded-md border border-gray-200 bg-white p-2 shadow-lg md:hidden" role="menu" aria-label="Menu">
+            <div className="flex flex-col gap-1">
+              {/* Home */}
+              <a href="/" className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm text-gray-800 hover:bg-gray-50" onClick={() => setMenuOpen(false)}>
+                <HomeIcon className="h-4 w-4" />
+                <span>Home</span>
               </a>
-            )}
+              {/* Meu Currículo */}
+              <a href="/meu-curriculo" className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm text-gray-800 hover:bg-gray-50" onClick={() => setMenuOpen(false)}>
+                <CurriculumIcon className="h-4 w-4" />
+                <span>Meu Currículo</span>
+              </a>
+              {auth?.abilities?.manageUsers && (
+                <a href="/admin/dashboard" className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm text-gray-800 hover:bg-gray-50" onClick={() => setMenuOpen(false)}>
+                  <DashboardIcon className="h-4 w-4" />
+                  <span>Dashboard</span>
+                </a>
+              )}
             {!auth.isAuthenticated ? (
               <a
                 href={(function(){
@@ -330,3 +359,18 @@ function UserIcon({ className }: { className?: string }) {
   );
 }
 
+function HomeIcon({ className }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+      <path d="M11.47 2.72a.75.75 0 011.06 0l8.25 8.25a.75.75 0 11-1.06 1.06l-.97-.97v7.69A2.25 2.25 0 0116.5 21H7.5A2.25 2.25 0 015.25 18.75v-7.69l-.97.97a.75.75 0 01-1.06-1.06l8.25-8.25zM12 4.81L6.75 10.06v8.69c0 .414.336.75.75.75h9a.75.75 0 00.75-.75v-8.69L12 4.81z" />
+    </svg>
+  );
+}
+
+function CurriculumIcon({ className }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+      <path d="M6.75 3A2.25 2.25 0 004.5 5.25v13.5A2.25 2.25 0 006.75 21h10.5A2.25 2.25 0 0019.5 18.75V8.81a2.25 2.25 0 00-.66-1.59l-3.06-3.06A2.25 2.25 0 0013.19 3H6.75zM13.5 4.81c.2 0 .39.08.53.22l3.06 3.06c.14.14.22.33.22.53H13.5V4.81zM8.25 12a.75.75 0 000 1.5h7.5a.75.75 0 000-1.5h-7.5zM8.25 15.75a.75.75 0 000 1.5h7.5a.75.75 0 000-1.5h-7.5zM8.25 8.25a.75.75 0 000 1.5h3a.75.75 0 000-1.5h-3z" />
+    </svg>
+  );
+}

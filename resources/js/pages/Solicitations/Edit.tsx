@@ -10,6 +10,7 @@ type Tag = { id: number; name: string; slug: string };
 
 type GameDto = {
   id: number;
+  rawg_id?: number | null;
   name: string;
   studio_id: number | null;
   cover_url: string | null;
@@ -37,6 +38,7 @@ export default function SolicitationEdit({ game, studios, platforms, tags }: Pro
   const auth = (page.props as any).auth;
   const { data, setData, put, processing, errors } = useForm<any>({
     name: game.name,
+    rawg_id: (game as any).rawg_id ?? '',
     studio_id: game.studio_id ?? '',
     tag_ids: [...game.tag_ids],
     platform_ids: [...game.platform_ids],
@@ -50,8 +52,13 @@ export default function SolicitationEdit({ game, studios, platforms, tags }: Pro
     description: game.description ?? '',
   });
   const [capturing, setCapturing] = React.useState(false);
+  const [capturedFromRawg, setCapturedFromRawg] = React.useState(false);
   const applyCaptured = (d: any) => {
     if (!d || typeof d !== 'object') return;
+    if ('rawg_id' in d && !(data as any).rawg_id) {
+      const rawgId = Number(d.rawg_id);
+      if (Number.isFinite(rawgId) && rawgId > 0) setData('rawg_id', rawgId);
+    }
     if ('cover_url' in d && !data.cover_url) setData('cover_url', typeof d.cover_url === 'string' ? d.cover_url : '');
     if ('age_rating' in d && !(data as any).age_rating) setData('age_rating', typeof d.age_rating === 'string' ? d.age_rating : '');
     if ('description' in d && !(data as any).description) setData('description', typeof d.description === 'string' ? d.description : '');
@@ -88,7 +95,10 @@ export default function SolicitationEdit({ game, studios, platforms, tags }: Pro
       // @ts-ignore
       const res = await window.axios.post('/opcoes/solicitacoes/capturar', { ...data });
       const filled = res?.data?.data;
-      if (filled) applyCaptured(filled);
+      if (filled) {
+        applyCaptured(filled);
+        setCapturedFromRawg(true);
+      }
     } catch {}
     finally { setCapturing(false); }
   };
@@ -102,7 +112,7 @@ export default function SolicitationEdit({ game, studios, platforms, tags }: Pro
       if (v) platformReleases[id] = v;
     });
     put(`/opcoes/solicitacoes/${game.id}`, {
-      data: { ...data, gallery_urls: gallery, platform_releases: platformReleases, no_enrich: true },
+      data: { ...data, gallery_urls: gallery, platform_releases: platformReleases, no_enrich: true, from_capture: capturedFromRawg },
       preserveScroll: true,
       replace: true,
     });

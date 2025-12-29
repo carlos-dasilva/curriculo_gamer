@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Http\RedirectResponse;
 use App\Domain\Games\Http\Requests\StoreGameRequest;
 use App\Domain\Games\Services\RawgImporter;
+use App\Domain\Games\Services\N8nWebhookNotifier;
 
 class GameController extends Controller
 {
@@ -150,6 +151,9 @@ class GameController extends Controller
                 }
                 if ($resp->ok() && !empty($resp['results'])) {
                     $first = $resp['results'][0] ?? [];
+                    if (empty($data['rawg_id'] ?? null) && !empty($first['id'])) {
+                        $data['rawg_id'] = (int) $first['id'];
+                    }
                     // Metascore e user score: só preencher se estiver vazio
                     if ((!isset($data['metacritic_metascore']) || $data['metacritic_metascore'] === null || $data['metacritic_metascore'] === '') && isset($first['metacritic']) && $first['metacritic'] !== null) {
                         $data['metacritic_metascore'] = (int) $first['metacritic'];
@@ -336,6 +340,7 @@ class GameController extends Controller
             'name' => $data['name'] ?? $game->name,
             'no_enrich' => (bool) $request->boolean('no_enrich'),
         ]);
+        $notifyN8n = $request->boolean('from_capture');
 
         // Enriquecimento via RAWG na edição: se metascore não informado, tenta buscar
         try {
@@ -508,7 +513,7 @@ class GameController extends Controller
             // ignora enriquecimento em caso de falha
         }
 
-        return DB::transaction(function () use ($data, $game) {
+        $redirect = DB::transaction(function () use ($data, $game) {
             $newStatus = $data['status'] ?? $game->status;
             $releasedBy = $game->released_by;
             if ($game->status !== 'liberado' && $newStatus === 'liberado') {
@@ -568,6 +573,13 @@ class GameController extends Controller
 
             return redirect()->route('admin.games.edit', $game)->with('success', 'Jogo atualizado com sucesso.');
         });
+
+        if ($notifyN8n) {
+            $game->refresh();
+            app(N8nWebhookNotifier::class)->notify($game);
+        }
+
+        return $redirect;
     }
 
     public function destroy(Game $game): RedirectResponse

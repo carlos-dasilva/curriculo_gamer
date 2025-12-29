@@ -46,6 +46,37 @@ paths:
           $ref: '#/components/responses/TooManyRequests'
         '503':
           $ref: '#/components/responses/ServiceUnavailable'
+
+  /api/sync/ping:
+    get:
+      tags: [Sync]
+      summary: Ping sync API
+      description: Validates the sync token and returns a 200 response.
+      security:
+        - bearerAuth: []
+        - syncTokenHeader: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  status:
+                    type: string
+                required: [status]
+              examples:
+                ok:
+                  value:
+                    status: ok
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
   /api/sync/games/{game}:
     post:
       tags: [Sync]

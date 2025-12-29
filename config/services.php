@@ -47,4 +47,9 @@ return [
         'token' => env('SYNC_API_TOKEN'),
     ],
 
+    'n8n' => [
+        'webhook_url' => env('N8N_WEBHOOK_URL'),
+        'api_key' => env('N8N_API_KEY'),
+    ],
+
 ];

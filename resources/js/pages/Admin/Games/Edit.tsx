@@ -66,8 +66,13 @@ export default function GamesEdit({ game, studios, platforms, tags, flash }: Pro
   });
 
   const [capturing, setCapturing] = React.useState(false);
+  const [capturedFromRawg, setCapturedFromRawg] = React.useState(false);
   const applyCaptured = (d: any) => {
     if (!d || typeof d !== 'object') return;
+    if ('rawg_id' in d && !(data as any).rawg_id) {
+      const rawgId = Number(d.rawg_id);
+      if (Number.isFinite(rawgId) && rawgId > 0) setData('rawg_id', rawgId);
+    }
     if ('cover_url' in d && !data.cover_url) setData('cover_url', typeof d.cover_url === 'string' ? d.cover_url : '');
     if ('age_rating' in d && !(data as any).age_rating) setData('age_rating', typeof d.age_rating === 'string' ? d.age_rating : '');
     if ('description' in d && !(data as any).description) setData('description', typeof d.description === 'string' ? d.description : '');
@@ -115,7 +120,10 @@ export default function GamesEdit({ game, studios, platforms, tags, flash }: Pro
       // @ts-ignore
       const res = await window.axios.post('/admin/jogos/capturar', { ...data });
       const filled = res?.data?.data;
-      if (filled) applyCaptured(filled);
+      if (filled) {
+        applyCaptured(filled);
+        setCapturedFromRawg(true);
+      }
     } catch {}
     finally { setCapturing(false); }
   };
@@ -129,7 +137,7 @@ export default function GamesEdit({ game, studios, platforms, tags, flash }: Pro
       const v = data.platform_releases?.[id];
       if (v) platformReleases[id] = v;
     });
-    put(`/admin/jogos/${game.id}`, { preserveScroll: true, data: { ...data, gallery_urls: gallery, external_links: links, platform_releases: platformReleases, no_enrich: true } });
+    put(`/admin/jogos/${game.id}`, { preserveScroll: true, data: { ...data, gallery_urls: gallery, external_links: links, platform_releases: platformReleases, no_enrich: true, from_capture: capturedFromRawg } });
   };
 
   // Combos de seleção com prevenção de duplicatas

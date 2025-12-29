@@ -16,6 +16,7 @@ class UpdateSolicitationRequest extends FormRequest
     {
         return [
             'name' => ['required','string','max:255'],
+            'rawg_id' => ['nullable','integer','min:1'],
             'studio_id' => ['nullable','integer', Rule::exists('studios','id')],
             'cover_url' => ['nullable','url','max:2048'],
             'age_rating' => ['nullable','string','max:50'],
@@ -43,6 +44,8 @@ class UpdateSolicitationRequest extends FormRequest
         // Normalize studio_id
         $studio = $this->input('studio_id');
         $studioId = ($studio === '' || $studio === null) ? null : (int) $studio;
+        $rawg = $this->input('rawg_id');
+        $rawgId = ($rawg === '' || $rawg === null) ? null : (int) $rawg;
         $gallery = collect((array) $this->input('gallery_urls', []))
             ->map(fn($u) => is_string($u) ? trim($u) : ($u ?? ''))
             ->filter(fn($u) => $u !== '')
@@ -50,6 +53,7 @@ class UpdateSolicitationRequest extends FormRequest
             ->all();
 
         $this->merge([
+            'rawg_id' => $rawgId,
             'studio_id' => $studioId,
             'ptbr_subtitled' => filter_var($this->ptbr_subtitled, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false,
             'ptbr_dubbed' => filter_var($this->ptbr_dubbed, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false,

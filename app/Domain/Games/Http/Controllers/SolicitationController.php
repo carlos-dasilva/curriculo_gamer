@@ -17,6 +17,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use App\Domain\Games\Http\Requests\StoreSolicitationRequest;
 use App\Domain\Games\Http\Requests\UpdateSolicitationRequest;
+use App\Domain\Games\Services\N8nWebhookNotifier;
 
 class SolicitationController extends Controller
 {
@@ -260,19 +261,20 @@ class SolicitationController extends Controller
             }
             try {
                 $game = Game::create([
-                'studio_id' => $data['studio_id'] ?? null,
-                'name' => $data['name'],
-                'cover_url' => $data['cover_url'] ?? null,
-                'status' => 'avaliacao',
-                'released_by' => null,
-                'created_by' => auth()->id(),
-                'age_rating' => $data['age_rating'] ?? null,
-                'description' => $data['description'] ?? null,
-                'metacritic_metascore' => $data['metacritic_metascore'] ?? null,
-                'metacritic_user_score' => $data['metacritic_user_score'] ?? null,
-                'hours_to_finish' => $data['hours_to_finish'] ?? null,
-                'ptbr_subtitled' => (bool) ($data['ptbr_subtitled'] ?? false),
-                'ptbr_dubbed' => (bool) ($data['ptbr_dubbed'] ?? false),
+                    'rawg_id' => $data['rawg_id'] ?? null,
+                    'studio_id' => $data['studio_id'] ?? null,
+                    'name' => $data['name'],
+                    'cover_url' => $data['cover_url'] ?? null,
+                    'status' => 'avaliacao',
+                    'released_by' => null,
+                    'created_by' => auth()->id(),
+                    'age_rating' => $data['age_rating'] ?? null,
+                    'description' => $data['description'] ?? null,
+                    'metacritic_metascore' => $data['metacritic_metascore'] ?? null,
+                    'metacritic_user_score' => $data['metacritic_user_score'] ?? null,
+                    'hours_to_finish' => $data['hours_to_finish'] ?? null,
+                    'ptbr_subtitled' => (bool) ($data['ptbr_subtitled'] ?? false),
+                    'ptbr_dubbed' => (bool) ($data['ptbr_dubbed'] ?? false),
                 ]);
             } catch (\Illuminate\Database\QueryException $e) {
                 if ((int) ($e->getCode()) === 23000 || str_contains(strtolower($e->getMessage()), 'unique')) {
@@ -320,6 +322,7 @@ class SolicitationController extends Controller
         return Inertia::render('Solicitations/Edit', [
             'game' => [
                 'id' => $game->id,
+                'rawg_id' => $game->rawg_id,
                 'name' => $game->name,
                 'studio_id' => $game->studio_id,
                 'cover_url' => $game->cover_url,
@@ -352,6 +355,7 @@ class SolicitationController extends Controller
             'name' => $data['name'] ?? $game->name,
             'no_enrich' => (bool) $request->boolean('no_enrich'),
         ]);
+        $notifyN8n = $request->boolean('from_capture');
 
         // Enriquecimento RAWG também na atualização
         try {
@@ -487,7 +491,7 @@ class SolicitationController extends Controller
             // ignora enriquecimento em caso de falha
         }
 
-        return DB::transaction(function () use ($data, $game) {
+        $redirect = DB::transaction(function () use ($data, $game) {
             // Guarda de duplicidade na atualização (studio_id + name, ignorando o próprio registro)
             $__studioId = $data['studio_id'] ?? null;
             $__name = trim((string) ($data['name'] ?? ''));
@@ -502,6 +506,7 @@ class SolicitationController extends Controller
                 }
             }
             $game->update([
+                'rawg_id' => $data['rawg_id'] ?? $game->rawg_id,
                 'studio_id' => $data['studio_id'] ?? null,
                 'name' => $data['name'],
                 'cover_url' => $data['cover_url'] ?? null,
@@ -537,6 +542,13 @@ class SolicitationController extends Controller
 
             return redirect()->route('options.requests.edit', ['game' => $game->id])->with('success', 'Solicitação atualizada com sucesso.');
         });
+
+        if ($notifyN8n) {
+            $game->refresh();
+            app(N8nWebhookNotifier::class)->notify($game);
+        }
+
+        return $redirect;
     }
 
     public function destroy(Request $request, Game $game): RedirectResponse

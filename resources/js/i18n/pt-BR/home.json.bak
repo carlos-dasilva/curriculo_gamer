@@ -1,15 +1,15 @@
 ﻿{
   "header": {
-    "inicio": "InÃ­cio",
+    "inicio": "Início",
     "clientes": "Clientes",
     "contato": "Contato",
     "entrarGoogle": "Entrar com Google",
     "sair": "Sair"
   },
   "hero": {
-    "titulo": "Bem-vindo ao currí­culo Gamer",
-    "subtitulo": "Sua plataforma para jogos, conquistas e currí­culo Gamer.",
-    "cta": "Acessar meu currí­culo",
+    "titulo": "Bem-vindo ao currículo Gamer",
+    "subtitulo": "Sua plataforma para jogos, conquistas e currículo Gamer.",
+    "cta": "Acessar meu currículo",
     "altImagem": "Banner ilustrativo"
   },
   "cards": {
@@ -19,15 +19,15 @@
     "semResultados": "Nenhum resultado encontrado."
   },
   "footer": {
-    "direitos": "Â© 2025 currí­culo Gamer â€” Todos os direitos reservados.",
-    "sobreTitulo": "Sobre o currí­culo Gamer",
-    "sobreTexto": "Seu hub gamer para jogos, conquistas e projetos â€” acesso rÃ¡pido e organizado.",
+    "direitos": "© 2025 currículo Gamer — Todos os direitos reservados.",
+    "sobreTitulo": "Sobre o currículo Gamer",
+    "sobreTexto": "Seu hub gamer para jogos, conquistas e projetos — acesso rápido e organizado.",
     "contatoTitulo": "Contato",
     "email": "E-mail",
     "telefone": "Telefone",
-    "endereco": "EndereÃ§o",
-    "linksTitulo": "Links Ãºteis",
-    "politicaPrivacidade": "PolÃ­tica de Privacidade",
+    "endereco": "Endereço",
+    "linksTitulo": "Links úteis",
+    "politicaPrivacidade": "Política de Privacidade",
     "termosUso": "Termos de Uso",
     "sigaNos": "Acompanhe",
     "redesSociais": "Redes sociais"

@@ -12,7 +12,7 @@ use App\Models\User;
 class CurriculumController extends Controller
 {
     /**
-     * Exibe a pÃƒÂ¡gina "Meu CurrÃƒÂ­culo" com resumo por status e por plataforma.
+     * Exibe a página "Meu Currículo" com resumo por status e por plataforma.
      */
     public function index(Request $request)
     {
@@ -33,7 +33,7 @@ class CurriculumController extends Controller
             $mode = 'all';
         }
 
-        // Resumo por jogo com precedÃƒÂªncia: 100% > Finalizei > Joguei > Quero Jogar
+        // Resumo por jogo com precedência: 100% > Finalizei > Joguei > Quero Jogar
         $rankCase = "CASE ugps.status WHEN 'quero_jogar' THEN 1 WHEN 'joguei' THEN 2 WHEN 'finalizei' THEN 3 WHEN 'cem_por_cento' THEN 4 END";
         $perGame = DB::table('user_game_platform_statuses as ugps')
             ->join('games', 'games.id', '=', 'ugps.game_id')
@@ -87,7 +87,7 @@ class CurriculumController extends Controller
         }
 
         $byPlatform = array_values($byPlatformMap);
-        // OrdenaÃƒÂ§ÃƒÂ£o: 100% > Finalizei > Joguei > Quero Jogar
+        // Ordenação: 100% > Finalizei > Joguei > Quero Jogar
         usort($byPlatform, function ($a, $b) {
             $orderKeys = ['cem_por_cento','finalizei','joguei','quero_jogar'];
             foreach ($orderKeys as $k) {
@@ -132,7 +132,7 @@ class CurriculumController extends Controller
             })
             ->when($sub, fn($q2) => $q2->where('ptbr_subtitled', true))
             ->when($dub, fn($q2) => $q2->where('ptbr_dubbed', true))
-            // 1) Nota geral > 2) Metascore > 3) User Score (do usuÃƒÂ¡rio logado) > 4) ÃƒÅ¡ltimos cadastrados > 5) Nome
+            // 1) Nota geral > 2) Metascore > 3) User Score (do usuário logado) > 4) Últimos cadastrados > 5) Nome
             ->orderByDesc('overall_score')
             ->orderByDesc('metacritic_metascore')
             ->whereExists(function ($q) use ($userId, $status, $platformId) {
@@ -175,7 +175,7 @@ class CurriculumController extends Controller
 
         $games = $gamesQuery->paginate(30)->withQueryString();
 
-        // Jogo atual (Estou jogando) do prÃ³prio usuÃ¡rio
+        // Jogo atual (Estou jogando) do próprio usuário
         $nowPlaying = null;
         try {
             $cid = auth()->user()->currently_playing_game_id ?? null;
@@ -207,7 +207,7 @@ class CurriculumController extends Controller
     }
 
     /**
-     * Exibe o currÃƒÂ­culo de outro usuÃƒÂ¡rio (auth obrigatÃƒÂ³rio).
+     * Exibe o currículo de outro usuário (auth obrigatório).
      */
     public function show(Request $request, int $user)
     {
@@ -363,7 +363,7 @@ class CurriculumController extends Controller
 
         $games = $gamesQuery->paginate(30)->withQueryString();
 
-        // Jogo atual (Estou jogando) do usuÃ¡rio visitado
+        // Jogo atual (Estou jogando) do usuário visitado
         $nowPlaying = null;
         try {
             $cid = $userModel->currently_playing_game_id ?? null;

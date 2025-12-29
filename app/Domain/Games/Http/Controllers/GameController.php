@@ -95,7 +95,7 @@ class GameController extends Controller
             // Tags
             $game->tags()->sync($data['tag_ids'] ?? []);
 
-            // Plataformas com data de lanÃ§amento no pivot
+            // Plataformas com data de lançamento no pivot
             $pivot = [];
             foreach (($data['platform_ids'] ?? []) as $pid) {
                 $pivot[$pid] = [
@@ -337,7 +337,7 @@ class GameController extends Controller
             'no_enrich' => (bool) $request->boolean('no_enrich'),
         ]);
 
-        // Enriquecimento via RAWG na ediÃ§Ã£o: se metascore não informado, tenta buscar
+        // Enriquecimento via RAWG na edição: se metascore não informado, tenta buscar
         try {
             $hasMeta = isset($data['metacritic_metascore']) && $data['metacritic_metascore'] !== null && $data['metacritic_metascore'] !== '';
             if ($request->boolean('no_enrich')) { $hasMeta = true; }
@@ -599,5 +599,5 @@ class GameController extends Controller
         return response()->json(['ok' => true]);
     }
     
-    // (Removido) suporte a traduÃ§Ã£o automÃ¡tica
+    // (Removido) suporte a tradução automática
 }

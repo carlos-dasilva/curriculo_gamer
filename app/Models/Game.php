@@ -29,6 +29,7 @@ class Game extends Model
         'hours_to_finish',
         'ptbr_subtitled',
         'ptbr_dubbed',
+        'times_updated',
     ];
 
     protected $casts = [
@@ -40,6 +41,7 @@ class Game extends Model
         'difficulty' => 'decimal:2',
         'gameplay_hours' => 'decimal:1',
         'hours_to_finish' => 'integer',
+        'times_updated' => 'integer',
     ];
 
     public function studio()

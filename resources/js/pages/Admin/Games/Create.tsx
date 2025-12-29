@@ -171,7 +171,7 @@ export default function GamesCreate({ studios, platforms, tags, flash }: Props) 
     post('/admin/jogos', { preserveScroll: true, data: payload });
   };
 
-  // Combos de seleÃ§Ã£o com prevenÃ§Ã£o de duplicatas
+  // Combos de seleção com prevenção de duplicatas
   const [selectedTagId, setSelectedTagId] = React.useState<string>('');
   const [selectedPlatformId, setSelectedPlatformId] = React.useState<string>('');
 
@@ -240,7 +240,7 @@ export default function GamesCreate({ studios, platforms, tags, flash }: Props) 
           <div className="mb-4 rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-800">{flash.success}</div>
         )}
 
-        <form onSubmit={submit} className="space-y-8" aria-label="FormulÃ¡rio de cadastro de jogo">
+        <form onSubmit={submit} className="space-y-8" aria-label="Formulário de cadastro de jogo">
           {/* Informações gerais */}
           <section>
             <h2 className="text-lg font-semibold text-gray-900">Informações gerais</h2>
@@ -421,7 +421,7 @@ export default function GamesCreate({ studios, platforms, tags, flash }: Props) 
             {errors.platform_ids && <p className="mt-1 text-sm text-red-600">{errors.platform_ids}</p>}
           </section>
 
-          {/* Avaliação / CaracterÃ­sticas */}
+          {/* Avaliação / Características */}
           <section>
             <h2 className="text-lg font-semibold text-gray-900">avaliação e características</h2>
             <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
@@ -523,7 +523,7 @@ export default function GamesCreate({ studios, platforms, tags, flash }: Props) 
           {/* Ações */}
           <div className="flex items-center gap-3">
             <button type="submit" disabled={processing} className="inline-flex items-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900 disabled:cursor-not-allowed disabled:opacity-60">
-              {processing ? 'Salvandoâ€¦' : 'Salvar jogo'}
+              {processing ? 'Salvando…' : 'Salvar jogo'}
             </button>
             <Link href="/admin/jogos" className="text-sm text-gray-700 underline-offset-2 hover:underline">Cancelar</Link>
           </div>

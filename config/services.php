@@ -43,4 +43,8 @@ return [
 
     // (Removido) integrações de tradução
 
+    'sync_api' => [
+        'token' => env('SYNC_API_TOKEN'),
+    ],
+
 ];

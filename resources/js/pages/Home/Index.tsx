@@ -54,11 +54,11 @@ export default function HomeIndex({ games, auth, flash, filters }: Props) {
   return (
     <AppLayout
       title="Currículo Gamer"
-      description="Explore jogos legendados e dublados em PT-BR e organize seu currÃ­culo gamer."
+      description="Explore jogos legendados e dublados em PT-BR e organize seu currículo gamer."
     >
       <main>
-        {/* SEO: garantir um h1 Ãºnico e descritivo */}
-        <h1 className="sr-only">CurrÃ­culo Gamer â€” Descubra, filtre e organize seus jogos</h1>
+        {/* SEO: garantir um h1 único e descritivo */}
+        <h1 className="sr-only">Currículo Gamer — Descubra, filtre e organize seus jogos</h1>
 
         {flash?.error && (
           <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8">

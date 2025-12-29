@@ -211,7 +211,7 @@ export default function Header({ auth }: Props) {
           )}
         </div>
 
-        {/* Menu mobile (hambÃºrguer) */}
+        {/* Menu mobile (hambúrguer) */}
                 {/* Mobile actions: Google login (guest) or hamburger (auth) */}
         <div className="md:hidden ml-auto">
           {!auth.isAuthenticated ? (

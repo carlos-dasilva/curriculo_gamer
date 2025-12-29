@@ -1,0 +1,448 @@
+﻿openapi: 3.0.3
+info:
+  title: Curriculo Gamer Public API
+  version: 1.0.0
+  description: |
+    Public API endpoints available for external integrations.
+    All endpoints require an API token.
+servers:
+  - url: https://seu-dominio.com
+    description: Production (replace with your base URL)
+  - url: http://localhost
+    description: Local development
+security:
+  - bearerAuth: []
+  - syncTokenHeader: []
+tags:
+  - name: Sync
+    description: Game sync endpoints
+paths:
+  /api/sync/next-game:
+    get:
+      tags: [Sync]
+      summary: Get the next game to sync
+      description: |
+        Returns the first game ordered by:
+        1) times_updated (asc)
+        2) overall_score (desc)
+        3) metacritic_metascore (desc)
+        4) metacritic_user_score (desc)
+        5) name (asc)
+      security:
+        - bearerAuth: []
+        - syncTokenHeader: []
+      responses:
+        '200':
+          description: Game payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameSyncResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /api/sync/games/{game}:
+    post:
+      tags: [Sync]
+      summary: Update a game from an external source
+      description: |
+        Updates a game and increments times_updated.
+        Tags/platforms/images/links are appended or synced according to payload.
+      security:
+        - bearerAuth: []
+        - syncTokenHeader: []
+      parameters:
+        - name: game
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Game ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GameSyncUpdateRequest'
+      responses:
+        '200':
+          description: Updated game payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameSyncSingleResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: token
+    syncTokenHeader:
+      type: apiKey
+      in: header
+      name: X-Sync-Token
+  responses:
+    Unauthorized:
+      description: Invalid or missing token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            unauthorized:
+              value:
+                message: Unauthorized.
+    NotFound:
+      description: No game available
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            notFound:
+              value:
+                message: Nenhum jogo disponivel para sincronizacao.
+    UnprocessableEntity:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationErrorResponse'
+    TooManyRequests:
+      description: Rate limit exceeded
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ServiceUnavailable:
+      description: Token not configured
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            tokenMissing:
+              value:
+                message: Sync API token not configured.
+  schemas:
+    ErrorResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        message:
+          type: string
+      required: [message]
+    ValidationErrorResponse:
+      type: object
+      additionalProperties: true
+      properties:
+        message:
+          type: string
+        errors:
+          type: object
+      required: [message]
+    GameSyncResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          $ref: '#/components/schemas/GameSync'
+        meta:
+          type: object
+          properties:
+            order:
+              type: array
+              items:
+                type: string
+      required: [data]
+    GameSyncSingleResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        data:
+          $ref: '#/components/schemas/GameSync'
+      required: [data]
+    GameSync:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+        rawg_id:
+          type: integer
+          nullable: true
+        studio:
+          $ref: '#/components/schemas/StudioRef'
+          nullable: true
+        name:
+          type: string
+        cover_url:
+          type: string
+          nullable: true
+        status:
+          type: string
+          nullable: true
+          enum: [avaliacao, liberado]
+        age_rating:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        metacritic_metascore:
+          type: integer
+          nullable: true
+          minimum: 0
+          maximum: 100
+        metacritic_user_score:
+          type: number
+          format: float
+          nullable: true
+          minimum: 0
+          maximum: 10
+        overall_score:
+          type: number
+          format: float
+          nullable: true
+          minimum: 0
+          maximum: 10
+        difficulty:
+          type: number
+          format: float
+          nullable: true
+          minimum: 0
+          maximum: 10
+        gameplay_hours:
+          type: number
+          format: float
+          nullable: true
+          minimum: 0
+        hours_to_finish:
+          type: integer
+          nullable: true
+          minimum: 0
+        ptbr_subtitled:
+          type: boolean
+        ptbr_dubbed:
+          type: boolean
+        times_updated:
+          type: integer
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagRef'
+        platforms:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlatformRef'
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/GameImageRef'
+        external_links:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExternalLinkRef'
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+      required: [id, name, ptbr_subtitled, ptbr_dubbed, times_updated]
+    StudioRef:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+      required: [id, name]
+    TagRef:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+      required: [id, name, slug]
+    PlatformRef:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        release_date:
+          type: string
+          format: date
+          nullable: true
+      required: [id, name]
+    GameImageRef:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+        url:
+          type: string
+        sort_order:
+          type: integer
+      required: [id, url, sort_order]
+    ExternalLinkRef:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+        label:
+          type: string
+        url:
+          type: string
+      required: [id, label, url]
+    GameSyncUpdateRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+        rawg_id:
+          type: integer
+          nullable: true
+        studio_id:
+          type: integer
+          nullable: true
+        name:
+          type: string
+        cover_url:
+          type: string
+          nullable: true
+        status:
+          type: string
+          nullable: true
+          enum: [avaliacao, liberado]
+        age_rating:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        metacritic_metascore:
+          type: integer
+          nullable: true
+          minimum: 0
+          maximum: 100
+        metacritic_user_score:
+          type: number
+          format: float
+          nullable: true
+          minimum: 0
+          maximum: 10
+        overall_score:
+          type: number
+          format: float
+          nullable: true
+          minimum: 0
+          maximum: 10
+        difficulty:
+          type: number
+          format: float
+          nullable: true
+          minimum: 0
+          maximum: 10
+        gameplay_hours:
+          type: number
+          format: float
+          nullable: true
+          minimum: 0
+        hours_to_finish:
+          type: integer
+          nullable: true
+          minimum: 0
+        ptbr_subtitled:
+          type: boolean
+        ptbr_dubbed:
+          type: boolean
+        studio:
+          type: object
+          properties:
+            id:
+              type: integer
+              nullable: true
+            name:
+              type: string
+              nullable: true
+          additionalProperties: false
+        tags:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              id:
+                type: integer
+                nullable: true
+              name:
+                type: string
+                nullable: true
+              slug:
+                type: string
+                nullable: true
+        platforms:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              id:
+                type: integer
+                nullable: true
+              name:
+                type: string
+                nullable: true
+              release_date:
+                type: string
+                format: date
+                nullable: true
+        images:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              url:
+                type: string
+              sort_order:
+                type: integer
+                nullable: true
+        external_links:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              label:
+                type: string
+              url:
+                type: string
+      required: [id, name]

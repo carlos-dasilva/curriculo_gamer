@@ -29,7 +29,7 @@ class GoogleAuthController extends Controller
                 $request->session()->put('url.intended', $intended);
             }
         } else {
-            // fallback: pÃ¡gina anterior interna
+            // fallback: página anterior interna
             $previous = url()->previous();
             $host = parse_url($previous, PHP_URL_HOST);
             $appHost = parse_url(config('app.url'), PHP_URL_HOST);
@@ -56,26 +56,26 @@ class GoogleAuthController extends Controller
             $googleUser = Socialite::driver('google')->user();
 
             $email = $googleUser->getEmail();
-            $name = $googleUser->getName() ?: ($googleUser->getNickname() ?: 'UsuÃ¡rio');
+            $name = $googleUser->getName() ?: ($googleUser->getNickname() ?: 'Usuário');
 
             $user = User::firstOrCreate(
                 ['email' => $email],
                 [
                     'name' => $name,
-                    // Gera senha randÃ´mica pois login serÃ¡ sempre via Google
+                    // Gera senha randômica pois login será sempre via Google
                     'password' => Hash::make(Str::random(32)),
                     'email_verified_at' => now(),
-                    // Define role padrÃ£o na criação
+                    // Define role padrão na criação
                     'role' => Role::CO_MUM->value,
                 ]
             );
 
-            // Se usuÃ¡rio estiver bloqueado, impede login
+            // Se usuário estiver bloqueado, impede login
             if ((bool) ($user->is_blocked ?? false)) {
-                return redirect()->route('home')->with('error', 'Seu usuÃ¡rio estÃ¡ bloqueado. Entre em contato com o suporte.');
+                return redirect()->route('home')->with('error', 'Seu usuário está bloqueado. Entre em contato com o suporte.');
             }
 
-            // não sobrescrever o nome customizado do usuÃ¡rio em re-logins.
+            // não sobrescrever o nome customizado do usuário em re-logins.
             // Apenas definir/ajustar no primeiro login ou se estiver vazio.
             if ($user->wasRecentlyCreated || empty(trim((string) $user->name))) {
                 $user->name = $name;

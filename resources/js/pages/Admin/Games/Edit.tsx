@@ -132,7 +132,7 @@ export default function GamesEdit({ game, studios, platforms, tags, flash }: Pro
     put(`/admin/jogos/${game.id}`, { preserveScroll: true, data: { ...data, gallery_urls: gallery, external_links: links, platform_releases: platformReleases, no_enrich: true } });
   };
 
-  // Combos de seleÃ§Ã£o com prevenÃ§Ã£o de duplicatas
+  // Combos de seleção com prevenção de duplicatas
   const [selectedTagId, setSelectedTagId] = React.useState<string>('');
   const [selectedPlatformId, setSelectedPlatformId] = React.useState<string>('');
 
@@ -205,15 +205,15 @@ export default function GamesEdit({ game, studios, platforms, tags, flash }: Pro
           <Link
             href={`/jogos/${game.id}`}
             className="inline-flex items-center gap-2 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-200 hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
-            aria-label="Abrir visualização pÃºblica"
-            title="Abrir visualização pÃºblica"
+            aria-label="Abrir visualização pública"
+            title="Abrir visualização pública"
           >
             <EyeIcon className="h-4 w-4" />
             <span>Visualizar</span>
           </Link>
         </div>
 
-        <form onSubmit={submit} className="space-y-8" aria-label="FormulÃ¡rio de ediÃ§Ã£o de jogo">
+        <form onSubmit={submit} className="space-y-8" aria-label="Formulário de edição de jogo">
           {/* Informações gerais */}
           <section>
             <h2 className="text-lg font-semibold text-gray-900">Informações gerais</h2>
@@ -357,7 +357,7 @@ export default function GamesEdit({ game, studios, platforms, tags, flash }: Pro
             </div>
           </section>
 
-          {/* Avaliação / CaracterÃ­sticas */}
+          {/* Avaliação / Características */}
           <section>
             <h2 className="text-lg font-semibold text-gray-900">Avaliação e características</h2>
             <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">

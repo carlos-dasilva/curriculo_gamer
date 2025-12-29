@@ -127,7 +127,7 @@ export default function StudiosIndex({ studios, filters, flash }: Props) {
               <p className="mt-2 text-sm text-gray-700">Tem certeza que deseja remover {confirmDelete.name ? (<strong>{confirmDelete.name}</strong>) : 'este Estúdio'}?</p>
               <div className="mt-6 flex items-center justify-end gap-3">
                 <button type="button" onClick={() => setConfirmDelete(null)} disabled={deleting} className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50">Cancelar</button>
-                <button type="button" onClick={() => remove(confirmDelete.id)} disabled={deleting} className="inline-flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 disabled:cursor-not-allowed disabled:opacity-50">{deleting ? 'Removendoâ€¦' : 'Remover'}</button>
+                <button type="button" onClick={() => remove(confirmDelete.id)} disabled={deleting} className="inline-flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 disabled:cursor-not-allowed disabled:opacity-50">{deleting ? 'Removendo…' : 'Remover'}</button>
               </div>
             </div>
           </div>

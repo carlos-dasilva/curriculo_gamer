@@ -31,7 +31,7 @@ export default function OptionsIndex() {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Mantém a navegação em /opcoes apÃ³s salvar
+    // Mantém a navegação em /opcoes após salvar
     put('/perfil', { preserveScroll: true, preserveState: true, replace: true });
   };
 
@@ -50,7 +50,7 @@ export default function OptionsIndex() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[260px_1fr]">
           {/* Sidebar esquerda */}
           <aside className="lg:sticky lg:top-20 self-start">
-            <nav aria-label="Opções do usuÃ¡rio">
+            <nav aria-label="Opções do usuário">
               <ul className="space-y-1">
                 <li>
                   <button
@@ -89,14 +89,14 @@ export default function OptionsIndex() {
             </nav>
           </aside>
 
-          {/* ConteÃºdo Ã  direita */}
+          {/* Conteúdo à direita */}
           <section>
             {active === 'perfil' ? (
               <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
                 <h2 className="text-lg font-semibold text-gray-900">Meu Perfil</h2>
                 <p className="mt-1 text-sm text-gray-600">Gerencie seus dados pessoais. O e-mail é somente leitura pois o login é feito via {authProvider}.</p>
 
-                <form onSubmit={submit} className="mt-6 space-y-6" aria-label="FormulÃ¡rio de atualização de perfil">
+                <form onSubmit={submit} className="mt-6 space-y-6" aria-label="Formulário de atualização de perfil">
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium text-gray-700">Nome</label>
                     <input
@@ -140,7 +140,7 @@ export default function OptionsIndex() {
             ) : active === 'seguindo' ? (
               <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
                 <h2 className="text-lg font-semibold text-gray-900">Seguindo</h2>
-                <p className="mt-1 text-sm text-gray-600">Resumo do currí­culo das pessoas que você segue.</p>
+                <p className="mt-1 text-sm text-gray-600">Resumo do currículo das pessoas que você segue.</p>
                 {(!meSummary && (!followingSummary || followingSummary.length === 0)) ? (
                   <p className="mt-3 text-sm text-gray-600">você ainda não segue ninguém.</p>
                 ) : (
@@ -287,7 +287,7 @@ export default function OptionsIndex() {
                   setDeleting(false);
                   setConfirmDelete(null);
                 }
-              }} disabled={deleting} className="inline-flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 disabled:cursor-not-allowed disabled:opacity-50">{deleting ? 'Excluindoâ€¦' : 'Excluir'}</button>
+              }} disabled={deleting} className="inline-flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 disabled:cursor-not-allowed disabled:opacity-50">{deleting ? 'Excluindo…' : 'Excluir'}</button>
             </div>
           </div>
         </div>

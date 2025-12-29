@@ -440,7 +440,7 @@ function ShareMyCurriculum({ userId, selected }: { userId: number; selected: Sel
                 <button
                   type="button"
                   onClick={async () => {
-                    // Tenta compartilhar nativamente se disponí­vel
+                    // Tenta compartilhar nativamente se disponível
                     // @ts-ignore
                     if (navigator.share) {
                       try {

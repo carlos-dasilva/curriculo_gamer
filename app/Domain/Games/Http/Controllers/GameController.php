@@ -582,6 +582,20 @@ class GameController extends Controller
         return $redirect;
     }
 
+    public function notifyN8n(Game $game): JsonResponse
+    {
+        if (trim((string) $game->name) === '') {
+            return response()->json(['message' => 'Nome do jogo obrigatorio.'], 422);
+        }
+        if (!$game->platforms()->exists()) {
+            return response()->json(['message' => 'Informe ao menos uma plataforma.'], 422);
+        }
+
+        app(N8nWebhookNotifier::class)->notify($game);
+
+        return response()->json(['ok' => true]);
+    }
+
     public function destroy(Game $game): RedirectResponse
     {
         DB::transaction(function () use ($game) {

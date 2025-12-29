@@ -67,6 +67,9 @@ export default function GamesEdit({ game, studios, platforms, tags, flash }: Pro
 
   const [capturing, setCapturing] = React.useState(false);
   const [capturedFromRawg, setCapturedFromRawg] = React.useState(false);
+  const [n8nLoading, setN8nLoading] = React.useState(false);
+  const [n8nFeedback, setN8nFeedback] = React.useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const canTriggerN8n = Boolean((data.name || '').trim()) && Array.isArray(data.platform_ids) && data.platform_ids.length > 0;
   const applyCaptured = (d: any) => {
     if (!d || typeof d !== 'object') return;
     if ('rawg_id' in d && !(data as any).rawg_id) {
@@ -126,6 +129,21 @@ export default function GamesEdit({ game, studios, platforms, tags, flash }: Pro
       }
     } catch {}
     finally { setCapturing(false); }
+  };
+
+  const triggerN8n = async () => {
+    if (!canTriggerN8n || n8nLoading) return;
+    setN8nLoading(true);
+    setN8nFeedback(null);
+    try {
+      // @ts-ignore
+      await window.axios.post(`/admin/jogos/${game.id}/n8n`);
+      setN8nFeedback({ type: 'success', message: 'IA N8N enviada.' });
+    } catch {
+      setN8nFeedback({ type: 'error', message: 'Falha ao chamar IA N8N.' });
+    } finally {
+      setN8nLoading(false);
+    }
   };
 
   const submit = (e: React.FormEvent) => {
@@ -231,9 +249,15 @@ export default function GamesEdit({ game, studios, platforms, tags, flash }: Pro
                 <div className="mt-1 flex items-center gap-2">
                   <input id="name" required value={data.name} onChange={(e) => setData('name', e.target.value)} className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500" />
                   <button type="button" onClick={capture} disabled={capturing || !data.name} className="inline-flex items-center whitespace-nowrap rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 shadow-sm hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed" style={{ cursor: (capturing || !data.name) ? "not-allowed" : "pointer" }}>
-                    {capturing ? 'Capturando...' : 'Capturar Informações'}
+                    {capturing ? 'Capturando Rawg...' : 'Capturar Rawg'}
+                  </button>
+                  <button type="button" onClick={triggerN8n} disabled={n8nLoading || !canTriggerN8n} className="inline-flex items-center whitespace-nowrap rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 shadow-sm hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed" style={{ cursor: (n8nLoading || !canTriggerN8n) ? "not-allowed" : "pointer" }}>
+                    {n8nLoading ? 'Enviando...' : 'IA N8N'}
                   </button>
                 </div>
+                {n8nFeedback && (
+                  <p className={`mt-1 text-xs ${n8nFeedback.type === 'success' ? 'text-green-700' : 'text-red-600'}`}>{n8nFeedback.message}</p>
+                )}
                 {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
               </div>
 

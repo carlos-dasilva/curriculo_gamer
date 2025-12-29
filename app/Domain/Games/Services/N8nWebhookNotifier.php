@@ -22,6 +22,11 @@ class N8nWebhookNotifier
 
         $payload = GameSyncPayload::payload($game, true);
 
+        Log::info('N8N webhook dispatching.', [
+            'game_id' => $game->id,
+            'url' => $url,
+        ]);
+
         $response = Http::timeout(10)
             ->withHeaders([
                 'X-API-KEY' => $apiKey,
@@ -30,12 +35,18 @@ class N8nWebhookNotifier
             ])
             ->post($url, $payload);
 
-        if ($response->failed()) {
-            Log::error('N8N webhook failed.', [
+        if ($response->successful()) {
+            Log::info('N8N webhook delivered.', [
                 'game_id' => $game->id,
                 'status' => $response->status(),
-                'body' => $response->body(),
             ]);
+            return;
         }
+
+        Log::error('N8N webhook failed.', [
+            'game_id' => $game->id,
+            'status' => $response->status(),
+            'body' => $response->body(),
+        ]);
     }
 }

@@ -75,6 +75,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/opcoes/solicitacoes/capturar', [\App\Domain\Games\Http\Controllers\SolicitationController::class, 'capture'])->name('options.requests.capture');
     Route::get('/opcoes/solicitacoes/{game}/editar', [\App\Domain\Games\Http\Controllers\SolicitationController::class, 'edit'])->name('options.requests.edit');
     Route::put('/opcoes/solicitacoes/{game}', [\App\Domain\Games\Http\Controllers\SolicitationController::class, 'update'])->name('options.requests.update');
+    Route::post('/opcoes/solicitacoes/{game}/n8n', [\App\Domain\Games\Http\Controllers\SolicitationController::class, 'notifyN8n'])->name('options.requests.n8n');
     Route::delete('/opcoes/solicitacoes/{game}', [\App\Domain\Games\Http\Controllers\SolicitationController::class, 'destroy'])->name('options.requests.destroy');
     Route::put('/opcoes/solicitacoes/{game}/liberar', [\App\Domain\Games\Http\Controllers\SolicitationController::class, 'release'])->middleware('role:moderador,admin')->name('options.requests.release');
 });
@@ -126,6 +127,7 @@ Route::middleware(['auth','role:moderador,admin'])->prefix('admin')->name('admin
       Route::post('/jogos/capturar', [GamesController::class, 'capture'])->name('games.capture');
       Route::post('/jogos/{game}/capturar-id', [GamesController::class, 'captureById'])->name('games.captureById');
       Route::put('/jogos/{game}', [GamesController::class, 'update'])->name('games.update');
+      Route::post('/jogos/{game}/n8n', [GamesController::class, 'notifyN8n'])->name('games.n8n');
     Route::delete('/jogos/{game}/imagens/{image}', [GamesController::class, 'removeImage'])->name('games.images.destroy');
     Route::delete('/jogos/{game}', [GamesController::class, 'destroy'])->name('games.destroy');
 

@@ -6,6 +6,7 @@ use Illuminate\Routing\Controller;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 use App\Models\Game;
 use App\Models\Studio;
 use App\Models\Platform;
@@ -549,6 +550,22 @@ class SolicitationController extends Controller
         }
 
         return $redirect;
+    }
+
+    public function notifyN8n(Game $game): JsonResponse
+    {
+        $this->ensureCanManage($game);
+
+        if (trim((string) $game->name) === '') {
+            return response()->json(['message' => 'Nome do jogo obrigatorio.'], 422);
+        }
+        if (!$game->platforms()->exists()) {
+            return response()->json(['message' => 'Informe ao menos uma plataforma.'], 422);
+        }
+
+        app(N8nWebhookNotifier::class)->notify($game);
+
+        return response()->json(['ok' => true]);
     }
 
     public function destroy(Request $request, Game $game): RedirectResponse

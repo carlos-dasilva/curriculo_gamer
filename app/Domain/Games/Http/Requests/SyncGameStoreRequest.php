@@ -4,6 +4,7 @@ namespace App\Domain\Games\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Arr;
 
 class SyncGameStoreRequest extends FormRequest
 {
@@ -43,6 +44,7 @@ class SyncGameStoreRequest extends FormRequest
 
             'platforms' => ['array'],
             'platforms.*.id' => ['nullable', 'integer', 'exists:platforms,id'],
+            'platforms.*.rawg_id' => ['nullable', 'integer', 'min:1'],
             'platforms.*.name' => ['required_without:platforms.*.id', 'string', 'max:255'],
             'platforms.*.release_date' => ['nullable', 'date_format:Y-m-d'],
 
@@ -58,35 +60,98 @@ class SyncGameStoreRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
+        $rawgOriginal = (array) $this->input('rawg_original', []);
+
         $payload = [
             'id' => $this->toIntOrNull($this->input('id')),
-            'rawg_id' => $this->toIntOrNull($this->input('rawg_id')),
+            'rawg_id' => $this->toIntOrNull($this->firstFilled([
+                $this->input('rawg_id'),
+                data_get($rawgOriginal, 'id'),
+                $this->input('id'),
+            ])),
             'studio_id' => $this->toIntOrNull($this->input('studio_id')),
+            'name' => $this->firstFilled([
+                $this->input('name'),
+                $this->input('nome'),
+                data_get($rawgOriginal, 'name'),
+            ]),
+            'cover_url' => $this->firstFilled([
+                $this->input('cover_url'),
+                $this->input('imagem_capa'),
+                $this->input('capa'),
+                $this->input('background_image'),
+                data_get($rawgOriginal, 'background_image'),
+            ]),
+            'status' => $this->input('status', 'liberado'),
+            'age_rating' => $this->normalizeAgeRating($this->firstFilled([
+                $this->input('age_rating'),
+                $this->input('classificacao_indicativa'),
+                $this->input('classificação_indicativa'),
+                $this->input('classificacao'),
+                data_get($rawgOriginal, 'esrb_rating.name'),
+                data_get($rawgOriginal, 'esrb_rating.slug'),
+            ])),
+            'description' => $this->firstFilled([
+                $this->input('description'),
+                $this->input('descricao'),
+                $this->input('descrição'),
+                $this->input('sinopse'),
+                $this->input('descricao_sinopse'),
+                data_get($rawgOriginal, 'description_raw'),
+                data_get($rawgOriginal, 'description'),
+            ]),
+            'metacritic_metascore' => $this->toIntOrNull($this->firstFilled([
+                $this->input('metacritic_metascore'),
+                $this->input('metascore'),
+                $this->input('metacritic'),
+                data_get($rawgOriginal, 'metacritic'),
+            ])),
+            'metacritic_user_score' => $this->toDecimalOrNull($this->firstFilled([
+                $this->input('metacritic_user_score'),
+                $this->input('usercore'),
+                $this->input('user_score'),
+                $this->input('userscore'),
+            ])),
+            'overall_score' => $this->toDecimalOrNull($this->input('overall_score')),
+            'difficulty' => $this->toDecimalOrNull($this->input('difficulty')),
+            'gameplay_hours' => $this->toDecimalOrNull($this->input('gameplay_hours')),
+            'hours_to_finish' => $this->toIntOrNull($this->firstFilled([
+                $this->input('hours_to_finish'),
+                $this->input('horas_para_finalizar'),
+                $this->input('horas_finalizar'),
+            ])),
         ];
 
-        if ($this->has('ptbr_subtitled')) {
-            $payload['ptbr_subtitled'] = $this->toBool($this->input('ptbr_subtitled'), false);
-        }
-        if ($this->has('ptbr_dubbed')) {
-            $payload['ptbr_dubbed'] = $this->toBool($this->input('ptbr_dubbed'), false);
-        }
-        if ($this->has('studio')) {
-            $payload['studio'] = $this->normalizeStudio($this->input('studio'));
-        }
-        if ($this->has('tags')) {
-            $payload['tags'] = $this->normalizeTags($this->input('tags', []));
-        }
-        if ($this->has('platforms')) {
-            $payload['platforms'] = $this->normalizePlatforms($this->input('platforms', []));
-        }
-        if ($this->has('images')) {
-            $payload['images'] = $this->normalizeImages($this->input('images', []));
-        }
+        $payload['ptbr_subtitled'] = $this->toBool($this->input('ptbr_subtitled'), false);
+        $payload['ptbr_dubbed'] = $this->toBool($this->input('ptbr_dubbed'), false);
+        $payload['studio'] = $this->normalizeStudio($this->firstFilled([
+            $this->input('studio'),
+            $this->input('estudio'),
+            $this->input('estúdio'),
+            Arr::first((array) data_get($rawgOriginal, 'developers', [])),
+        ]));
+        $payload['tags'] = $this->normalizeTags($this->firstFilled([
+            $this->input('tags'),
+            $this->input('marcadores'),
+            data_get($rawgOriginal, 'genres'),
+            data_get($rawgOriginal, 'tags'),
+        ], []));
+        $payload['platforms'] = $this->normalizePlatforms($this->firstFilled([
+            $this->input('platforms'),
+            $this->input('plataformas'),
+            data_get($rawgOriginal, 'platforms'),
+        ], []));
+        $payload['images'] = $this->normalizeImages($this->firstFilled([
+            $this->input('images'),
+            $this->input('imagens'),
+            $this->input('short_screenshots'),
+            data_get($rawgOriginal, 'short_screenshots'),
+        ], []));
         if ($this->has('external_links')) {
             $payload['external_links'] = $this->normalizeLinks($this->input('external_links', []));
         }
 
-        $this->merge($payload);
+        $this->merge(array_filter($payload, fn ($value) => $value !== null));
     }
 
     private function toIntOrNull($value): ?int
@@ -107,8 +172,51 @@ class SyncGameStoreRequest extends FormRequest
         return filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
     }
 
+    private function toDecimalOrNull($value): ?float
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        return (float) str_replace(',', '.', (string) $value);
+    }
+
+    private function firstFilled(array $values, $default = null)
+    {
+        foreach ($values as $value) {
+            if ($value !== null && $value !== '') {
+                return $value;
+            }
+        }
+
+        return $default;
+    }
+
+    private function normalizeAgeRating($value): ?string
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        $rating = mb_strtolower(trim((string) $value));
+
+        return match ($rating) {
+            'ec', 'early childhood' => '3+',
+            'e', 'everyone' => '6+',
+            'e10', 'e10+', 'everyone 10+', 'everyone-10-plus' => '10+',
+            't', 'teen' => '13+',
+            'm', 'mature', 'mature 17+' => '17+',
+            'ao', 'adults only', 'adults only 18+' => '18+',
+            default => preg_match('/^\d+\+$/', $rating) ? $rating : trim((string) $value),
+        };
+    }
+
     private function normalizeStudio($studio): array
     {
+        if (is_string($studio)) {
+            $studio = ['name' => $studio];
+        }
+
         $id = $this->toIntOrNull(data_get($studio, 'id'));
         $name = is_string(data_get($studio, 'name')) ? trim((string) data_get($studio, 'name')) : '';
 
@@ -121,6 +229,7 @@ class SyncGameStoreRequest extends FormRequest
     private function normalizeTags($tags): array
     {
         return collect((array) $tags)
+            ->take(8)
             ->map(function ($tag) {
                 return [
                     'id' => $this->toIntOrNull(data_get($tag, 'id')),
@@ -138,14 +247,24 @@ class SyncGameStoreRequest extends FormRequest
         return collect((array) $platforms)
             ->map(function ($platform) {
                 $release = is_string(data_get($platform, 'release_date')) ? trim((string) data_get($platform, 'release_date')) : null;
+                $release = $release ?: (is_string(data_get($platform, 'released_at')) ? trim((string) data_get($platform, 'released_at')) : null);
+                $rawgPlatform = (array) data_get($platform, 'platform', []);
+                $rawgId = $this->toIntOrNull($this->firstFilled([
+                    data_get($platform, 'rawg_id'),
+                    data_get($rawgPlatform, 'id'),
+                ]));
 
                 return [
-                    'id' => $this->toIntOrNull(data_get($platform, 'id')),
-                    'name' => is_string(data_get($platform, 'name')) ? trim((string) data_get($platform, 'name')) : '',
+                    'id' => $this->toIntOrNull(data_get($platform, 'local_id') ?? ($rawgId === null ? data_get($platform, 'id') : null)),
+                    'rawg_id' => $rawgId,
+                    'name' => $this->firstFilled([
+                        is_string(data_get($platform, 'name')) ? trim((string) data_get($platform, 'name')) : null,
+                        is_string(data_get($rawgPlatform, 'name')) ? trim((string) data_get($rawgPlatform, 'name')) : null,
+                    ], ''),
                     'release_date' => $release ?: null,
                 ];
             })
-            ->filter(fn ($platform) => $platform['id'] !== null || $platform['name'] !== '')
+            ->filter(fn ($platform) => $platform['id'] !== null || $platform['rawg_id'] !== null || $platform['name'] !== '')
             ->values()
             ->all();
     }
@@ -153,10 +272,11 @@ class SyncGameStoreRequest extends FormRequest
     private function normalizeImages($images): array
     {
         return collect((array) $images)
-            ->map(function ($image) {
+            ->values()
+            ->map(function ($image, int $index) {
                 return [
                     'url' => is_string(data_get($image, 'url')) ? trim((string) data_get($image, 'url')) : '',
-                    'sort_order' => $this->toIntOrNull(data_get($image, 'sort_order')),
+                    'sort_order' => $this->toIntOrNull(data_get($image, 'sort_order')) ?? $index,
                 ];
             })
             ->filter(fn ($image) => $image['url'] !== '')

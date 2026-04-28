@@ -122,6 +122,7 @@ class GameSyncController extends Controller
 
         $game = DB::transaction(function () use ($data) {
             $studioId = $data['studio_id'] ?? $this->resolveStudio($data['studio'] ?? []);
+            $studioId ??= $this->resolveFallbackStudio();
             $game = $this->createGame($data, $studioId);
 
             if (array_key_exists('tags', $data)) {
@@ -282,6 +283,20 @@ class GameSyncController extends Controller
         }
     }
 
+    private function resolveFallbackStudio(): int
+    {
+        $studio = Studio::query()->whereRaw('LOWER(name) = ?', ['desconhecido'])->first();
+        if ($studio) {
+            return $studio->id;
+        }
+
+        try {
+            return Studio::create(['name' => 'Desconhecido'])->id;
+        } catch (\Throwable $e) {
+            return (int) Studio::query()->whereRaw('LOWER(name) = ?', ['desconhecido'])->value('id');
+        }
+    }
+
     private function resolveTags(array $tags): array
     {
         $ids = [];
@@ -335,6 +350,14 @@ class GameSyncController extends Controller
                 }
             }
 
+            $rawgId = !empty($platform['rawg_id']) ? (int) $platform['rawg_id'] : null;
+            if ($platformId === null && $rawgId !== null) {
+                $found = Platform::query()->where('rawg_id', $rawgId)->first();
+                if ($found) {
+                    $platformId = $found->id;
+                }
+            }
+
             if ($platformId === null) {
                 $name = trim((string) ($platform['name'] ?? ''));
                 if ($name === '') {
@@ -344,9 +367,18 @@ class GameSyncController extends Controller
                 $existing = Platform::query()->whereRaw('LOWER(name) = ?', [mb_strtolower($name)])->first();
                 if (!$existing) {
                     try {
-                        $existing = Platform::create(['name' => $name]);
+                        $existing = Platform::create([
+                            'name' => $name,
+                            'rawg_id' => $rawgId,
+                        ]);
                     } catch (\Throwable $e) {
                         $existing = Platform::query()->whereRaw('LOWER(name) = ?', [mb_strtolower($name)])->first();
+                    }
+                } elseif ($rawgId !== null && empty($existing->rawg_id)) {
+                    try {
+                        $existing->update(['rawg_id' => $rawgId]);
+                    } catch (\Throwable $e) {
+                        // Ignore unique conflicts; the platform was still resolved by name.
                     }
                 }
                 if ($existing) {

@@ -416,7 +416,10 @@ export default function GameShow({ game, auth, myInfo, myPlatformStatuses, isBac
                         if (auth?.isAuthenticated) {
                           try {
                             // @ts-ignore
-                            await window.axios.post(`/jogos/${game.id}/plataformas/${p.id}/status`, { status: value });
+                            const resp = await window.axios.post(`/jogos/${game.id}/plataformas/${p.id}/status`, { status: value });
+                            if (resp?.data && typeof resp.data.is_backlogged === 'boolean') {
+                              setBacklogged(resp.data.is_backlogged);
+                            }
                           } catch (err) {
                             // opcional: indicar erro visual se necessário
                           }
@@ -555,17 +558,24 @@ export default function GameShow({ game, auth, myInfo, myPlatformStatuses, isBac
                       type="button"
                       disabled={backlogSaving}
                       onClick={async () => {
+                        const nextBacklogged = !backlogged;
                         try {
                           setBacklogSaving(true);
+                          setBacklogged(nextBacklogged);
                           // @ts-ignore
-                          if (backlogged) {
-                            await window.axios.delete(`/jogos/${game.id}/backlog`);
-                            setBacklogged(false);
+                          if (!nextBacklogged) {
+                            const resp = await window.axios.delete(`/jogos/${game.id}/backlog`);
+                            if (resp?.data && typeof resp.data.is_backlogged === 'boolean') {
+                              setBacklogged(resp.data.is_backlogged);
+                            }
                           } else {
-                            await window.axios.post(`/jogos/${game.id}/backlog`);
-                            setBacklogged(true);
+                            const resp = await window.axios.post(`/jogos/${game.id}/backlog`);
+                            if (resp?.data && typeof resp.data.is_backlogged === 'boolean') {
+                              setBacklogged(resp.data.is_backlogged);
+                            }
                           }
                         } catch (e) {
+                          setBacklogged(!nextBacklogged);
                           // silencioso conforme solicitado: sem mensagens visuais
                         } finally {
                           setBacklogSaving(false);

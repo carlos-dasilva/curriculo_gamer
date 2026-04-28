@@ -131,7 +131,9 @@ class BacklogTest extends TestCase
 
         $this->actingAs($user)
             ->postJson("/jogos/{$game->id}/plataformas/{$platform->id}/status", ['status' => 'finalizei'])
-            ->assertOk();
+            ->assertOk()
+            ->assertJsonPath('is_backlogged', true)
+            ->assertJsonPath('backlog_removed', false);
 
         $this->assertDatabaseHas('user_game_backlogs', [
             'user_id' => $user->id,
@@ -140,7 +142,9 @@ class BacklogTest extends TestCase
 
         $this->actingAs($user)
             ->postJson("/jogos/{$game->id}/plataformas/{$platform->id}/status", ['status' => 'cem_por_cento'])
-            ->assertOk();
+            ->assertOk()
+            ->assertJsonPath('is_backlogged', false)
+            ->assertJsonPath('backlog_removed', true);
 
         $this->assertDatabaseMissing('user_game_backlogs', [
             'user_id' => $user->id,

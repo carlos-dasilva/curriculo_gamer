@@ -32,7 +32,9 @@ class GameProgressController extends Controller
 
         $userId = (int) auth()->id();
 
-        $record = DB::transaction(function () use ($userId, $game, $platform, $status) {
+        $backlogRemoved = false;
+
+        $record = DB::transaction(function () use ($userId, $game, $platform, $status, &$backlogRemoved) {
             $previous = UserGamePlatformStatus::query()
                 ->where('user_id', $userId)
                 ->where('game_id', $game->id)
@@ -59,6 +61,7 @@ class GameProgressController extends Controller
                     ->delete();
 
                 if ($deleted > 0) {
+                    $backlogRemoved = true;
                     $this->normalizeBacklogPositions($userId);
                 }
             }
@@ -68,6 +71,11 @@ class GameProgressController extends Controller
 
         return response()->json([
             'status' => $record->status,
+            'is_backlogged' => !$backlogRemoved && UserGameBacklog::query()
+                ->where('user_id', $userId)
+                ->where('game_id', $game->id)
+                ->exists(),
+            'backlog_removed' => $backlogRemoved,
         ]);
     }
 

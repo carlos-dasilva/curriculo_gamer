@@ -61,6 +61,13 @@ class SyncGameStoreRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $rawgOriginal = (array) $this->input('rawg_original', []);
+        $released = $this->firstFilled([
+            $this->input('released'),
+            $this->input('release_date'),
+            $this->input('data_lancamento'),
+            $this->input('data_lançamento'),
+            data_get($rawgOriginal, 'released'),
+        ]);
 
         $payload = [
             'id' => $this->toIntOrNull($this->input('id')),
@@ -140,7 +147,7 @@ class SyncGameStoreRequest extends FormRequest
             $this->input('platforms'),
             $this->input('plataformas'),
             data_get($rawgOriginal, 'platforms'),
-        ], []));
+        ], []), $released);
         $payload['images'] = $this->normalizeImages($this->firstFilled([
             $this->input('images'),
             $this->input('imagens'),
@@ -242,12 +249,13 @@ class SyncGameStoreRequest extends FormRequest
             ->all();
     }
 
-    private function normalizePlatforms($platforms): array
+    private function normalizePlatforms($platforms, ?string $fallbackReleaseDate = null): array
     {
         return collect((array) $platforms)
-            ->map(function ($platform) {
+            ->map(function ($platform) use ($fallbackReleaseDate) {
                 $release = is_string(data_get($platform, 'release_date')) ? trim((string) data_get($platform, 'release_date')) : null;
                 $release = $release ?: (is_string(data_get($platform, 'released_at')) ? trim((string) data_get($platform, 'released_at')) : null);
+                $release = $release ?: $fallbackReleaseDate;
                 $rawgPlatform = (array) data_get($platform, 'platform', []);
                 $rawgId = $this->toIntOrNull($this->firstFilled([
                     data_get($platform, 'rawg_id'),
@@ -275,7 +283,10 @@ class SyncGameStoreRequest extends FormRequest
             ->values()
             ->map(function ($image, int $index) {
                 return [
-                    'url' => is_string(data_get($image, 'url')) ? trim((string) data_get($image, 'url')) : '',
+                    'url' => $this->firstFilled([
+                        is_string(data_get($image, 'url')) ? trim((string) data_get($image, 'url')) : null,
+                        is_string(data_get($image, 'image')) ? trim((string) data_get($image, 'image')) : null,
+                    ], ''),
                     'sort_order' => $this->toIntOrNull(data_get($image, 'sort_order')) ?? $index,
                 ];
             })

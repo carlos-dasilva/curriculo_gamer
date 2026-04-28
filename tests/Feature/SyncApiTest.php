@@ -124,16 +124,14 @@ class SyncApiTest extends TestCase
                 'platforms' => [
                     [
                         'platform' => ['id' => 7, 'name' => 'Nintendo Switch'],
-                        'released_at' => '2026-01-07',
                     ],
                     [
                         'platform' => ['id' => 4, 'name' => 'PC'],
-                        'released_at' => '2026-01-07',
                     ],
                 ],
                 'short_screenshots' => [
-                    ['id' => 1, 'url' => 'https://media.rawg.io/media/screenshots/one.jpg'],
-                    ['id' => 2, 'url' => 'https://media.rawg.io/media/screenshots/two.jpg'],
+                    ['id' => 1, 'image' => 'https://media.rawg.io/media/screenshots/one.jpg'],
+                    ['id' => 2, 'image' => 'https://media.rawg.io/media/screenshots/two.jpg'],
                 ],
             ],
             'lookup' => [
@@ -154,6 +152,7 @@ class SyncApiTest extends TestCase
             ->assertJsonPath('data.cover_url', 'https://media.rawg.io/media/screenshots/cover.jpg')
             ->assertJsonPath('data.age_rating', '10+')
             ->assertJsonPath('data.metacritic_metascore', 81)
+            ->assertJsonPath('data.platforms.0.release_date', '2026-01-07')
             ->assertJsonCount(2, 'data.images')
             ->assertJsonCount(2, 'data.platforms');
 

@@ -53,4 +53,12 @@ class User extends Authenticatable
             'currently_playing_game_id' => 'integer',
         ];
     }
+
+    public function backlogGames()
+    {
+        return $this->belongsToMany(Game::class, 'user_game_backlogs')
+            ->withPivot('position')
+            ->withTimestamps()
+            ->orderBy('user_game_backlogs.position');
+    }
 }

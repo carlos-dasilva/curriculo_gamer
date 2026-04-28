@@ -8,8 +8,12 @@ export default defineConfig({
         host: '0.0.0.0',
         port: 5173,
         strictPort: true,
+        cors: true,
+        headers: {
+            'Access-Control-Allow-Origin': '*',
+        },
         hmr: {
-            host: '192-168-0-100.nip.io',
+            host: '192-168-1-100.nip.io',
             protocol: 'http',
             port: 5173,
         },
@@ -19,7 +23,7 @@ export default defineConfig({
             input: ['resources/css/app.css', 'resources/js/app.tsx'],
             refresh: true,
             devServer: {
-                url: 'http://192-168-0-100.nip.io:5173',
+                url: 'http://192-168-1-100.nip.io:5173',
             },
         }),
         tailwindcss(),

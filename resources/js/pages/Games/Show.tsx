@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Head, Link } from '@inertiajs/react';
 import Header from '@/components/ui/Header';
 import Footer from '@/components/ui/Footer';
@@ -32,7 +32,7 @@ type GameDto = {
 
 type AuthInfo = {
   isAuthenticated: boolean;
-  user?: { name: string; email: string; currentlyPlayingGameId?: number | null } | null;
+  user?: { name: string; email: string } | null;
   loginUrl?: string;
   logoutUrl?: string;
   abilities?: { manageUsers?: boolean };
@@ -45,13 +45,13 @@ type Props = {
   auth: AuthInfo;
   myInfo?: MyInfoDto;
   myPlatformStatuses?: Record<number, 'nao_joguei' | 'quero_jogar' | 'joguei' | 'finalizei' | 'cem_por_cento'>;
+  isBacklogged?: boolean;
 };
 
-export default function GameShow({ game, auth, myInfo, myPlatformStatuses }: Props) {
+export default function GameShow({ game, auth, myInfo, myPlatformStatuses, isBacklogged = false }: Props) {
   const placeholder = '/img/sem-imagem.svg';
-  const [isPlayingThis, setIsPlayingThis] = React.useState<boolean>(
-    !!(auth?.user && (auth.user as any).currentlyPlayingGameId === game.id)
-  );
+  const [backlogged, setBacklogged] = React.useState<boolean>(!!isBacklogged);
+  const [backlogSaving, setBacklogSaving] = React.useState(false);
   const [gallery, setGallery] = React.useState<{ id: number; url: string }[]>([...((game as any).gallery || [])]);
   const imagesMap = React.useMemo(() => new Map(gallery.map((g) => [g.url, g.id])), [gallery]);
   const allImages = React.useMemo(() => {
@@ -495,9 +495,9 @@ export default function GameShow({ game, auth, myInfo, myPlatformStatuses }: Pro
                   placeholder="Compartilhe suas impressões sobre o jogo..."
                   className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
                 />
-                {/* Observação sobre Estou Jogando */}
+                {/* Observação sobre Backlog */}
                 <p className="mt-3 text-xs text-gray-500" role="note">
-                  OBS: Somente um jogo poderá estar marcado como "Estou Jogando".
+                  O backlog permite organizar todos os jogos que você pretende priorizar.
                 </p>
                 {/* Ações */}
                 <div className="mt-4 flex items-center gap-3">
@@ -550,24 +550,31 @@ export default function GameShow({ game, auth, myInfo, myPlatformStatuses }: Pro
                   ) : (
                     <a href={auth?.loginUrl || '#'} className="text-sm text-sky-700 underline-offset-2 hover:underline">Entre para salvar suas informações</a>
                   )}
-                  {auth?.isAuthenticated && !isPlayingThis && (
+                  {auth?.isAuthenticated && (
                     <button
                       type="button"
+                      disabled={backlogSaving}
                       onClick={async () => {
                         try {
+                          setBacklogSaving(true);
                           // @ts-ignore
-                          await window.axios.post(`/jogos/${game.id}/estou-jogando`);
-                          setIsPlayingThis(true);
+                          if (backlogged) {
+                            await window.axios.delete(`/jogos/${game.id}/backlog`);
+                            setBacklogged(false);
+                          } else {
+                            await window.axios.post(`/jogos/${game.id}/backlog`);
+                            setBacklogged(true);
+                          }
                         } catch (e) {
                           // silencioso conforme solicitado: sem mensagens visuais
                         } finally {
-                          // nada a fazer
+                          setBacklogSaving(false);
                         }
                       }}
-                      className="ml-auto inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 cursor-pointer"
-                      title="Definir este jogo como Estou Jogando"
+                      className={`ml-auto inline-flex items-center rounded-md px-4 py-2 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 disabled:cursor-not-allowed disabled:opacity-60 ${backlogged ? 'border border-red-200 bg-red-50 text-red-700 hover:bg-red-100' : 'border border-gray-300 bg-white text-gray-900 hover:bg-gray-50'}`}
+                      title={backlogged ? 'Remover este jogo do backlog' : 'Adicionar este jogo ao backlog'}
                     >
-                      Estou Jogando
+                      {backlogSaving ? 'Atualizando…' : (backlogged ? 'Remover do Backlog' : 'Adicionar ao Backlog')}
                     </button>
                   )}
                 </div>

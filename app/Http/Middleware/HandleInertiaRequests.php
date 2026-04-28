@@ -31,7 +31,6 @@ class HandleInertiaRequests extends Middleware
                     'name' => auth()->user()->name,
                     'email' => auth()->user()->email,
                     'avatar_url' => auth()->user()->avatar_url,
-                    'currentlyPlayingGameId' => auth()->user()->currently_playing_game_id,
                 ] : null,
                 'loginUrl' => fn () => \Illuminate\Support\Facades\Route::has('auth.google.redirect') ? route('auth.google.redirect') : '#',
                 'logoutUrl' => fn () => \Illuminate\Support\Facades\Route::has('logout') ? route('logout') : '#',

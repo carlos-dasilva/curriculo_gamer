@@ -57,6 +57,7 @@ class PublicGameController extends Controller
         // Carrega minhas informações salvas (se autenticado)
         $myInfo = null;
         $myPlatformStatuses = [];
+        $isBacklogged = false;
         if (auth()->check()) {
             try {
                 $myInfo = \App\Models\UserGameInfo::query()
@@ -74,6 +75,14 @@ class PublicGameController extends Controller
                 $myPlatformStatuses = $rows->mapWithKeys(fn($r) => [$r->platform_id => (string) $r->status])->all();
             } catch (\Throwable $e) {
                 $myPlatformStatuses = [];
+            }
+            try {
+                $isBacklogged = \App\Models\UserGameBacklog::query()
+                    ->where('user_id', auth()->id())
+                    ->where('game_id', $game->id)
+                    ->exists();
+            } catch (\Throwable $e) {
+                $isBacklogged = false;
             }
         }
 
@@ -110,6 +119,7 @@ class PublicGameController extends Controller
             ],
             'myInfo' => $myInfo,
             'myPlatformStatuses' => $myPlatformStatuses,
+            'isBacklogged' => $isBacklogged,
         ]);
     }
 }

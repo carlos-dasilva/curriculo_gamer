@@ -20,6 +20,7 @@ use App\Domain\Games\Http\Controllers\GameCommentsController;
 use App\Domain\Games\Http\Controllers\UserGameInfoController;
 use App\Domain\Games\Http\Controllers\GameProgressController;
 use App\Domain\Games\Http\Controllers\CurriculumController;
+use App\Domain\Games\Http\Controllers\BacklogController;
 use App\Domain\Users\Http\Controllers\FollowController;
 use App\Domain\Profile\Http\Controllers\OptionsController;
 
@@ -35,7 +36,8 @@ Route::get('/termos-uso', [TermsController::class, 'index'])->name('terms');
 // Página de jogo (restrita a usuários autenticados)
 Route::middleware('auth')->get('/jogos/{game}', [PublicGameController::class, 'show'])->name('games.show');
 Route::middleware('auth')->post('/jogos/{game}/minhas-informacoes', [UserGameInfoController::class, 'save'])->name('games.mine.save');
-Route::middleware('auth')->post('/jogos/{game}/estou-jogando', [UserGameInfoController::class, 'setPlaying'])->name('games.mine.playing');
+Route::middleware('auth')->post('/jogos/{game}/backlog', [BacklogController::class, 'store'])->name('games.backlog.store');
+Route::middleware('auth')->delete('/jogos/{game}/backlog', [BacklogController::class, 'destroy'])->name('games.backlog.destroy');
 Route::middleware('auth')->post('/jogos/{game}/plataformas/{platform}/status', [GameProgressController::class, 'update'])->name('games.platform.status');
 // Comentários da Comunidade (público para listar; ações autenticadas)
 Route::get('/jogos/{game}/comentarios', [GameCommentsController::class, 'index'])->name('games.comments.index');
@@ -82,6 +84,8 @@ Route::middleware('auth')->group(function () {
 
 // Meu Currículo (somente autenticado)
 Route::middleware('auth')->get('/meu-curriculo', [CurriculumController::class, 'index'])->name('curriculum.index');
+Route::middleware('auth')->get('/meu-backlog', [BacklogController::class, 'index'])->name('backlog.index');
+Route::middleware('auth')->put('/meu-backlog/ordem', [BacklogController::class, 'reorder'])->name('backlog.reorder');
 // Currículo de outro usuário (somente autenticado)
 Route::get('/curriculo/{user}', [CurriculumController::class, 'show'])->whereNumber('user')->name('curriculum.show');
 

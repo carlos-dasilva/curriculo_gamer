@@ -36,9 +36,11 @@ type BacklogItem = {
 type Props = {
   auth: AuthInfo;
   items: BacklogItem[];
+  subject: { id: number; name: string; avatar_url?: string | null; isMe: boolean };
+  editable: boolean;
 };
 
-export default function BacklogIndex({ auth, items: initialItems }: Props) {
+export default function BacklogIndex({ auth, items: initialItems, subject, editable }: Props) {
   const [items, setItems] = React.useState<BacklogItem[]>(initialItems || []);
   const [draggingId, setDraggingId] = React.useState<number | null>(null);
   const [saving, setSaving] = React.useState(false);
@@ -50,6 +52,7 @@ export default function BacklogIndex({ auth, items: initialItems }: Props) {
   }, [initialItems]);
 
   const persistOrder = async (nextItems: BacklogItem[]) => {
+    if (!editable) return;
     try {
       setSaving(true);
       // @ts-ignore
@@ -77,6 +80,7 @@ export default function BacklogIndex({ auth, items: initialItems }: Props) {
   };
 
   const removeItem = async (gameId: number) => {
+    if (!editable) return;
     try {
       setRemovingId(gameId);
       // @ts-ignore
@@ -93,23 +97,36 @@ export default function BacklogIndex({ auth, items: initialItems }: Props) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Head title="Meu Backlog">
+      <Head title={subject?.isMe ? 'Meu Backlog' : `Backlog de ${subject?.name || ''}`}>
         <meta name="description" content="Backlog pessoal de jogos organizado por prioridade." />
       </Head>
       <Header auth={auth} />
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-900">Meu Backlog</h1>
-            <p className="mt-1 text-sm text-gray-600">{items.length} {items.length === 1 ? 'jogo priorizado' : 'jogos priorizados'}</p>
+          <div className="flex items-center gap-3">
+            <img
+              src={subject?.avatar_url || '/img/sem-imagem.svg'}
+              alt={subject?.name || 'Usuário'}
+              referrerPolicy="no-referrer"
+              onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/img/sem-imagem.svg'; }}
+              className="h-12 w-12 rounded-full object-cover ring-2 ring-gray-200 shadow-sm"
+              width={48}
+              height={48}
+              loading="lazy"
+              decoding="async"
+            />
+            <div>
+              <h1 className="text-2xl font-semibold text-gray-900">{subject?.isMe ? 'Meu Backlog' : `Backlog de ${subject?.name}`}</h1>
+              <p className="mt-1 text-sm text-gray-600">{items.length} {items.length === 1 ? 'jogo priorizado' : 'jogos priorizados'}</p>
+            </div>
           </div>
           <div className="min-h-9">
-            {saving && (
+            {editable && saving && (
               <span className="inline-flex rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-700 ring-1 ring-inset ring-gray-200">
                 Salvando ordem...
               </span>
             )}
-            {message && (
+            {editable && message && (
               <span className={`inline-flex rounded-md px-3 py-2 text-sm font-medium ring-1 ring-inset ${message.type === 'success' ? 'bg-green-50 text-green-800 ring-green-200' : 'bg-red-50 text-red-800 ring-red-200'}`}>
                 {message.text}
               </span>
@@ -120,13 +137,15 @@ export default function BacklogIndex({ auth, items: initialItems }: Props) {
         {items.length === 0 ? (
           <section className="mt-6 rounded-lg border border-gray-200 bg-white p-6 text-center shadow-sm">
             <h2 className="text-lg font-semibold text-gray-900">Nenhum jogo no backlog</h2>
-            <p className="mt-2 text-sm text-gray-600">Adicione jogos pela tela de informações de cada jogo.</p>
-            <a
-              href="/"
-              className="mt-5 inline-flex items-center rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
-            >
-              Ver jogos
-            </a>
+            <p className="mt-2 text-sm text-gray-600">{editable ? 'Adicione jogos pela tela de informações de cada jogo.' : 'Este usuário ainda não possui jogos públicos no backlog.'}</p>
+            {editable && (
+              <a
+                href="/"
+                className="mt-5 inline-flex items-center rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
+              >
+                Ver jogos
+              </a>
+            )}
           </section>
         ) : (
           <ol className="mt-6 space-y-3" aria-label="Jogos do meu backlog">
@@ -136,18 +155,21 @@ export default function BacklogIndex({ auth, items: initialItems }: Props) {
               return (
                 <li
                   key={item.id}
-                  draggable
+                  draggable={editable}
                   onDragStart={(event) => {
+                    if (!editable) return;
                     setDraggingId(item.id);
                     event.dataTransfer.effectAllowed = 'move';
                     event.dataTransfer.setData('text/plain', String(item.id));
                   }}
                   onDragEnd={() => setDraggingId(null)}
                   onDragOver={(event) => {
+                    if (!editable) return;
                     event.preventDefault();
                     event.dataTransfer.dropEffect = 'move';
                   }}
                   onDrop={(event) => {
+                    if (!editable) return;
                     event.preventDefault();
                     const sourceId = Number(event.dataTransfer.getData('text/plain')) || draggingId;
                     const fromIndex = items.findIndex((current) => current.id === sourceId);
@@ -217,6 +239,7 @@ export default function BacklogIndex({ auth, items: initialItems }: Props) {
                       </div>
                     </div>
 
+                    {editable && (
                     <div className="col-span-2 flex items-center justify-end gap-2 sm:col-span-1">
                       <button
                         type="button"
@@ -247,6 +270,7 @@ export default function BacklogIndex({ auth, items: initialItems }: Props) {
                         {removingId === game.id ? 'Removendo...' : 'Remover'}
                       </button>
                     </div>
+                    )}
                   </article>
                 </li>
               );

@@ -88,6 +88,7 @@ Route::middleware('auth')->get('/meu-backlog', [BacklogController::class, 'index
 Route::middleware('auth')->put('/meu-backlog/ordem', [BacklogController::class, 'reorder'])->name('backlog.reorder');
 // Currículo de outro usuário (somente autenticado)
 Route::get('/curriculo/{user}', [CurriculumController::class, 'show'])->whereNumber('user')->name('curriculum.show');
+Route::get('/backlog/{user}', [BacklogController::class, 'show'])->whereNumber('user')->name('backlog.show');
 
 // Gestão de usuários (apenas moderador e admin)
 Route::middleware(['auth','role:moderador,admin'])->prefix('admin')->name('admin.')->group(function () {

@@ -174,6 +174,7 @@ class CurriculumController extends Controller
             ->orderBy('name');
 
         $games = $gamesQuery->paginate(30)->withQueryString();
+        $nowPlaying = $this->topBacklogGame($userId, true);
 
         return Inertia::render('Curriculum/Index', [
             'mode' => $mode,
@@ -192,6 +193,7 @@ class CurriculumController extends Controller
                 'isMe' => true,
                 'isFollowed' => false,
             ],
+            'nowPlaying' => $nowPlaying,
         ]);
     }
 
@@ -351,6 +353,7 @@ class CurriculumController extends Controller
             ->orderBy('name');
 
         $games = $gamesQuery->paginate(30)->withQueryString();
+        $nowPlaying = $this->topBacklogGame($userId, (int) $userModel->id === (int) auth()->id());
 
         $isFollowed = false;
         if (auth()->check() && (int) auth()->id() !== (int) $userModel->id) {
@@ -382,7 +385,34 @@ class CurriculumController extends Controller
                 'isMe' => (int) $userModel->id === (int) auth()->id(),
                 'isFollowed' => $isFollowed,
             ],
+            'nowPlaying' => $nowPlaying,
         ]);
+    }
+
+    private function topBacklogGame(int $userId, bool $isOwnCurriculum): ?array
+    {
+        try {
+            $query = Game::query()
+                ->select(['games.id','games.name','games.cover_url'])
+                ->join('user_game_backlogs as backlog', 'backlog.game_id', '=', 'games.id')
+                ->where('backlog.user_id', $userId)
+                ->orderBy('backlog.position')
+                ->orderBy('backlog.id');
+
+            if (!$isOwnCurriculum) {
+                $query->where('games.status', 'liberado');
+            }
+
+            $game = $query->first();
+
+            return $game ? [
+                'id' => $game->id,
+                'name' => $game->name,
+                'cover_url' => $game->cover_url,
+            ] : null;
+        } catch (\Throwable $e) {
+            return null;
+        }
     }
 }
 

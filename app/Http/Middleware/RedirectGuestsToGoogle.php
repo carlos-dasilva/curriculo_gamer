@@ -29,6 +29,7 @@ class RedirectGuestsToGoogle
             'privacy',
             'terms',
             'curriculum.show',
+            'backlog.show',
             'games.comments.index',
         ];
 

@@ -4,6 +4,7 @@ namespace App\Domain\Games\Http\Controllers;
 
 use App\Domain\Auth\Enums\Role;
 use App\Models\Game;
+use App\Models\User;
 use App\Models\UserGameBacklog;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -19,8 +20,18 @@ class BacklogController extends Controller
             return redirect()->route('home');
         }
 
-        $items = UserGameBacklog::query()
-            ->where('user_id', auth()->id())
+        return $this->renderBacklog(auth()->user(), true);
+    }
+
+    public function show(User $user)
+    {
+        return $this->renderBacklog($user, false);
+    }
+
+    private function renderBacklog(User $user, bool $editable)
+    {
+        $query = UserGameBacklog::query()
+            ->where('user_id', $user->id)
             ->with([
                 'game:id,name,cover_url,description,overall_score,metacritic_metascore,ptbr_subtitled,ptbr_dubbed,status,studio_id',
                 'game.studio:id,name',
@@ -28,8 +39,13 @@ class BacklogController extends Controller
                 'game.tags:id,name,slug',
             ])
             ->orderBy('position')
-            ->orderBy('id')
-            ->get()
+            ->orderBy('id');
+
+        if (!$editable) {
+            $query->whereHas('game', fn ($gameQuery) => $gameQuery->where('status', 'liberado'));
+        }
+
+        $items = $query->get()
             ->filter(fn (UserGameBacklog $item) => $item->game !== null)
             ->map(fn (UserGameBacklog $item) => [
                 'id' => $item->id,
@@ -60,6 +76,13 @@ class BacklogController extends Controller
 
         return Inertia::render('Backlog/Index', [
             'items' => $items,
+            'subject' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'avatar_url' => $user->avatar_url ?? null,
+                'isMe' => auth()->check() && (int) auth()->id() === (int) $user->id,
+            ],
+            'editable' => $editable,
         ]);
     }
 

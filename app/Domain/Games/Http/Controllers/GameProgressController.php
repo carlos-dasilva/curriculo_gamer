@@ -6,7 +6,9 @@ use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
 use App\Models\Game;
 use App\Models\Platform;
+use App\Models\UserGameBacklog;
 use App\Models\UserGamePlatformStatus;
+use Illuminate\Support\Facades\DB;
 
 class GameProgressController extends Controller
 {
@@ -28,19 +30,59 @@ class GameProgressController extends Controller
             return response()->json(['message' => 'Plataforma não associada ao jogo.'], 422);
         }
 
-        $record = UserGamePlatformStatus::query()->updateOrCreate(
-            [
-                'user_id' => auth()->id(),
-                'game_id' => $game->id,
-                'platform_id' => $platform->id,
-            ],
-            [
-                'status' => $status,
-            ]
-        );
+        $userId = (int) auth()->id();
+
+        $record = DB::transaction(function () use ($userId, $game, $platform, $status) {
+            $previous = UserGamePlatformStatus::query()
+                ->where('user_id', $userId)
+                ->where('game_id', $game->id)
+                ->where('platform_id', $platform->id)
+                ->first();
+
+            $previousStatus = $previous?->status;
+
+            $record = UserGamePlatformStatus::query()->updateOrCreate(
+                [
+                    'user_id' => $userId,
+                    'game_id' => $game->id,
+                    'platform_id' => $platform->id,
+                ],
+                [
+                    'status' => $status,
+                ]
+            );
+
+            if (in_array($status, ['finalizei','cem_por_cento'], true) && $previousStatus !== $status) {
+                $deleted = UserGameBacklog::query()
+                    ->where('user_id', $userId)
+                    ->where('game_id', $game->id)
+                    ->delete();
+
+                if ($deleted > 0) {
+                    $this->normalizeBacklogPositions($userId);
+                }
+            }
+
+            return $record;
+        });
 
         return response()->json([
             'status' => $record->status,
         ]);
+    }
+
+    private function normalizeBacklogPositions(int $userId): void
+    {
+        $ids = UserGameBacklog::query()
+            ->where('user_id', $userId)
+            ->orderBy('position')
+            ->orderBy('id')
+            ->pluck('id');
+
+        foreach ($ids as $index => $id) {
+            UserGameBacklog::query()
+                ->where('id', $id)
+                ->update(['position' => $index + 1]);
+        }
     }
 }

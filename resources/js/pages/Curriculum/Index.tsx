@@ -52,6 +52,7 @@ type Props = {
   auth: AuthInfo;
   flash?: { success?: string; error?: string };
   filters?: { q?: string; sub?: boolean; dub?: boolean };
+  nowPlaying?: { id: number; name: string; cover_url?: string | null } | null;
 };
 
 const STATUS_LABELS: Record<StatusKey, string> = {
@@ -61,7 +62,7 @@ const STATUS_LABELS: Record<StatusKey, string> = {
   quero_jogar: 'Quero Jogar',
 };
 
-export default function CurriculumIndex({ mode, summary, byPlatform, selected, games, subject, auth, flash, filters }: Props) {
+export default function CurriculumIndex({ mode, summary, byPlatform, selected, games, subject, auth, flash, filters, nowPlaying }: Props) {
   const [currentMode, setCurrentMode] = React.useState<'all' | 'platform'>(mode || 'all');
   const basePath = subject?.isMe ? '/meu-curriculo' : `/curriculo/${subject?.id}`;
   const [q, setQ] = React.useState<string>(filters?.q || '');
@@ -103,6 +104,37 @@ export default function CurriculumIndex({ mode, summary, byPlatform, selected, g
       <Head title={subject?.isMe ? 'Meu Currículo' : `Currículo de ${subject?.name || ''}`} />
       <Header auth={auth} />
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        {nowPlaying && (
+          <section className="relative isolate mb-6 overflow-hidden rounded-lg border border-gray-200 shadow-sm">
+            <div className="absolute inset-0 pointer-events-none">
+              <img
+                src={nowPlaying.cover_url || '/img/sem-imagem.svg'}
+                alt={nowPlaying.name}
+                className="h-full w-full object-cover"
+                loading="lazy"
+                decoding="async"
+                fetchPriority="low"
+                width={1600}
+                height={600}
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent" aria-hidden="true" />
+            </div>
+            <div className="relative flex min-h-[160px] items-center px-6 py-6 sm:min-h-[200px] sm:px-8 sm:py-7">
+              <div>
+                <span className="inline-flex items-center rounded-full bg-white/90 px-3 py-1 text-xs font-semibold uppercase text-gray-900 ring-1 ring-inset ring-gray-200">Jogando atualmente</span>
+                <h2 className="mt-3 text-2xl font-bold text-white drop-shadow-sm sm:text-3xl md:text-4xl">{nowPlaying.name}</h2>
+                <div className="mt-4">
+                  <a
+                    href={`/jogos/${nowPlaying.id}`}
+                    className="inline-flex items-center rounded-md bg-white/95 px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-200 hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                  >
+                    Ver jogo
+                  </a>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <img
@@ -121,11 +153,19 @@ export default function CurriculumIndex({ mode, summary, byPlatform, selected, g
               <p className="mt-1 text-sm text-gray-600">{subject?.isMe ? 'Resumo do seu progresso por status e por plataforma.' : 'Resumo do progresso deste usuário por status e por plataforma.'}</p>
             </div>
           </div>
-          {subject?.isMe ? (
-            <ShareMyCurriculum userId={subject.id} selected={selected} />
-          ) : (auth?.isAuthenticated ? (
-            <FollowButton subjectId={subject.id} initialFollowing={!!subject?.isFollowed} />
-          ) : null)}
+          <div className="flex flex-wrap items-center gap-2">
+            <a
+              href={subject?.isMe ? '/meu-backlog' : `/backlog/${subject?.id}`}
+              className="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
+            >
+              Ver Backlog
+            </a>
+            {subject?.isMe ? (
+              <ShareMyCurriculum userId={subject.id} selected={selected} />
+            ) : (auth?.isAuthenticated ? (
+              <FollowButton subjectId={subject.id} initialFollowing={!!subject?.isFollowed} />
+            ) : null)}
+          </div>
         </div>
 
         {flash?.error && (

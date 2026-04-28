@@ -79,7 +79,7 @@ class BacklogTest extends TestCase
             ->get('/meu-curriculo')
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->component('Curriculum/Index')
+                ->component('Curriculum/Index', false)
                 ->where('nowPlaying.id', $first->id)
                 ->where('nowPlaying.name', 'Topo do Backlog')
             );
@@ -103,7 +103,7 @@ class BacklogTest extends TestCase
         $this->get("/backlog/{$user->id}")
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->component('Backlog/Index')
+                ->component('Backlog/Index', false)
                 ->where('editable', false)
                 ->where('subject.id', $user->id)
                 ->where('subject.isMe', false)

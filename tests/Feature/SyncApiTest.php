@@ -78,6 +78,10 @@ class SyncApiTest extends TestCase
         $this->withToken('sync-test-token')
             ->postJson('/api/sync/games', $payload)
             ->assertCreated()
+            ->assertJsonPath('created', true)
+            ->assertJsonPath('registered', true)
+            ->assertJsonPath('sync_status', 'created')
+            ->assertJsonPath('message', 'Novo jogo cadastrado com sucesso.')
             ->assertJsonPath('data.rawg_id', 98765)
             ->assertJsonPath('data.name', 'Jogo Novo RAWG')
             ->assertJsonPath('data.studio.name', 'Studio Novo')
@@ -94,7 +98,10 @@ class SyncApiTest extends TestCase
 
         $this->withToken('sync-test-token')
             ->postJson('/api/sync/games', $payload)
-            ->assertStatus(409)
+            ->assertOk()
+            ->assertJsonPath('created', false)
+            ->assertJsonPath('registered', false)
+            ->assertJsonPath('sync_status', 'skipped_existing')
             ->assertJsonPath('exists', true)
             ->assertJsonPath('data.rawg_id', 98765);
     }
@@ -146,6 +153,9 @@ class SyncApiTest extends TestCase
         $this->withToken('sync-test-token')
             ->postJson('/api/sync/games', $payload)
             ->assertCreated()
+            ->assertJsonPath('created', true)
+            ->assertJsonPath('registered', true)
+            ->assertJsonPath('sync_status', 'created')
             ->assertJsonPath('data.rawg_id', 987897)
             ->assertJsonPath('data.name', 'FAIRY TAIL: DUNGEONS')
             ->assertJsonPath('data.status', 'liberado')

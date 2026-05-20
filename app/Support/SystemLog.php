@@ -48,4 +48,11 @@ class SystemLog
         if (!$logger) return;
         $logger->info($event, array_merge(['level' => 'debug'], $context));
     }
+
+    public static function error(string $event, array $context = []): void
+    {
+        $logger = self::logger();
+        if (!$logger) return;
+        $logger->error($event, $context);
+    }
 }

@@ -12,10 +12,12 @@ use App\Models\Platform;
 use App\Models\Studio;
 use App\Models\Tag;
 use App\Support\SystemLog;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Throwable;
 
 class GameSyncController extends Controller
 {
@@ -112,41 +114,92 @@ class GameSyncController extends Controller
 
         if ($existing) {
             return response()->json([
-                'message' => 'Jogo RAWG ja cadastrado.',
+                'created' => false,
+                'registered' => false,
+                'sync_status' => 'skipped_existing',
+                'message' => 'Jogo RAWG ja cadastrado. Nenhum novo jogo foi criado.',
                 'exists' => true,
                 'rawg_id' => $rawgId,
                 'deleted' => $existing->trashed(),
                 'data' => GameSyncPayload::serialize($existing),
-            ], 409);
+            ]);
         }
 
-        $game = DB::transaction(function () use ($data) {
-            $studioId = $data['studio_id'] ?? $this->resolveStudio($data['studio'] ?? []);
-            $studioId ??= $this->resolveFallbackStudio();
-            $game = $this->createGame($data, $studioId);
+        try {
+            $game = DB::transaction(function () use ($data) {
+                $studioId = $data['studio_id'] ?? $this->resolveStudio($data['studio'] ?? []);
+                $studioId ??= $this->resolveFallbackStudio();
+                $game = $this->createGame($data, $studioId);
 
-            if (array_key_exists('tags', $data)) {
-                $tagIds = $this->resolveTags($data['tags'] ?? []);
-                $game->tags()->sync($tagIds);
+                if (array_key_exists('tags', $data)) {
+                    $tagIds = $this->resolveTags($data['tags'] ?? []);
+                    $game->tags()->sync($tagIds);
+                }
+
+                if (array_key_exists('platforms', $data)) {
+                    $pivot = $this->resolvePlatforms($data['platforms'] ?? []);
+                    $game->platforms()->sync($pivot);
+                }
+
+                if (array_key_exists('images', $data)) {
+                    $game->loadMissing('images');
+                    $this->appendImages($game, $data['images'] ?? []);
+                }
+
+                if (array_key_exists('external_links', $data)) {
+                    $game->loadMissing('links');
+                    $this->appendLinks($game, $data['external_links'] ?? []);
+                }
+
+                return $game;
+            });
+        } catch (QueryException $e) {
+            $existing = Game::withTrashed()
+                ->where('rawg_id', $rawgId)
+                ->orderByDesc('id')
+                ->first();
+
+            if ($existing) {
+                return response()->json([
+                    'created' => false,
+                    'registered' => false,
+                    'sync_status' => 'skipped_existing',
+                    'message' => 'Jogo RAWG ja cadastrado por outra execucao. Nenhum novo jogo foi criado.',
+                    'exists' => true,
+                    'rawg_id' => $rawgId,
+                    'deleted' => $existing->trashed(),
+                    'data' => GameSyncPayload::serialize($existing),
+                ]);
             }
 
-            if (array_key_exists('platforms', $data)) {
-                $pivot = $this->resolvePlatforms($data['platforms'] ?? []);
-                $game->platforms()->sync($pivot);
-            }
+            SystemLog::error('API.sync.create_game.database_error', [
+                'rawg_id' => $rawgId,
+                'message' => $e->getMessage(),
+            ]);
 
-            if (array_key_exists('images', $data)) {
-                $game->loadMissing('images');
-                $this->appendImages($game, $data['images'] ?? []);
-            }
+            return response()->json([
+                'created' => false,
+                'registered' => false,
+                'sync_status' => 'failed',
+                'message' => 'Nao foi possivel cadastrar o jogo por erro de banco de dados.',
+                'rawg_id' => $rawgId,
+                'data' => null,
+            ], 500);
+        } catch (Throwable $e) {
+            SystemLog::error('API.sync.create_game.error', [
+                'rawg_id' => $rawgId,
+                'message' => $e->getMessage(),
+            ]);
 
-            if (array_key_exists('external_links', $data)) {
-                $game->loadMissing('links');
-                $this->appendLinks($game, $data['external_links'] ?? []);
-            }
-
-            return $game;
-        });
+            return response()->json([
+                'created' => false,
+                'registered' => false,
+                'sync_status' => 'failed',
+                'message' => 'Nao foi possivel cadastrar o jogo.',
+                'rawg_id' => $rawgId,
+                'data' => null,
+            ], 500);
+        }
 
         $game->refresh()->load(['studio:id,name', 'tags:id,name,slug', 'platforms:id,name', 'images:id,game_id,url,sort_order', 'links:id,game_id,label,url']);
 
@@ -155,7 +208,14 @@ class GameSyncController extends Controller
             'rawg_id' => $game->rawg_id,
         ]);
 
-        return response()->json(GameSyncPayload::payload($game), 201);
+        return response()->json(array_merge(GameSyncPayload::payload($game), [
+            'created' => true,
+            'registered' => true,
+            'sync_status' => 'created',
+            'message' => 'Novo jogo cadastrado com sucesso.',
+            'exists' => true,
+            'rawg_id' => $game->rawg_id,
+        ]), 201);
     }
 
     public function update(SyncGameUpdateRequest $request, Game $game): JsonResponse

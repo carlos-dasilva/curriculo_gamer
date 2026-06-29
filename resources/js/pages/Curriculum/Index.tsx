@@ -44,15 +44,27 @@ type Paginator<T> = {
 
 type Props = {
   mode: 'all' | 'platform';
+  view?: 'games' | 'chronologies';
   summary: Counts;
   byPlatform: PlatformCounts[];
   selected: Selected;
   games: Paginator<GameCard>;
+  chronologies?: ChronologyProgress[];
   subject: { id: number; name: string; avatar_url?: string | null; isMe: boolean; isFollowed?: boolean };
   auth: AuthInfo;
   flash?: { success?: string; error?: string };
   filters?: { q?: string; sub?: boolean; dub?: boolean };
   nowPlaying?: { id: number; name: string; cover_url?: string | null } | null;
+};
+
+type ChronologyProgress = {
+  id: number;
+  name: string;
+  description?: string | null;
+  total_steps: number;
+  completed_steps: number;
+  completion_percent: number;
+  cover_urls: string[];
 };
 
 const STATUS_LABELS: Record<StatusKey, string> = {
@@ -62,7 +74,7 @@ const STATUS_LABELS: Record<StatusKey, string> = {
   quero_jogar: 'Quero Jogar',
 };
 
-export default function CurriculumIndex({ mode, summary, byPlatform, selected, games, subject, auth, flash, filters, nowPlaying }: Props) {
+export default function CurriculumIndex({ mode, view = 'games', summary, byPlatform, selected, games, chronologies = [], subject, auth, flash, filters, nowPlaying }: Props) {
   const [currentMode, setCurrentMode] = React.useState<'all' | 'platform'>(mode || 'all');
   const basePath = subject?.isMe ? '/meu-curriculo' : `/curriculo/${subject?.id}`;
   const [q, setQ] = React.useState<string>(filters?.q || '');
@@ -88,6 +100,10 @@ export default function CurriculumIndex({ mode, summary, byPlatform, selected, g
     if (sub) params.sub = 1;
     if (dub) params.dub = 1;
     router.get(basePath, params, { preserveScroll: true, preserveState: true });
+  };
+
+  const showChronologies = () => {
+    router.get(basePath, { view: 'chronologies' }, { preserveScroll: true, preserveState: true });
   };
   const applyFilters = (e: React.FormEvent) => {
     e.preventDefault();
@@ -177,6 +193,35 @@ export default function CurriculumIndex({ mode, summary, byPlatform, selected, g
           <aside className="lg:sticky lg:top-20 self-start">
             {/* Lista de filtros */}
             <div className="mt-4">
+              <nav aria-label="Áreas do currículo" className="mb-4">
+                <ul className="space-y-1">
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => router.get(basePath, { mode: selected.mode, status: selected.status, ...(selected.platformId ? { platform: selected.platformId } : {}) }, { preserveScroll: true, preserveState: true })}
+                      aria-current={view === 'games' ? 'true' : undefined}
+                      className={`${view === 'games' ? 'bg-gray-900 text-white' : 'bg-white text-gray-800 hover:bg-gray-50'} flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium ring-1 ring-inset ring-gray-200 cursor-pointer`}
+                    >
+                      <GamepadIcon className="h-4 w-4" />
+                      <span>Jogos</span>
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      type="button"
+                      onClick={showChronologies}
+                      aria-current={view === 'chronologies' ? 'true' : undefined}
+                      className={`${view === 'chronologies' ? 'bg-gray-900 text-white' : 'bg-white text-gray-800 hover:bg-gray-50'} flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium ring-1 ring-inset ring-gray-200 cursor-pointer`}
+                    >
+                      <TimelineIcon className="h-4 w-4" />
+                      <span>Cronologias</span>
+                      <Badge value={chronologies.length} inverted={view === 'chronologies'} />
+                    </button>
+                  </li>
+                </ul>
+              </nav>
+              {view === 'games' && (
+              <>
               <ul className="space-y-1" role="list" aria-label="Status gerais">
                 {(['cem_por_cento','finalizei','joguei','quero_jogar'] as StatusKey[]).map((key) => {
                   const active = selected.status === key; // mantém destaque no status atual
@@ -238,11 +283,17 @@ export default function CurriculumIndex({ mode, summary, byPlatform, selected, g
                   </section>
                 );
               })()}
+              </>
+              )}
             </div>
           </aside>
 
           {/* Conteúdo principal: cards */}
           <section className="lg:col-start-2 min-w-0">
+            {view === 'chronologies' ? (
+              <ChronologiesPanel chronologies={chronologies} subject={subject} />
+            ) : (
+            <>
             <form onSubmit={applyFilters} className="mb-4 rounded-lg border border-gray-200 bg-white p-3 shadow-sm">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
                 <div className="sm:flex-1">
@@ -287,6 +338,8 @@ export default function CurriculumIndex({ mode, summary, byPlatform, selected, g
                 
               </>
             )}
+            </>
+            )}
           </section>
         </div>
       </main>
@@ -295,9 +348,72 @@ export default function CurriculumIndex({ mode, summary, byPlatform, selected, g
   );
 }
 
+function ChronologiesPanel({ chronologies, subject }: { chronologies: ChronologyProgress[]; subject: Props['subject'] }) {
+  const baseHref = subject?.isMe ? '/meu-curriculo/cronologias' : `/curriculo/${subject?.id}/cronologias`;
+
+  if (!chronologies.length) {
+    return (
+      <div className="rounded-lg border border-gray-200 bg-white p-6 text-sm text-gray-600 shadow-sm">
+        Nenhuma cronologia disponível para este currículo. As cronologias aparecem aqui quando o jogador finaliza ou faz 100% em pelo menos uma parte.
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="mb-4">
+        <h2 className="text-lg font-semibold text-gray-900">Cronologias</h2>
+        <p className="mt-1 text-sm text-gray-600">Ordenadas pela maior porcentagem de conclusão.</p>
+      </div>
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        {chronologies.map((chronology) => (
+          <a key={chronology.id} href={`${baseHref}/${chronology.id}`} className="group overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition hover:border-gray-300 hover:shadow-md">
+            <div className="grid grid-cols-[112px_1fr] sm:grid-cols-[148px_1fr]">
+              <div className="grid h-full min-h-[172px] grid-cols-2 grid-rows-2 bg-gray-100">
+                {(chronology.cover_urls.length ? chronology.cover_urls : ['/img/sem-imagem.svg']).slice(0, 4).map((url, index) => (
+                  <img key={`${chronology.id}-${index}`} src={url || '/img/sem-imagem.svg'} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />
+                ))}
+              </div>
+              <div className="min-w-0 p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <h3 className="line-clamp-2 text-base font-semibold text-gray-900 group-hover:underline">{chronology.name}</h3>
+                  <span className="inline-flex flex-none rounded-full bg-gray-900 px-2.5 py-1 text-xs font-semibold text-white">{chronology.completion_percent}%</span>
+                </div>
+                <p className="mt-2 line-clamp-2 text-sm text-gray-600">{chronology.description || 'Cronologia aprovada pela administração.'}</p>
+                <div className="mt-4 h-2 overflow-hidden rounded-full bg-gray-200">
+                  <div className="h-full rounded-full bg-gray-900" style={{ width: `${chronology.completion_percent}%` }} />
+                </div>
+                <p className="mt-3 text-sm font-medium text-gray-700">
+                  {chronology.completed_steps} de {chronology.total_steps} partes concluídas
+                </p>
+              </div>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function Badge({ value, inverted }: { value: number; inverted?: boolean }) {
   return (
     <span className={`inline-flex min-w-8 items-center justify-center rounded-full px-2 py-0.5 text-xs font-semibold ${inverted ? 'bg-white text-gray-900' : 'bg-gray-900 text-white'}`}>{value}</span>
+  );
+}
+
+function GamepadIcon({ className }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={className} aria-hidden="true">
+      <path d="M4.5 7.5A4.5 4.5 0 019 3h2a4.5 4.5 0 014.5 4.5v4A3.5 3.5 0 0112 15h-.7l-.9-.9a.6.6 0 00-.4-.1.6.6 0 00-.4.1l-.9.9H8a3.5 3.5 0 01-3.5-3.5v-4zM7 8a.75.75 0 000 1.5h.75v.75a.75.75 0 001.5 0V9.5H10a.75.75 0 000-1.5h-.75v-.75a.75.75 0 00-1.5 0V8H7zm6.25.75a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm1.5 2a.75.75 0 10-1.5 0 .75.75 0 001.5 0z" />
+    </svg>
+  );
+}
+
+function TimelineIcon({ className }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={className} aria-hidden="true">
+      <path d="M4.25 3a1.75 1.75 0 100 3.5 1.75 1.75 0 000-3.5zM4.25 8.25a1.75 1.75 0 100 3.5 1.75 1.75 0 000-3.5zM2.5 15.25a1.75 1.75 0 113.5 0 1.75 1.75 0 01-3.5 0zM8 4a.75.75 0 000 1.5h8.25a.75.75 0 000-1.5H8zM8 9.25a.75.75 0 000 1.5h8.25a.75.75 0 000-1.5H8zM7.25 15.25A.75.75 0 018 14.5h8.25a.75.75 0 010 1.5H8a.75.75 0 01-.75-.75z" />
+    </svg>
   );
 }
 

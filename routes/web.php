@@ -23,6 +23,7 @@ use App\Domain\Games\Http\Controllers\CurriculumController;
 use App\Domain\Games\Http\Controllers\BacklogController;
 use App\Domain\Users\Http\Controllers\FollowController;
 use App\Domain\Profile\Http\Controllers\OptionsController;
+use App\Domain\Chronologies\Http\Controllers\ChronologyController;
 
 // Rota Home (Inertia)
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -82,12 +83,24 @@ Route::middleware('auth')->group(function () {
     Route::put('/opcoes/solicitacoes/{game}/liberar', [\App\Domain\Games\Http\Controllers\SolicitationController::class, 'release'])->middleware('role:moderador,admin')->name('options.requests.release');
 });
 
+// Cronologias (criação/edição em avaliação pelo usuário)
+Route::middleware('auth')->group(function () {
+    Route::get('/opcoes/cronologias/novo', [ChronologyController::class, 'create'])->name('options.chronologies.create');
+    Route::post('/opcoes/cronologias', [ChronologyController::class, 'store'])->name('options.chronologies.store');
+    Route::get('/opcoes/cronologias/{chronology}/editar', [ChronologyController::class, 'edit'])->name('options.chronologies.edit');
+    Route::put('/opcoes/cronologias/{chronology}', [ChronologyController::class, 'update'])->name('options.chronologies.update');
+    Route::delete('/opcoes/cronologias/{chronology}', [ChronologyController::class, 'destroy'])->name('options.chronologies.destroy');
+    Route::put('/opcoes/cronologias/{chronology}/liberar', [ChronologyController::class, 'release'])->middleware('role:admin')->name('options.chronologies.release');
+});
+
 // Meu Currículo (somente autenticado)
 Route::middleware('auth')->get('/meu-curriculo', [CurriculumController::class, 'index'])->name('curriculum.index');
+Route::middleware('auth')->get('/meu-curriculo/cronologias/{chronology}', [ChronologyController::class, 'showMine'])->name('curriculum.chronologies.show.mine');
 Route::middleware('auth')->get('/meu-backlog', [BacklogController::class, 'index'])->name('backlog.index');
 Route::middleware('auth')->put('/meu-backlog/ordem', [BacklogController::class, 'reorder'])->name('backlog.reorder');
 // Currículo de outro usuário (somente autenticado)
 Route::get('/curriculo/{user}', [CurriculumController::class, 'show'])->whereNumber('user')->name('curriculum.show');
+Route::get('/curriculo/{user}/cronologias/{chronology}', [ChronologyController::class, 'showForUser'])->whereNumber('user')->name('curriculum.chronologies.show');
 Route::get('/backlog/{user}', [BacklogController::class, 'show'])->whereNumber('user')->name('backlog.show');
 
 // Gestão de usuários (apenas moderador e admin)
@@ -98,6 +111,13 @@ Route::middleware(['auth','role:moderador,admin'])->prefix('admin')->name('admin
     Route::put('/usuarios/{user}', [UserManagementController::class, 'update'])->name('users.update');
     Route::put('/usuarios/{user}/bloquear', [UserManagementController::class, 'block'])->name('users.block');
     Route::put('/usuarios/{user}/desbloquear', [UserManagementController::class, 'unblock'])->name('users.unblock');
+
+    Route::get('/cronologias', [ChronologyController::class, 'adminIndex'])
+        ->name('chronologies.index')
+        ->middleware('role:admin');
+    Route::put('/cronologias/{chronology}/liberar', [ChronologyController::class, 'release'])
+        ->name('chronologies.release')
+        ->middleware('role:admin');
 
     // Estúdios (moderador e admin)
     Route::get('/estudios', [StudioController::class, 'index'])->name('studios.index');

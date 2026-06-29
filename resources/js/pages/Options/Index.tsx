@@ -13,14 +13,15 @@ export default function OptionsIndex() {
   const meSummary = (page.props as any).meSummary as FollowingRow | undefined;
   const followingSummary = (page.props as any).followingSummary as FollowingRow[] | undefined;
   const solicitations = (page.props as any).solicitations as any[] | undefined;
-  const abilities = (page.props as any).abilities as { canModerate: boolean } | undefined;
-  const [active, setActive] = React.useState<'perfil' | 'seguindo' | 'solicitacoes'>('perfil');
+  const chronologySolicitations = (page.props as any).chronologySolicitations as any[] | undefined;
+  const abilities = (page.props as any).abilities as { canModerate: boolean; canApproveChronologies?: boolean } | undefined;
+  const [active, setActive] = React.useState<'perfil' | 'seguindo' | 'solicitacoes' | 'cronologias'>('perfil');
   React.useEffect(() => {
     try {
       const w = window as any;
       const url = new URL(w.location?.href ?? '', w.location?.origin ?? undefined);
       const tab = (url.searchParams.get('tab') || (w.location?.hash || '').replace('#','')).toLowerCase();
-      if (tab === 'solicitacoes' || tab === 'seguindo' || tab === 'perfil') {
+      if (tab === 'solicitacoes' || tab === 'seguindo' || tab === 'perfil' || tab === 'cronologias') {
         setActive(tab as any);
       }
     } catch (_) { /* ignore */ }
@@ -83,6 +84,17 @@ export default function OptionsIndex() {
                   >
                     <PlusIcon className="h-4 w-4" />
                     <span>Solicitações</span>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => setActive('cronologias')}
+                    aria-current={active === 'cronologias' ? 'true' : undefined}
+                    className={`${active === 'cronologias' ? 'bg-brand-600 text-white' : 'bg-white text-gray-800 hover:bg-gray-50'} flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium ring-1 ring-inset ring-gray-200 cursor-pointer`}
+                  >
+                    <TimelineIcon className="h-4 w-4" />
+                    <span>Cronologias</span>
                   </button>
                 </li>
               </ul>
@@ -264,6 +276,67 @@ export default function OptionsIndex() {
                   </table>
                 </div>
               </div>
+            ) : active === 'cronologias' ? (
+              <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900">Cronologias</h2>
+                    <p className="mt-1 text-sm text-gray-600">
+                      Crie sequências cronológicas de jogos. Elas ficam em avaliação até aprovação de um admin.
+                    </p>
+                  </div>
+                  <a
+                    href="/opcoes/cronologias/novo"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-gray-900 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900 sm:w-auto"
+                  >
+                    <PlusIcon className="h-4 w-4" />
+                    Nova cronologia
+                  </a>
+                </div>
+
+                <div className="mt-4 overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200 overflow-hidden rounded-lg border border-gray-200 bg-white">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th scope="col" className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700">Cronologia</th>
+                        <th scope="col" className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700">Etapas</th>
+                        {abilities?.canApproveChronologies && (
+                          <th scope="col" className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700">Criada por</th>
+                        )}
+                        <th scope="col" className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-gray-700">Criada em</th>
+                        <th scope="col" className="px-4 py-2 text-right text-xs font-semibold uppercase tracking-wider text-gray-700">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {(chronologySolicitations || []).map((c: any) => (
+                        <tr key={c.id} className="hover:bg-gray-50">
+                          <td className="px-4 py-2 text-sm text-gray-900">
+                            <div className="max-w-md">
+                              <p className="font-medium">{c.name}</p>
+                              <p className="line-clamp-2 text-xs text-gray-500">{c.description || 'Sem descrição'}</p>
+                            </div>
+                          </td>
+                          <td className="px-4 py-2 text-sm text-gray-800">{c.steps_count}</td>
+                          {abilities?.canApproveChronologies && (
+                            <td className="px-4 py-2 text-sm text-gray-800">{c.created_by_name || '-'}</td>
+                          )}
+                          <td className="px-4 py-2 text-sm text-gray-800">{new Date(c.created_at).toLocaleDateString()}</td>
+                          <td className="px-4 py-2 text-sm text-gray-800">
+                            <div className="flex items-center justify-end gap-2">
+                              <a href={`/opcoes/cronologias/${c.id}/editar`} className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50">Editar</a>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                      {(chronologySolicitations || []).length === 0 && (
+                        <tr>
+                          <td colSpan={abilities?.canApproveChronologies ? 5 : 4} className="px-4 py-6 text-center text-sm text-gray-600">Nenhuma cronologia em avaliação.</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             ) : null}
           </section>
         </div>
@@ -316,6 +389,14 @@ function PlusIcon({ className }: { className?: string }) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={className} aria-hidden="true">
       <path d="M10 3a.75.75 0 01.75.75v5.5h5.5a.75.75 0 010 1.5h-5.5v5.5a.75.75 0 01-1.5 0v-5.5h-5.5a.75.75 0 010-1.5h5.5v-5.5A.75.75 0 0110 3z" />
+    </svg>
+  );
+}
+
+function TimelineIcon({ className }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={className} aria-hidden="true">
+      <path d="M4.25 3a1.75 1.75 0 100 3.5 1.75 1.75 0 000-3.5zM4.25 8.25a1.75 1.75 0 100 3.5 1.75 1.75 0 000-3.5zM2.5 15.25a1.75 1.75 0 113.5 0 1.75 1.75 0 01-3.5 0zM8 4a.75.75 0 000 1.5h8.25a.75.75 0 000-1.5H8zM8 9.25a.75.75 0 000 1.5h8.25a.75.75 0 000-1.5H8zM7.25 15.25A.75.75 0 018 14.5h8.25a.75.75 0 010 1.5H8a.75.75 0 01-.75-.75z" />
     </svg>
   );
 }

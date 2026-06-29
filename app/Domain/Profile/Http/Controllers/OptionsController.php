@@ -92,6 +92,7 @@ class OptionsController extends Controller
         $rawRole = is_object($user->role) ? $user->role->value : ($user->role ?? 'co.mum');
         $role = strtolower(trim((string) $rawRole));
         $canModerate = in_array($role, ['moderador','admin'], true);
+        $canManageChronologies = $role === 'admin';
         $solicitationQuery = DB::table('games as g')
             ->leftJoin('studios as s', 's.id', '=', 'g.studio_id')
             ->leftJoin('users as u', 'u.id', '=', 'g.created_by')
@@ -108,6 +109,27 @@ class OptionsController extends Controller
         }
         $solicitations = $solicitationQuery->get();
 
+        $chronologyQuery = DB::table('chronologies as c')
+            ->leftJoin('users as u', 'u.id', '=', 'c.created_by')
+            ->leftJoin('chronology_steps as cs', 'cs.chronology_id', '=', 'c.id')
+            ->where('c.status', 'avaliacao')
+            ->whereNull('c.deleted_at')
+            ->select([
+                'c.id',
+                'c.name',
+                'c.description',
+                'c.created_at',
+                'u.id as created_by_id',
+                'u.name as created_by_name',
+                DB::raw('COUNT(DISTINCT cs.id) as steps_count'),
+            ])
+            ->groupBy('c.id', 'c.name', 'c.description', 'c.created_at', 'u.id', 'u.name')
+            ->orderBy('c.created_at', 'desc');
+        if (!$canManageChronologies) {
+            $chronologyQuery->where('c.created_by', $user->id);
+        }
+        $chronologySolicitations = $chronologyQuery->get();
+
         return Inertia::render('Options/Index', [
             'user' => [
                 'name' => $user->name,
@@ -118,8 +140,10 @@ class OptionsController extends Controller
             'meSummary' => $meSummary,
             'followingSummary' => $followingSummary,
             'solicitations' => $solicitations,
+            'chronologySolicitations' => $chronologySolicitations,
             'abilities' => [
                 'canModerate' => $canModerate,
+                'canApproveChronologies' => $canManageChronologies,
             ],
         ]);
     }

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use App\Models\Game;
 use App\Models\User;
+use App\Domain\Chronologies\Services\ChronologyProgressService;
 
 class CurriculumController extends Controller
 {
@@ -21,6 +22,11 @@ class CurriculumController extends Controller
         }
 
         $userId = (int) auth()->id();
+
+        $view = (string) $request->input('view', 'games');
+        if (!in_array($view, ['games', 'chronologies'], true)) {
+            $view = 'games';
+        }
 
         $allowedStatuses = ['cem_por_cento','finalizei','joguei','quero_jogar'];
         $status = (string) $request->input('status', 'cem_por_cento');
@@ -194,6 +200,8 @@ class CurriculumController extends Controller
                 'isFollowed' => false,
             ],
             'nowPlaying' => $nowPlaying,
+            'view' => $view,
+            'chronologies' => app(ChronologyProgressService::class)->listForUser($userId),
         ]);
     }
 
@@ -208,6 +216,11 @@ class CurriculumController extends Controller
         }
 
         $userId = (int) $userModel->id;
+
+        $view = (string) $request->input('view', 'games');
+        if (!in_array($view, ['games', 'chronologies'], true)) {
+            $view = 'games';
+        }
 
         $allowedStatuses = ['cem_por_cento','finalizei','joguei','quero_jogar'];
         $status = (string) $request->input('status', 'cem_por_cento');
@@ -386,6 +399,8 @@ class CurriculumController extends Controller
                 'isFollowed' => $isFollowed,
             ],
             'nowPlaying' => $nowPlaying,
+            'view' => $view,
+            'chronologies' => app(ChronologyProgressService::class)->listForUser($userId),
         ]);
     }
 

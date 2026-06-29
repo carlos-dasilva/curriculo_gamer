@@ -23,6 +23,9 @@ export default function AdminLayout({ title, children }: Props) {
       { label: 'Dashboard', href: '/admin/dashboard' },
       { label: 'Usuários', href: '/admin/usuarios' },
     ];
+    if (isAdmin) {
+      base.push({ label: 'Cronologias', href: '/admin/cronologias' });
+    }
     base.push({ label: 'Jogos', href: '/admin/jogos' });
     base.push({ label: 'Estúdios', href: '/admin/estudios' });
     base.push({ label: 'Plataformas', href: '/admin/plataformas' });
@@ -135,6 +138,7 @@ function renderIcon(href: string) {
   const cls = 'h-4 w-4';
   if (href.startsWith('/admin/dashboard')) return <Squares2x2Icon className={cls} />;
   if (href.startsWith('/admin/usuarios')) return <UsersIcon className={cls} />;
+  if (href.startsWith('/admin/cronologias')) return <TimelineIcon className={cls} />;
   if (href.startsWith('/admin/jogos')) return <GamepadIcon className={cls} />;
   if (href.startsWith('/admin/estudios')) return <BuildingIcon className={cls} />;
   if (href.startsWith('/admin/plataformas')) return <GamepadIcon className={cls} />;
@@ -207,6 +211,14 @@ function BookIcon({ className }: { className?: string }) {
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
       <path d="M4.5 3.75A2.25 2.25 0 016.75 1.5h10.5A2.25 2.25 0 0119.5 3.75v14.25a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 18V3.75zM6.75 3a.75.75 0 00-.75.75V18c0 .414.336.75.75.75h10.5a.75.75 0 00.75-.75V3.75a.75.75 0 00-.75-.75H6.75z" />
       <path d="M8.25 6.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 010-1.5zM8.25 9.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 010-1.5z" />
+    </svg>
+  );
+}
+
+function TimelineIcon({ className }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={className} aria-hidden="true">
+      <path d="M4.25 3a1.75 1.75 0 100 3.5 1.75 1.75 0 000-3.5zM4.25 8.25a1.75 1.75 0 100 3.5 1.75 1.75 0 000-3.5zM2.5 15.25a1.75 1.75 0 113.5 0 1.75 1.75 0 01-3.5 0zM8 4a.75.75 0 000 1.5h8.25a.75.75 0 000-1.5H8zM8 9.25a.75.75 0 000 1.5h8.25a.75.75 0 000-1.5H8zM7.25 15.25A.75.75 0 018 14.5h8.25a.75.75 0 010 1.5H8a.75.75 0 01-.75-.75z" />
     </svg>
   );
 }

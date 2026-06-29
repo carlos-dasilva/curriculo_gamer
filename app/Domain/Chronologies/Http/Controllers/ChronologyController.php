@@ -55,14 +55,14 @@ class ChronologyController extends Controller
             'games' => $this->gameOptions(),
             'abilities' => [
                 'canApprove' => $this->isAdmin(),
-                'canEdit' => $this->canManageDraft($chronology),
+                'canEdit' => $this->canEditChronology($chronology),
             ],
         ]);
     }
 
     public function update(StoreChronologyRequest $request, Chronology $chronology): RedirectResponse
     {
-        $this->ensureCanManageDraft($chronology);
+        $this->ensureCanEditChronology($chronology);
         $data = $request->validated();
 
         DB::transaction(function () use ($chronology, $data) {
@@ -239,6 +239,22 @@ class ChronologyController extends Controller
         if (!$this->canManageDraft($chronology)) {
             abort(403, 'Cronologias aprovadas não podem ser alteradas por este fluxo.');
         }
+    }
+
+    private function ensureCanEditChronology(Chronology $chronology): void
+    {
+        if (!$this->canEditChronology($chronology)) {
+            abort(403, 'Apenas admins podem editar cronologias aprovadas.');
+        }
+    }
+
+    private function canEditChronology(Chronology $chronology): bool
+    {
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        return $chronology->status === 'avaliacao' && (int) $chronology->created_by === (int) auth()->id();
     }
 
     private function canManageDraft(Chronology $chronology): bool

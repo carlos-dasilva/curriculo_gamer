@@ -76,22 +76,14 @@ export default function ChronologyShow({ chronology, progress, steps, subject }:
         </div>
 
         <section className="mb-6 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
-          <div className="grid gap-0 lg:grid-cols-[1fr_280px]">
-            <div className="p-5">
-              <p className="text-sm text-gray-600">{chronology.description || 'Sequência cronológica aprovada pela administração.'}</p>
-              <div className="mt-5 h-3 overflow-hidden rounded-full bg-gray-200" aria-label={`Progresso: ${progress.completion_percent}%`}>
-                <div className="h-full rounded-full bg-gray-900" style={{ width: `${progress.completion_percent}%` }} />
-              </div>
-              <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-gray-700">
-                <span className="font-semibold text-gray-900">{progress.completion_percent}% concluído</span>
-                <span>{progress.completed_steps} de {progress.total_steps} partes concluídas</span>
-              </div>
+          <div className="p-5">
+            <p className="text-sm text-gray-600">{chronology.description || 'Sequência cronológica aprovada pela administração.'}</p>
+            <div className="mt-5 h-3 overflow-hidden rounded-full bg-gray-200" aria-label={`Progresso: ${progress.completion_percent}%`}>
+              <div className="h-full rounded-full bg-gray-900" style={{ width: `${progress.completion_percent}%` }} />
             </div>
-            <div className="border-t border-gray-200 bg-gray-900 p-5 text-white lg:border-l lg:border-t-0">
-              <p className="text-xs font-semibold uppercase text-gray-300">Regra de conclusão</p>
-              <p className="mt-2 text-sm text-gray-100">
-                Uma parte é concluída quando pelo menos um jogo daquela linha está marcado como Finalizei ou Fiz 100%.
-              </p>
+            <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-gray-700">
+              <span className="font-semibold text-gray-900">{progress.completion_percent}% concluído</span>
+              <span>{progress.completed_steps} de {progress.total_steps} partes concluídas</span>
             </div>
           </div>
         </section>

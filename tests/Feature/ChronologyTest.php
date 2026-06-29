@@ -88,6 +88,67 @@ class ChronologyTest extends TestCase
             );
     }
 
+    public function test_admin_can_edit_approved_chronology(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $creator = User::factory()->create();
+        $studio = Studio::query()->create(['name' => 'Studio Teste']);
+
+        $first = $this->createReleasedGame($studio, 'Primeiro Jogo');
+        $second = $this->createReleasedGame($studio, 'Segundo Jogo');
+
+        $chronology = Chronology::query()->create([
+            'name' => 'Cronologia Aprovada',
+            'description' => 'Descrição antiga.',
+            'status' => 'liberado',
+            'created_by' => $creator->id,
+            'approved_by' => $admin->id,
+        ]);
+
+        $step = $chronology->steps()->create([
+            'position' => 1,
+            'title' => 'Parte antiga',
+        ]);
+        $step->stepGames()->create([
+            'game_id' => $first->id,
+            'position' => 1,
+        ]);
+
+        $this->actingAs($admin)
+            ->get("/opcoes/cronologias/{$chronology->id}/editar")
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Chronologies/Edit', false)
+                ->where('abilities.canEdit', true)
+            );
+
+        $this->actingAs($admin)
+            ->put("/opcoes/cronologias/{$chronology->id}", [
+                'name' => 'Cronologia Aprovada Editada',
+                'description' => 'Descrição nova.',
+                'steps' => [
+                    ['title' => 'Parte nova', 'game_ids' => [$first->id, $second->id]],
+                ],
+            ])
+            ->assertRedirect(route('options.chronologies.edit', $chronology));
+
+        $this->assertDatabaseHas('chronologies', [
+            'id' => $chronology->id,
+            'name' => 'Cronologia Aprovada Editada',
+            'description' => 'Descrição nova.',
+            'status' => 'liberado',
+        ]);
+        $this->assertDatabaseHas('chronology_steps', [
+            'chronology_id' => $chronology->id,
+            'position' => 1,
+            'title' => 'Parte nova',
+        ]);
+        $this->assertDatabaseHas('chronology_step_games', [
+            'game_id' => $second->id,
+            'position' => 2,
+        ]);
+    }
+
     private function createReleasedGame(Studio $studio, string $name): Game
     {
         return Game::query()->create([

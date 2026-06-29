@@ -42,7 +42,9 @@ export default function ChronologyForm({ mode, games, chronology, abilities }: P
   const flash = (page.props as any).flash as { success?: string; error?: string } | undefined;
   const isEdit = mode === 'edit';
   const canEdit = !isEdit || abilities?.canEdit !== false;
-  const [selectedByStep, setSelectedByStep] = React.useState<Record<number, string>>({});
+  const [selectedByStep, setSelectedByStep] = React.useState<Record<number, number>>({});
+  const [gameSearchByStep, setGameSearchByStep] = React.useState<Record<number, string>>({});
+  const [activeSearchStep, setActiveSearchStep] = React.useState<number | null>(null);
 
   const { data, setData, post, put, processing, errors } = useForm<ChronologyFormData>({
     name: chronology?.name || '',
@@ -52,6 +54,19 @@ export default function ChronologyForm({ mode, games, chronology, abilities }: P
 
   const gameMap = React.useMemo(() => new Map(games.map((game) => [game.id, game])), [games]);
   const usedGameIds = React.useMemo(() => new Set(data.steps.flatMap((step) => step.game_ids)), [data.steps]);
+  const gameLabel = (game: GameOption) => `${game.name}${game.studio_name ? ` - ${game.studio_name}` : ''}`;
+  const normalizeSearch = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  const filteredGamesForStep = (stepIndex: number) => {
+    const query = normalizeSearch(gameSearchByStep[stepIndex] || '');
+    if (query.length < 2) {
+      return [];
+    }
+
+    return games
+      .filter((game) => !usedGameIds.has(game.id))
+      .filter((game) => normalizeSearch(`${game.name} ${game.studio_name || ''}`).includes(query))
+      .slice(0, 10);
+  };
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,7 +110,15 @@ export default function ChronologyForm({ mode, games, chronology, abilities }: P
     if (!selected || usedGameIds.has(selected)) return;
     const step = data.steps[stepIndex];
     updateStep(stepIndex, { ...step, game_ids: [...step.game_ids, selected] });
-    setSelectedByStep({ ...selectedByStep, [stepIndex]: '' });
+    setSelectedByStep({ ...selectedByStep, [stepIndex]: 0 });
+    setGameSearchByStep({ ...gameSearchByStep, [stepIndex]: '' });
+    setActiveSearchStep(null);
+  };
+
+  const selectGameForStep = (stepIndex: number, game: GameOption) => {
+    setSelectedByStep({ ...selectedByStep, [stepIndex]: game.id });
+    setGameSearchByStep({ ...gameSearchByStep, [stepIndex]: gameLabel(game) });
+    setActiveSearchStep(null);
   };
 
   const removeGame = (stepIndex: number, gameId: number) => {
@@ -233,19 +256,74 @@ export default function ChronologyForm({ mode, games, chronology, abilities }: P
 
                       {canEdit && (
                         <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-                          <select
-                            value={selectedByStep[stepIndex] || ''}
-                            onChange={(e) => setSelectedByStep({ ...selectedByStep, [stepIndex]: e.target.value })}
-                            className="min-w-0 flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900"
+                          <div className="relative min-w-0 flex-1">
+                            <label htmlFor={`game-search-${stepIndex}`} className="sr-only">Pesquisar jogo para a etapa {stepIndex + 1}</label>
+                            <input
+                              id={`game-search-${stepIndex}`}
+                              type="search"
+                              value={gameSearchByStep[stepIndex] || ''}
+                              onFocus={() => setActiveSearchStep(stepIndex)}
+                              onBlur={() => window.setTimeout(() => setActiveSearchStep((current) => current === stepIndex ? null : current), 150)}
+                              onChange={(e) => {
+                                setGameSearchByStep({ ...gameSearchByStep, [stepIndex]: e.target.value });
+                                setSelectedByStep({ ...selectedByStep, [stepIndex]: 0 });
+                                setActiveSearchStep(stepIndex);
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key !== 'Enter') return;
+                                const options = filteredGamesForStep(stepIndex);
+                                if (options.length === 1) {
+                                  e.preventDefault();
+                                  selectGameForStep(stepIndex, options[0]);
+                                }
+                              }}
+                              autoComplete="off"
+                              role="combobox"
+                              aria-autocomplete="list"
+                              aria-expanded={activeSearchStep === stepIndex}
+                              aria-controls={`game-search-results-${stepIndex}`}
+                              placeholder={games.length > 0 ? 'Pesquisar jogo cadastrado...' : 'Nenhum jogo liberado encontrado'}
+                              disabled={games.length === 0}
+                              className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500"
+                            />
+                            {activeSearchStep === stepIndex && (
+                              <div
+                                id={`game-search-results-${stepIndex}`}
+                                role="listbox"
+                                className="absolute z-20 mt-1 max-h-80 w-full overflow-auto rounded-md border border-gray-200 bg-white py-1 shadow-lg"
+                              >
+                                {(gameSearchByStep[stepIndex] || '').trim().length < 2 ? (
+                                  <div className="px-3 py-3 text-sm text-gray-600">Digite pelo menos 2 letras para pesquisar.</div>
+                                ) : filteredGamesForStep(stepIndex).length === 0 ? (
+                                  <div className="px-3 py-3 text-sm text-gray-600">Nenhum jogo liberado encontrado para esta busca.</div>
+                                ) : (
+                                  filteredGamesForStep(stepIndex).map((game) => (
+                                    <button
+                                      key={game.id}
+                                      type="button"
+                                      role="option"
+                                      aria-selected={selectedByStep[stepIndex] === game.id}
+                                      onMouseDown={(e) => e.preventDefault()}
+                                      onClick={() => selectGameForStep(stepIndex, game)}
+                                      className="flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
+                                    >
+                                      <img src={game.cover_url || '/img/sem-imagem.svg'} alt="" className="h-12 w-9 flex-none rounded object-cover ring-1 ring-gray-200" loading="lazy" decoding="async" width={36} height={48} />
+                                      <span className="min-w-0">
+                                        <span className="block truncate text-sm font-semibold text-gray-900">{game.name}</span>
+                                        <span className="block truncate text-xs text-gray-500">{game.studio_name || 'Sem estúdio'}</span>
+                                      </span>
+                                    </button>
+                                  ))
+                                )}
+                              </div>
+                            )}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => addGame(stepIndex)}
+                            disabled={!selectedByStep[stepIndex]}
+                            className="inline-flex items-center justify-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
                           >
-                            <option value="">Adicionar jogo liberado...</option>
-                            {games.map((game) => (
-                              <option key={game.id} value={game.id} disabled={usedGameIds.has(game.id)}>
-                                {game.name}{game.studio_name ? ` - ${game.studio_name}` : ''}
-                              </option>
-                            ))}
-                          </select>
-                          <button type="button" onClick={() => addGame(stepIndex)} className="inline-flex items-center justify-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             Adicionar jogo
                           </button>
                         </div>

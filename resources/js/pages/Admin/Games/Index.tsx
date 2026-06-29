@@ -3,7 +3,17 @@ import { Head, Link, router } from '@inertiajs/react';
 import Pagination from '@/components/ui/Pagination';
 import AdminLayout from '@/components/layouts/AdminLayout';
 
-type GameRow = { id: number; name: string; studio?: { name: string } | null; platforms_count: number; tags_count: number };
+type GameStatus = 'avaliacao' | 'liberado' | 'inativo';
+
+type GameRow = {
+  id: number;
+  name: string;
+  cover_url?: string | null;
+  status: GameStatus;
+  studio?: { name: string } | null;
+  platforms_count: number;
+  tags_count: number;
+};
 
 type Paginator<T> = {
   data: T[];
@@ -16,13 +26,19 @@ type Paginator<T> = {
 
 type Props = {
   games: Paginator<GameRow>;
-  filters?: { name?: string; status?: '' | 'avaliacao' | 'liberado' };
+  filters?: { name?: string; status?: '' | GameStatus };
   flash?: { success?: string; error?: string };
+};
+
+const statusMeta: Record<GameStatus, { label: string; className: string }> = {
+  avaliacao: { label: 'Em avaliação', className: 'bg-amber-50 text-amber-800 ring-amber-200' },
+  liberado: { label: 'Liberado', className: 'bg-emerald-50 text-emerald-800 ring-emerald-200' },
+  inativo: { label: 'Inativo', className: 'bg-slate-100 text-slate-700 ring-slate-200' },
 };
 
 export default function GamesIndex({ games, filters, flash }: Props) {
   const [name, setName] = React.useState(filters?.name ?? '');
-  const [status, setStatus] = React.useState<'' | 'avaliacao' | 'liberado'>(filters?.status ?? '');
+  const [status, setStatus] = React.useState<'' | GameStatus>(filters?.status ?? '');
   const [confirmDelete, setConfirmDelete] = React.useState<null | { id: number; name?: string }>(null);
   const [deleting, setDeleting] = React.useState(false);
 
@@ -44,7 +60,7 @@ export default function GamesIndex({ games, filters, flash }: Props) {
   return (
     <div>
       <Head title="Jogos">
-        <meta name="description" content="Gerencie jogos: filtrar por nome e status, visualizar estúdio, plataformas e marcadores, e acessar edição." />
+        <meta name="description" content="Gerencie jogos: filtre por nome e status, visualize estúdio, plataformas e marcadores, e acesse a edição." />
       </Head>
       <AdminLayout title="Jogos">
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end">
@@ -58,12 +74,13 @@ export default function GamesIndex({ games, filters, flash }: Props) {
               <select
                 id="status"
                 value={status}
-                onChange={(e) => setStatus(e.target.value as '' | 'avaliacao' | 'liberado')}
+                onChange={(e) => setStatus(e.target.value as '' | GameStatus)}
                 className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900"
               >
                 <option value="">Todos</option>
                 <option value="avaliacao">Em avaliação</option>
                 <option value="liberado">Liberado</option>
+                <option value="inativo">Inativo</option>
               </select>
             </div>
             <div>
@@ -97,9 +114,9 @@ export default function GamesIndex({ games, filters, flash }: Props) {
                 <tr key={g.id}>
                   <td className="px-4 py-3 text-sm text-gray-900">
                     <div className="flex items-center gap-3 min-w-0">
-                      {((g as any).cover_url ? (
+                      {g.cover_url ? (
                         <img
-                          src={(g as any).cover_url as string}
+                          src={g.cover_url}
                           alt=""
                           className="hidden md:block h-10 w-8 flex-none rounded object-cover"
                           loading="lazy"
@@ -110,10 +127,12 @@ export default function GamesIndex({ games, filters, flash }: Props) {
                         />
                       ) : (
                         <div className="hidden md:block h-10 w-8 flex-none rounded bg-gray-200" aria-hidden="true" />
-                      ))}
+                      )}
                       <div className="flex min-w-0 flex-col">
                         <span className="truncate font-medium">{g.name}</span>
-                        <span className="text-xs text-gray-500">{((g as any).status === 'liberado') ? 'Liberado' : 'Em avaliação'}</span>
+                        <span className={`mt-1 w-fit rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${statusMeta[g.status]?.className ?? statusMeta.avaliacao.className}`}>
+                          {statusMeta[g.status]?.label ?? 'Em avaliação'}
+                        </span>
                       </div>
                     </div>
                   </td>
@@ -122,15 +141,17 @@ export default function GamesIndex({ games, filters, flash }: Props) {
                   <td className="px-4 py-3 text-sm text-gray-700">{g.tags_count}</td>
                   <td className="px-4 py-3 text-right whitespace-nowrap">
                     <div className="inline-flex items-center gap-2">
-                      <Link
-                        href={`/jogos/${g.id}`}
-                        aria-label="Visualizar"
-                        title="Visualizar"
-                        className="inline-flex items-center justify-center rounded-md bg-white p-2 text-gray-700 ring-1 ring-inset ring-gray-200 shadow-sm hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
-                      >
-                        <EyeIcon className="h-4 w-4" />
-                        <span className="sr-only">Visualizar</span>
-                      </Link>
+                      {g.status === 'liberado' && (
+                        <Link
+                          href={`/jogos/${g.id}`}
+                          aria-label="Visualizar"
+                          title="Visualizar"
+                          className="inline-flex items-center justify-center rounded-md bg-white p-2 text-gray-700 ring-1 ring-inset ring-gray-200 shadow-sm hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
+                        >
+                          <EyeIcon className="h-4 w-4" />
+                          <span className="sr-only">Visualizar</span>
+                        </Link>
+                      )}
                       <Link
                         href={`/admin/jogos/${g.id}/editar`}
                         aria-label="Editar"
@@ -159,8 +180,6 @@ export default function GamesIndex({ games, filters, flash }: Props) {
 
         <Pagination links={games.links} />
 
-        {/* Modal de confirmação de remoção */
-        }
         {confirmDelete && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/60" aria-hidden="true" onClick={() => (!deleting ? setConfirmDelete(null) : null)} />
@@ -169,7 +188,7 @@ export default function GamesIndex({ games, filters, flash }: Props) {
               <p className="mt-2 text-sm text-gray-700">Tem certeza que deseja remover {confirmDelete.name ? (<strong>{confirmDelete.name}</strong>) : 'este jogo'}?</p>
               <div className="mt-6 flex items-center justify-end gap-3">
                 <button type="button" onClick={() => setConfirmDelete(null)} disabled={deleting} className="inline-flex items-center rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50">Cancelar</button>
-                <button type="button" onClick={() => remove(confirmDelete.id)} disabled={deleting} className="inline-flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 disabled:cursor-not-allowed disabled:opacity-50">{deleting ? 'Removendo…' : 'Remover'}</button>
+                <button type="button" onClick={() => remove(confirmDelete.id)} disabled={deleting} className="inline-flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 disabled:cursor-not-allowed disabled:opacity-50">{deleting ? 'Removendo...' : 'Remover'}</button>
               </div>
             </div>
           </div>

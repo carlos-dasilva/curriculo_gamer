@@ -330,8 +330,8 @@ class RawgImporter
                     $setIfEmpty('description', $desc !== '' ? mb_substr($desc, 0, 10000) : null);
                     if ($byId->metacritic_metascore === null && is_numeric($metascore)) { $patch['metacritic_metascore'] = (int) $metascore; }
                     if ($byId->metacritic_user_score === null && $userScore !== null) { $patch['metacritic_user_score'] = $userScore; }
-                    // Promove para liberado sempre que o serviço executar atualizações
-                    if (($byId->status ?? 'avaliacao') !== 'liberado') {
+                    // Promove solicitações em avaliação, sem reativar jogos inativos.
+                    if (($byId->status ?? 'avaliacao') === 'avaliacao') {
                         $patch['status'] = 'liberado';
                         if (empty($byId->released_by)) { $patch['released_by'] = auth()->id() ?: null; }
                     }
@@ -385,8 +385,8 @@ class RawgImporter
                     $setIfEmpty('description', $desc !== '' ? mb_substr($desc, 0, 10000) : null);
                     if ($byName->metacritic_metascore === null && is_numeric($metascore)) { $patch['metacritic_metascore'] = (int) $metascore; }
                     if ($byName->metacritic_user_score === null && $userScore !== null) { $patch['metacritic_user_score'] = $userScore; }
-                    // Promove para liberado ao atualizar por nome também
-                    if (($byName->status ?? 'avaliacao') !== 'liberado') {
+                    // Promove solicitações em avaliação, sem reativar jogos inativos.
+                    if (($byName->status ?? 'avaliacao') === 'avaliacao') {
                         $patch['status'] = 'liberado';
                         if (empty($byName->released_by)) { $patch['released_by'] = auth()->id() ?: null; }
                     }

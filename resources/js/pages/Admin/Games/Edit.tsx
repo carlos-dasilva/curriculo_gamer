@@ -15,7 +15,7 @@ type GameDto = {
   cover_url: string;
   age_rating?: string | null;
   description?: string | null;
-  status: 'avaliacao' | 'liberado';
+  status: 'avaliacao' | 'liberado' | 'inativo';
   released_by?: number | null;
   released_by_name?: string | null;
   metacritic_metascore?: number | null;
@@ -227,6 +227,7 @@ export default function GamesEdit({ game, studios, platforms, tags, flash }: Pro
           <div className="mb-4 rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-800">{flash.success}</div>
         )}
 
+        {data.status === 'liberado' && (
         <div className="mb-4 flex justify-end">
           <Link
             href={`/jogos/${game.id}`}
@@ -238,6 +239,7 @@ export default function GamesEdit({ game, studios, platforms, tags, flash }: Pro
             <span>Visualizar</span>
           </Link>
         </div>
+        )}
 
         <form onSubmit={submit} className="space-y-8" aria-label="Formulário de edição de jogo">
           {/* Informações gerais */}
@@ -320,11 +322,12 @@ export default function GamesEdit({ game, studios, platforms, tags, flash }: Pro
             <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label htmlFor="status" className="block text-sm font-medium text-gray-700">Status</label>
-                <select id="status" value={data.status || 'avaliacao'} onChange={(e) => setData('status', (e.target.value as 'avaliacao' | 'liberado'))} className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                <select id="status" value={data.status || 'avaliacao'} onChange={(e) => setData('status', (e.target.value as 'avaliacao' | 'liberado' | 'inativo'))} className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500">
                   <option value="avaliacao">Em avaliação</option>
                   <option value="liberado">Liberado</option>
+                  <option value="inativo">Inativo</option>
                 </select>
-                <p className="mt-1 text-xs text-gray-500">Ao alterar para "Liberado", o sistema registra automaticamente quem fez a liberação.</p>
+                <p className="mt-1 text-xs text-gray-500">Jogos inativos ficam visíveis apenas na consulta administrativa. Ao alterar para "Liberado", o sistema registra automaticamente quem fez a liberação.</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Liberado por</label>

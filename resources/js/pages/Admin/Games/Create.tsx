@@ -25,7 +25,7 @@ type FormData = {
   cover_url: string;
   gallery_urls: string[];
   external_links: ExternalLink[];
-  status?: 'avaliação' | 'liberado';
+  status?: 'avaliacao' | 'liberado' | 'inativo';
   metacritic_metascore?: number | '';
   metacritic_user_score?: number | '';
   ptbr_subtitled: boolean;
@@ -49,7 +49,7 @@ export default function GamesCreate({ studios, platforms, tags, flash }: Props) 
     cover_url: '',
     gallery_urls: [''],
     external_links: [{ label: '', url: '' }],
-    status: 'avaliação',
+    status: 'avaliacao',
     metacritic_metascore: '',
     metacritic_user_score: '',
     ptbr_subtitled: false,
@@ -316,11 +316,12 @@ export default function GamesCreate({ studios, platforms, tags, flash }: Props) 
             <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label htmlFor="status" className="block text-sm font-medium text-gray-700">Status</label>
-                <select id="status" value={data.status || 'avaliação'} onChange={(e) => setData('status', (e.target.value as 'avaliação' | 'liberado'))} className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500">
-                  <option value="avaliação">Em avaliação</option>
+                <select id="status" value={data.status || 'avaliacao'} onChange={(e) => setData('status', (e.target.value as 'avaliacao' | 'liberado' | 'inativo'))} className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                  <option value="avaliacao">Em avaliação</option>
                   <option value="liberado">Liberado</option>
+                  <option value="inativo">Inativo</option>
                 </select>
-                <p className="mt-1 text-xs text-gray-500">Se salvar como "Liberado", o sistema registrará você como responsável pela liberação.</p>
+                <p className="mt-1 text-xs text-gray-500">Jogos inativos ficam visíveis apenas na consulta administrativa. Se salvar como "Liberado", o sistema registrará você como responsável pela liberação.</p>
               </div>
             </div>
           </section>

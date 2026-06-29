@@ -20,7 +20,7 @@ class StoreGameRequest extends FormRequest
             'name' => ['required','string','max:255'],
             'studio_id' => ['nullable','integer', Rule::exists('studios','id')],
             'cover_url' => ['nullable','url','max:2048'],
-            'status' => ['nullable', Rule::in(['avaliacao','liberado'])],
+            'status' => ['nullable', Rule::in(['avaliacao', 'liberado', 'inativo'])],
             'age_rating' => ['nullable','string','max:50'],
             'description' => ['nullable','string','max:10000'],
 

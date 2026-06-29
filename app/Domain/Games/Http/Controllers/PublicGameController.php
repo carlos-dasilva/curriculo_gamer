@@ -22,6 +22,10 @@ class PublicGameController extends Controller
 
         $game = $query->firstOrFail();
 
+        if ($game->status === 'inativo') {
+            return redirect()->route('home');
+        }
+
         // If not released, allow viewing only for:
         // - Moderator/Admin users; or
         // - The creator of this game (created_by)

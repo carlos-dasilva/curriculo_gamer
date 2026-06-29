@@ -35,7 +35,7 @@ class GameController extends Controller
             ->when($name !== '', function ($q) use ($name) {
                 $q->where('name', 'like', "%{$name}%");
             })
-            ->when(in_array($status, ['avaliacao','liberado'], true), function ($q) use ($status) {
+            ->when(in_array($status, ['avaliacao', 'liberado', 'inativo'], true), function ($q) use ($status) {
                 $q->where('status', $status);
             })
             ->orderBy('name');

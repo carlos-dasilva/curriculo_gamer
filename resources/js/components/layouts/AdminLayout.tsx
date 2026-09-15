@@ -26,6 +26,7 @@ export default function AdminLayout({ title, children }: Props) {
     if (isAdmin) {
       base.push({ label: 'Cronologias', href: '/admin/cronologias' });
       base.push({ label: 'Coleção', href: '/admin/colecao' });
+      base.push({ label: 'Regiões da coleção', href: '/admin/colecao/cadastros/regions' });
     }
     base.push({ label: 'Jogos', href: '/admin/jogos' });
     base.push({ label: 'Estúdios', href: '/admin/estudios' });

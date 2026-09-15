@@ -29,6 +29,7 @@ export function money(value: string | number | null): string {
 }
 export function CollectionLayout({ title, children, kind }: { title: string; children: React.ReactNode; kind?: string }) {
   const page = usePage();
+  const isAdmin = (page.props.auth as { abilities?: { isAdmin?: boolean } } | undefined)?.abilities?.isAdmin === true;
   const flash = page.props.flash as { success?: string; error?: string } | undefined;
   return <AppLayout title={title} noIndex>
     <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
@@ -42,6 +43,10 @@ export function CollectionLayout({ title, children, kind }: { title: string; chi
         {Object.entries(kinds).map(([key, label]) => <Link key={key} href={base + '/' + key} aria-current={key === kind ? 'page' : undefined} className={'rounded-lg border px-4 py-3 text-sm ' + (key === kind ? 'bg-gray-900 text-white' : 'bg-white')}>{label}</Link>)}
         <Link href={base + '#empresas'} className="rounded-lg border bg-white px-4 py-3 text-sm">Por empresa</Link>
         <Link href={base + '#plataformas'} className="rounded-lg border bg-white px-4 py-3 text-sm">Por plataforma</Link>
+        {isAdmin && <>
+          <Link href="/admin/colecao" className="rounded-lg border bg-white px-4 py-3 text-sm">Cadastros da coleção</Link>
+          <Link href="/admin/colecao/cadastros/regions" className="rounded-lg border bg-white px-4 py-3 text-sm">Regiões</Link>
+        </>}
       </nav>
       {flash?.success && <p role="status" className="mb-5 rounded-lg border border-green-200 bg-green-50 p-4 text-green-800">{flash.success}</p>}
       {flash?.error && <p role="alert" className="mb-5 rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">{flash.error}</p>}

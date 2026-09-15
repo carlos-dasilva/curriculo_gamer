@@ -1,11 +1,13 @@
 import React from 'react';
-import { Link, useForm } from '@inertiajs/react';
+import { Link, router, useForm, usePage } from '@inertiajs/react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { CollectionLayout, ExternalImage, SearchPicker, base, control, visible, Field, ItemData, Option } from '@/components/collection/shared';
 
 type Props = { kind: string; title: string; fields: Field[]; item: Partial<ItemData>; itemId: number | null; selectedGame: Option | null; selectedConsole: Option | null };
 export default function CollectionForm({ kind, title, fields, item, itemId, selectedGame, selectedConsole }: Props) {
+  const page = usePage();
+  const isAdmin = (page.props.auth as { abilities?: { isAdmin?: boolean } } | undefined)?.abilities?.isAdmin === true;
   const defaults: ItemData = { images: [], platform_ids: [], media_type: 'physical', quantity: 1, connection_type: 'unknown' };
   fields.forEach(f => { if (!(f.key in defaults)) defaults[f.key] = ''; });
   Object.entries(item).forEach(([key, value]) => { if (value !== undefined) defaults[key] = value; });
@@ -55,6 +57,10 @@ export default function CollectionForm({ kind, title, fields, item, itemId, sele
     return <div key={key} className={type === 'platforms' || type === 'textarea' ? 'sm:col-span-2' : ''}>
       <label htmlFor={type === 'platforms' ? undefined : id} className="mb-1 block text-sm font-medium">{label}{field.required ? ' *' : ''}</label>{input}
       {error && <p id={id + '-error'} className="mt-1 text-sm text-red-700">{error}</p>}
+      {key === 'region_id' && isAdmin && <div className="mt-2 flex flex-wrap gap-3">
+        <a href="/admin/colecao/cadastros/regions" target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center text-sm font-medium underline underline-offset-4">Cadastrar região (nova aba)</a>
+        <button type="button" onClick={() => router.reload({ only: ['fields'] })} className="inline-flex min-h-11 items-center text-sm font-medium underline underline-offset-4">Atualizar regiões</button>
+      </div>}
     </div>;
   };
   const updateImage = (i: number, key: string, value: string | boolean) => form.setData('images', form.data.images.map((image, index) => index === i ? { ...image, [key]: value } : key === 'is_primary' ? { ...image, is_primary: false } : image));

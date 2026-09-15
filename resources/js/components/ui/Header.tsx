@@ -129,7 +129,7 @@ export default function Header({ auth }: Props) {
         </div>
 
         {/* Ações alinhadas à direita (desktop) */}
-        <div className="hidden md:flex items-center gap-4 ml-auto">
+        <div className="hidden xl:flex items-center gap-3 ml-auto">
           {/* Home */}
           <a
             href="/"
@@ -157,6 +157,12 @@ export default function Header({ auth }: Props) {
               <BacklogIcon className="h-4 w-4" />
               <span>Meu Backlog</span>
             </a>
+          )}
+          {auth.isAuthenticated && (
+            <Link href="/minha-colecao" className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50">
+              <BacklogIcon className="h-4 w-4" />
+              <span>Minha Coleção</span>
+            </Link>
           )}
           {auth?.abilities?.manageUsers && (
             <a
@@ -222,7 +228,7 @@ export default function Header({ auth }: Props) {
 
         {/* Menu mobile (hambúrguer) */}
                 {/* Mobile actions: Google login (guest) or hamburger (auth) */}
-        <div className="md:hidden ml-auto">
+        <div className="xl:hidden ml-auto">
           {!auth.isAuthenticated ? (
             <a
               href={auth.loginUrl || '#'}
@@ -258,7 +264,7 @@ export default function Header({ auth }: Props) {
 
         {/* Painel do menu mobile */}
         {auth.isAuthenticated && menuOpen && (
-          <div className="absolute right-4 top-16 z-50 w-56 rounded-md border border-gray-200 bg-white p-2 shadow-lg md:hidden" role="menu" aria-label="Menu">
+          <div className="absolute right-4 top-16 z-50 w-56 rounded-md border border-gray-200 bg-white p-2 shadow-lg xl:hidden" role="menu" aria-label="Menu">
             <div className="flex flex-col gap-1">
               {/* Home */}
               <a href="/" className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm text-gray-800 hover:bg-gray-50" onClick={() => setMenuOpen(false)}>
@@ -274,6 +280,12 @@ export default function Header({ auth }: Props) {
                 <BacklogIcon className="h-4 w-4" />
                 <span>Meu Backlog</span>
               </a>
+              {auth.isAuthenticated && (
+                <Link href="/minha-colecao" className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm text-gray-800 hover:bg-gray-50" onClick={() => setMenuOpen(false)}>
+                  <BacklogIcon className="h-4 w-4" />
+                  <span>Minha Coleção</span>
+                </Link>
+              )}
               {auth?.abilities?.manageUsers && (
                 <a href="/admin/dashboard" className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm text-gray-800 hover:bg-gray-50" onClick={() => setMenuOpen(false)}>
                   <DashboardIcon className="h-4 w-4" />

@@ -67,7 +67,14 @@ class PlatformController extends Controller
 
     public function destroy(Platform $platform): RedirectResponse
     {
-        $platform->delete();
+        try {
+            $platform->delete();
+        } catch (\Illuminate\Database\QueryException $exception) {
+            if (!in_array((string) $exception->getCode(), ['23000', '23503'], true)) {
+                throw $exception;
+            }
+            return redirect()->route('admin.platforms.index')->with('error', 'Esta plataforma está vinculada a itens de coleção e não pode ser removida.');
+        }
         return redirect()->route('admin.platforms.index')->with('success', 'Plataforma removida com sucesso.');
     }
 

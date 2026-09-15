@@ -39,8 +39,9 @@ class SystemRequestLogger
         $route = $request->route();
         $routeName = $route?->getName();
         $routeAction = $route?->getActionName();
+        $privateCollection = str_starts_with((string) $routeName, 'collection.');
 
-        $input = [
+        $input = $privateCollection ? ['omitted' => 'private collection'] : [
             'query' => $request->query(),
             'body' => $request->except(['password', 'password_confirmation', '_token']),
         ];
@@ -53,7 +54,9 @@ class SystemRequestLogger
         $body = null;
         $max = 20000; // cap body length to 20k chars
         try {
-            if ($response instanceof \Illuminate\Http\JsonResponse) {
+            if ($privateCollection) {
+                $body = '[private collection response omitted]';
+            } elseif ($response instanceof \Illuminate\Http\JsonResponse) {
                 $body = $response->getContent();
             } elseif ($response instanceof \Illuminate\Http\Response) {
                 $body = $response->getContent();
@@ -71,7 +74,7 @@ class SystemRequestLogger
             'datetime' => now()->toDateTimeString(),
             'method' => $request->getMethod(),
             'path' => $request->path(),
-            'full_url' => $request->fullUrl(),
+            'full_url' => $privateCollection ? $request->url() : $request->fullUrl(),
             'route' => [
                 'name' => $routeName,
                 'action' => $routeAction,

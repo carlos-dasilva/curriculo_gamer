@@ -24,6 +24,29 @@ use App\Domain\Games\Http\Controllers\BacklogController;
 use App\Domain\Users\Http\Controllers\FollowController;
 use App\Domain\Profile\Http\Controllers\OptionsController;
 use App\Domain\Chronologies\Http\Controllers\ChronologyController;
+use App\Domain\Collection\Http\Controllers\CollectionCatalogController;
+use App\Domain\Collection\Http\Controllers\CollectionController;
+
+Route::middleware(['auth', 'cache.headers:private;no_store'])->prefix('minha-colecao')->name('collection.')->group(function () {
+    Route::get('/', [CollectionController::class, 'dashboard'])->name('dashboard');
+    Route::get('/buscar/{source}', [CollectionController::class, 'lookup'])->name('lookup');
+    Route::get('/{kind}', [CollectionController::class, 'index'])->whereIn('kind', ['consoles', 'jogos', 'acessorios'])->name('index');
+    Route::get('/{kind}/novo', [CollectionController::class, 'create'])->whereIn('kind', ['consoles', 'jogos', 'acessorios'])->name('create');
+    Route::post('/{kind}', [CollectionController::class, 'store'])->whereIn('kind', ['consoles', 'jogos', 'acessorios'])->name('store');
+    Route::get('/{kind}/{item}/editar', [CollectionController::class, 'edit'])->whereIn('kind', ['consoles', 'jogos', 'acessorios'])->whereNumber('item')->name('edit');
+    Route::get('/{kind}/{item}', [CollectionController::class, 'show'])->whereIn('kind', ['consoles', 'jogos', 'acessorios'])->whereNumber('item')->name('show');
+    Route::put('/{kind}/{item}', [CollectionController::class, 'update'])->whereIn('kind', ['consoles', 'jogos', 'acessorios'])->whereNumber('item')->name('update');
+    Route::delete('/{kind}/{item}', [CollectionController::class, 'destroy'])->whereIn('kind', ['consoles', 'jogos', 'acessorios'])->whereNumber('item')->name('destroy');
+});
+
+Route::middleware(['auth', 'role:admin'])->prefix('admin/colecao')->name('admin.collection.')->group(function () {
+    Route::get('/', [CollectionCatalogController::class, 'index'])->name('index');
+    Route::get('/plataformas', [CollectionCatalogController::class, 'platforms'])->name('platforms');
+    Route::put('/plataformas/{platform}', [CollectionCatalogController::class, 'mapPlatform'])->name('platforms.update');
+    Route::get('/cadastros/{catalog}', [CollectionCatalogController::class, 'index'])->name('catalogs.index');
+    Route::post('/cadastros/{catalog}', [CollectionCatalogController::class, 'store'])->name('catalogs.store');
+    Route::put('/cadastros/{catalog}/{entry}', [CollectionCatalogController::class, 'update'])->whereNumber('entry')->name('catalogs.update');
+});
 
 // Rota Home (Inertia)
 Route::get('/', [HomeController::class, 'index'])->name('home');

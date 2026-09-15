@@ -15,6 +15,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Adicione aqui suas seeds quando necessário.
+        $this->call(CollectionCatalogSeeder::class);
     }
 }

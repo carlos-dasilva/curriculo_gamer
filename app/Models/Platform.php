@@ -9,6 +9,11 @@ class Platform extends Model
 {
     use HasFactory;
 
+    public function collectionCompanyMapping(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(CollectionPlatformCompany::class);
+    }
+
     protected $fillable = [
         'name',
         'rawg_id',

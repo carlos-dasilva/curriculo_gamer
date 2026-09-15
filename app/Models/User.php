@@ -54,6 +54,21 @@ class User extends Authenticatable
         ];
     }
 
+    public function collectionConsoles(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(UserCollectionConsole::class);
+    }
+
+    public function collectionGames(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(UserCollectionGame::class);
+    }
+
+    public function collectionAccessories(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(UserCollectionAccessory::class);
+    }
+
     public function backlogGames()
     {
         return $this->belongsToMany(Game::class, 'user_game_backlogs')

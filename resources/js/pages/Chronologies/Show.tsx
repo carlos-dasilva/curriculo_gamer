@@ -46,6 +46,7 @@ export default function ChronologyShow({ chronology, progress, steps, subject }:
   const page = usePage();
   const auth = (page.props as any).auth;
   const backHref = subject.isMe ? '/meu-curriculo?view=chronologies' : `/curriculo/${subject.id}?view=chronologies`;
+  const publicSharePath = `/curriculo/${subject.id}/cronologias/${chronology.id}`;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -70,9 +71,12 @@ export default function ChronologyShow({ chronology, progress, steps, subject }:
               <h1 className="truncate text-2xl font-semibold text-gray-900">{chronology.name}</h1>
             </div>
           </div>
-          <Link href={backHref} className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50">
-            Voltar para cronologias
-          </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            <ShareChronologyButton title={chronology.name} path={publicSharePath} />
+            <Link href={backHref} className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50">
+              Voltar para cronologias
+            </Link>
+          </div>
         </div>
 
         <section className="mb-6 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
@@ -139,6 +143,68 @@ export default function ChronologyShow({ chronology, progress, steps, subject }:
       </main>
       <Footer />
     </div>
+  );
+}
+
+function ShareChronologyButton({ title, path }: { title: string; path: string }) {
+  const [copied, setCopied] = React.useState(false);
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  const url = `${origin}${path}`;
+
+  const legacyCopy = (text: string) => {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'absolute';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    } catch {}
+  };
+
+  const share = async () => {
+    // @ts-ignore
+    if (navigator.share) {
+      try {
+        // @ts-ignore
+        await navigator.share({ title: `${title} - Cronologia Gamer`, text: 'Acesse esta cronologia gamer:', url });
+        return;
+      } catch {}
+    }
+
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      legacyCopy(url);
+    }
+
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
+  };
+
+  return (
+    <div className="flex items-center gap-2">
+      <button
+        type="button"
+        onClick={share}
+        className="inline-flex items-center justify-center gap-2 rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
+      >
+        <ShareIcon className="h-4 w-4" />
+        Compartilhar
+      </button>
+      {copied && <span className="text-xs font-medium text-gray-600">Link copiado!</span>}
+    </div>
+  );
+}
+
+function ShareIcon({ className }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={className} aria-hidden="true">
+      <path d="M13.5 4.5a2.5 2.5 0 11.89 1.91l-5.05 2.8a2.53 2.53 0 010 1.58l5.05 2.8a2.5 2.5 0 11-.72 1.3l-5.06-2.8a2.5 2.5 0 110-4.18l5.06-2.8a2.49 2.49 0 01-.17-.61z" />
+    </svg>
   );
 }
 

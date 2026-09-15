@@ -149,6 +149,57 @@ class ChronologyTest extends TestCase
         ]);
     }
 
+    public function test_guest_can_view_shared_chronologies_tab_and_detail(): void
+    {
+        $user = User::factory()->create();
+        $admin = User::factory()->create(['role' => 'admin']);
+        $studio = Studio::query()->create(['name' => 'Studio Teste']);
+        $platform = Platform::query()->create(['name' => 'Plataforma Teste']);
+        $game = $this->createReleasedGame($studio, 'Jogo da Cronologia');
+
+        $chronology = Chronology::query()->create([
+            'name' => 'Cronologia Pública',
+            'description' => 'Ordem pública.',
+            'status' => 'liberado',
+            'created_by' => $user->id,
+            'approved_by' => $admin->id,
+        ]);
+
+        $step = $chronology->steps()->create([
+            'position' => 1,
+            'title' => 'Parte única',
+        ]);
+        $step->stepGames()->create([
+            'game_id' => $game->id,
+            'position' => 1,
+        ]);
+
+        UserGamePlatformStatus::query()->create([
+            'user_id' => $user->id,
+            'game_id' => $game->id,
+            'platform_id' => $platform->id,
+            'status' => 'finalizei',
+        ]);
+
+        $this->get("/curriculo/{$user->id}?view=chronologies")
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Curriculum/Index', false)
+                ->where('view', 'chronologies')
+                ->has('chronologies', 1)
+                ->where('chronologies.0.id', $chronology->id)
+            );
+
+        $this->get("/curriculo/{$user->id}/cronologias/{$chronology->id}")
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Chronologies/Show', false)
+                ->where('subject.isMe', false)
+                ->where('chronology.id', $chronology->id)
+                ->where('progress.completed_steps', 1)
+            );
+    }
+
     private function createReleasedGame(Studio $studio, string $name): Game
     {
         return Game::query()->create([

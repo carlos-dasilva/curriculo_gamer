@@ -14,7 +14,7 @@ Prompts.txt
 /.zed
 /auth.json
 /node_modules
-/docs
+/docs/comecar.prompt
 /public/build
 /public/hot
 /public/storage

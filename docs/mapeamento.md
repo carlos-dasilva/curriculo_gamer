@@ -29,6 +29,7 @@
 - `MiddlewareServiceProvider` injeta `SystemRequestLogger` no grupo web (log condicional por SiteSetting.system_logs_enabled).
 
 ## Modelos-chave
+- /admin/jogos: ordenação padrão por cadastro mais recente; seletor por nome A–Z/Z–A, cadastro antigo, atualização recente e notas geral/Metacritic (crítica e usuários) crescentes/decrescentes. Valores ausentes ficam no fim, desempate por ID, com filtros e ordenação preservados na paginação.
 - User (enum Role: comum/moderador/admin; avatar_url; is_blocked), Game (soft delete, tags, plataformas pivot release_date, imagens, links, scores), Chronology, ChronologyStep, ChronologyStepGame, Platform (rawg_id, cover_url), Tag, Studio, SiteSetting (redes sociais, logs), UserFollow, UserGameInfo, UserGamePlatformStatus, UserGameBacklog, UserGameCommentRating.
 
 ## Dados e Migrações

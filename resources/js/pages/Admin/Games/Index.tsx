@@ -26,7 +26,8 @@ type Paginator<T> = {
 
 type Props = {
   games: Paginator<GameRow>;
-  filters?: { name?: string; status?: '' | GameStatus };
+  filters?: { name?: string; status?: '' | GameStatus; sort?: string };
+  sortOptions: { value: string; label: string }[];
   flash?: { success?: string; error?: string };
 };
 
@@ -36,15 +37,16 @@ const statusMeta: Record<GameStatus, { label: string; className: string }> = {
   inativo: { label: 'Inativo', className: 'bg-slate-100 text-slate-700 ring-slate-200' },
 };
 
-export default function GamesIndex({ games, filters, flash }: Props) {
+export default function GamesIndex({ games, filters, sortOptions, flash }: Props) {
   const [name, setName] = React.useState(filters?.name ?? '');
   const [status, setStatus] = React.useState<'' | GameStatus>(filters?.status ?? '');
+  const [sort, setSort] = React.useState(filters?.sort ?? 'newest');
   const [confirmDelete, setConfirmDelete] = React.useState<null | { id: number; name?: string }>(null);
   const [deleting, setDeleting] = React.useState(false);
 
   const applyFilters = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    router.get('/admin/jogos', { name, status }, { preserveScroll: true, replace: true });
+    router.get('/admin/jogos', { name, status, sort }, { preserveScroll: true, replace: true });
   };
 
   const remove = async (id: number) => {
@@ -64,7 +66,7 @@ export default function GamesIndex({ games, filters, flash }: Props) {
       </Head>
       <AdminLayout title="Jogos">
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end">
-          <form onSubmit={applyFilters} className="flex flex-col gap-3 sm:flex-row sm:items-end">
+          <form onSubmit={applyFilters} className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
             <div className="w-full sm:max-w-xs">
               <label htmlFor="name" className="block text-sm font-medium text-gray-700">Nome</label>
               <input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900" />
@@ -81,6 +83,12 @@ export default function GamesIndex({ games, filters, flash }: Props) {
                 <option value="avaliacao">Em avaliação</option>
                 <option value="liberado">Liberado</option>
                 <option value="inativo">Inativo</option>
+              </select>
+            </div>
+            <div className="w-full sm:w-auto">
+              <label htmlFor="sort" className="block text-sm font-medium text-gray-700">Ordenar por</label>
+              <select id="sort" value={sort} onChange={(e) => setSort(e.target.value)} className="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900">
+                {sortOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
               </select>
             </div>
             <div>

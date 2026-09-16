@@ -28,6 +28,22 @@ class GameController extends Controller
         $perPage = 15;
         $name = trim((string) request('name', ''));
         $status = trim((string) request('status', ''));
+        $sorts = [
+            'newest' => ['Últimos cadastrados', 'created_at', 'desc'],
+            'oldest' => ['Primeiros cadastrados', 'created_at', 'asc'],
+            'name_asc' => ['Nome: A–Z', 'name', 'asc'],
+            'name_desc' => ['Nome: Z–A', 'name', 'desc'],
+            'score_desc' => ['Nota geral: maior primeiro', 'overall_score', 'desc'],
+            'score_asc' => ['Nota geral: menor primeiro', 'overall_score', 'asc'],
+            'metascore_desc' => ['Metacritic (crítica): maior primeiro', 'metacritic_metascore', 'desc'],
+            'metascore_asc' => ['Metacritic (crítica): menor primeiro', 'metacritic_metascore', 'asc'],
+            'user_score_desc' => ['Metacritic (usuários): maior primeiro', 'metacritic_user_score', 'desc'],
+            'user_score_asc' => ['Metacritic (usuários): menor primeiro', 'metacritic_user_score', 'asc'],
+            'updated' => ['Atualizados recentemente', 'updated_at', 'desc'],
+        ];
+        $sort = request('sort', 'newest');
+        $sort = is_string($sort) && isset($sorts[$sort]) ? $sort : 'newest';
+        [, $column, $direction] = $sorts[$sort];
 
         $query = Game::query()
             ->with(['studio:id,name'])
@@ -37,14 +53,22 @@ class GameController extends Controller
             })
             ->when(in_array($status, ['avaliacao', 'liberado', 'inativo'], true), function ($q) use ($status) {
                 $q->where('status', $status);
-            })
-            ->orderBy('name');
+            });
+
+        // Coluna e direção vêm apenas da lista permitida; valores ausentes ficam no fim.
+        $query->orderByRaw("CASE WHEN {$column} IS NULL THEN 1 ELSE 0 END")
+            ->orderBy($column, $direction)
+            ->orderBy('id', $direction);
 
         $games = $query->paginate($perPage)->withQueryString();
 
         return Inertia::render('Admin/Games/Index', [
             'games' => $games,
-            'filters' => [ 'name' => $name, 'status' => $status ],
+            'filters' => [ 'name' => $name, 'status' => $status, 'sort' => $sort ],
+            'sortOptions' => collect($sorts)->map(fn ($option, $value) => [
+                'value' => $value,
+                'label' => $option[0],
+            ])->values(),
         ]);
     }
 

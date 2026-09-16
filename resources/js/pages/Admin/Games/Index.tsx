@@ -13,6 +13,7 @@ type GameRow = {
   studio?: { name: string } | null;
   platforms_count: number;
   tags_count: number;
+  created_at: string | null;
 };
 
 type Paginator<T> = {
@@ -36,6 +37,19 @@ const statusMeta: Record<GameStatus, { label: string; className: string }> = {
   liberado: { label: 'Liberado', className: 'bg-emerald-50 text-emerald-800 ring-emerald-200' },
   inativo: { label: 'Inativo', className: 'bg-slate-100 text-slate-700 ring-slate-200' },
 };
+
+const registrationDate = new Intl.DateTimeFormat('pt-BR', {
+  timeZone: 'America/Sao_Paulo',
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+});
+
+function formatRegistrationDate(value: string | null): string {
+  if (!value) return '—';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? '—' : registrationDate.format(date);
+}
 
 export default function GamesIndex({ games, filters, sortOptions, flash }: Props) {
   const [name, setName] = React.useState(filters?.name ?? '');
@@ -114,6 +128,7 @@ export default function GamesIndex({ games, filters, sortOptions, flash }: Props
                 <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Estúdio</th>
                 <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Plataformas</th>
                 <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Tags</th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 whitespace-nowrap">Cadastrado em</th>
                 <th className="px-4 py-3 w-40 text-right" />
               </tr>
             </thead>
@@ -147,6 +162,7 @@ export default function GamesIndex({ games, filters, sortOptions, flash }: Props
                   <td className="px-4 py-3 text-sm text-gray-700">{g.studio?.name || '-'}</td>
                   <td className="px-4 py-3 text-sm text-gray-700">{g.platforms_count}</td>
                   <td className="px-4 py-3 text-sm text-gray-700">{g.tags_count}</td>
+                  <td className="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">{formatRegistrationDate(g.created_at)}</td>
                   <td className="px-4 py-3 text-right whitespace-nowrap">
                     <div className="inline-flex items-center gap-2">
                       {g.status === 'liberado' && (

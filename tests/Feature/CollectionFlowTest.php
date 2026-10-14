@@ -80,6 +80,38 @@ class CollectionFlowTest extends TestCase
         }
     }
 
+    public function test_dashboard_sale_totals_are_filtered_and_owner_only(): void
+    {
+        $this->get('/minha-colecao')->assertInertia(fn (Assert $p) => $p->where('totals.sale_total', '0.00'));
+        $this->post('/minha-colecao/consoles', $this->console(['sale_price' => '300.10']))->assertRedirect();
+        $this->post('/minha-colecao/consoles', $this->console())->assertRedirect();
+        $this->post('/minha-colecao/jogos', $this->game(['sale_price' => '50.20']))->assertRedirect();
+        $this->post('/minha-colecao/jogos', $this->game(['sale_price' => '0']))->assertRedirect();
+        $this->post('/minha-colecao/acessorios', $this->accessory(['sale_price' => '90.30', 'quantity' => 3]))->assertRedirect();
+        $deleted = UserCollectionConsole::firstOrFail()->replicate();
+        $deleted->save();
+        $deleted->delete();
+        $public = '/colecao/'.$this->owner->id;
+        foreach (['/minha-colecao', $public] as $url) {
+            $this->get($url)->assertInertia(fn (Assert $p) => $p
+                ->where('totals.sale_total', '440.60')->where('totals.consoles_sale_total', '300.10')
+                ->where('totals.jogos_sale_total', '50.20')->where('totals.acessorios_sale_total', '90.30'));
+            $this->get($url.'?q=Controle')->assertInertia(fn (Assert $p) => $p
+                ->where('totals.sale_total', '90.30')->where('totals.consoles_sale_total', '0.00')->where('totals.jogos_sale_total', '0.00'));
+        }
+        foreach ([User::factory()->create(), User::factory()->create(['role' => 'admin']), null] as $viewer) {
+            if ($viewer) {
+                $this->actingAs($viewer);
+                $this->get('/minha-colecao')->assertInertia(fn (Assert $p) => $p->where('totals.sale_total', '0.00'));
+            } else {
+                auth()->logout();
+            }
+            $this->get($public)->assertInertia(fn (Assert $p) => $p
+                ->missing('totals.sale_total')->missing('totals.consoles_sale_total')
+                ->missing('totals.jogos_sale_total')->missing('totals.acessorios_sale_total')->missing('totals.investment'));
+        }
+    }
+
     public function test_console_crud_images_and_conditional_box_fields(): void
     {
         $images = [

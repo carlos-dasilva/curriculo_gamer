@@ -255,17 +255,20 @@ class CollectionQuery
 
     public function totals(int $ownerId, array $filters = []): array
     {
-        $result = ['items' => 0, 'investment' => 0, 'priced_items' => 0];
+        $result = ['items' => 0, 'investment' => 0, 'priced_items' => 0, 'sale_total' => 0];
         foreach (array_keys(CollectionItems::DEFINITIONS) as $kind) {
             $query = $this->query($kind, $ownerId, $filters);
             $units = $kind === 'acessorios' ? 'quantity' : '1';
-            $row = (clone $query)->selectRaw('COALESCE(SUM('.$units.'),0) as units, COALESCE(SUM(purchase_price),0) as investment, SUM(CASE WHEN purchase_price IS NOT NULL THEN '.$units.' ELSE 0 END) as priced')->first();
+            $row = (clone $query)->selectRaw('COALESCE(SUM('.$units.'),0) as units, COALESCE(SUM(purchase_price),0) as investment, COALESCE(SUM(sale_price),0) as sale_total, SUM(CASE WHEN purchase_price IS NOT NULL THEN '.$units.' ELSE 0 END) as priced')->first();
             $result[$kind] = (int) $row->units;
             $result['items'] += (int) $row->units;
             $result['priced_items'] += (int) $row->priced;
             $result['investment'] += (float) $row->investment;
+            $result[$kind.'_sale_total'] = number_format((float) $row->sale_total, 2, '.', '');
+            $result['sale_total'] += (float) $row->sale_total;
         }
         $result['investment'] = number_format($result['investment'], 2, '.', '');
+        $result['sale_total'] = number_format($result['sale_total'], 2, '.', '');
         $games = $this->query('jogos', $ownerId, $filters);
         foreach (['physical', 'digital'] as $type) {
             $result[$type] = (clone $games)->where('media_type', $type)->count();

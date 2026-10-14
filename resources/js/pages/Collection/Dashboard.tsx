@@ -19,9 +19,12 @@ export default function Dashboard({ filters, scope, totals, sections, companies,
     {scope && <Link href={base} className="mb-5 inline-block text-sm underline">Ver toda a coleção</Link>}
     <section className="mb-8 rounded-2xl bg-gray-900 p-6 text-white sm:p-8">
       <div className="flex flex-wrap items-start justify-between gap-5"><div><p className="text-sm text-gray-300">Inventário gamer</p><p className="mt-2 text-4xl font-bold">{totals.items} <span className="text-xl font-normal text-gray-300">itens</span></p></div>
-        {isOwner && <div><p className="text-sm text-gray-300">Total investido</p><p className="mt-2 text-2xl font-semibold">{money(totals.investment)}</p><p className="mt-1 text-xs text-gray-400">{totals.priced_items} item(ns) com valor informado</p></div>}
+        {isOwner && <div className="flex flex-wrap gap-6">
+          <div><p className="text-sm text-gray-300">Total investido</p><p className="mt-2 break-words text-2xl font-semibold">{money(totals.investment)}</p><p className="mt-1 text-xs text-gray-400">{totals.priced_items} item(ns) com valor informado</p></div>
+          <div><p className="text-sm text-gray-300">Valor total de venda</p><p className="mt-2 break-words text-2xl font-semibold">{money(totals.sale_total)}</p><p className="mt-1 text-xs text-gray-400">Soma dos valores de venda cadastrados</p></div>
+        </div>}
       </div>
-      <div className="mt-7 grid grid-cols-3 gap-3">{countCards.map(card => <Link key={card.key} href={href(base + '/' + card.key)} className="rounded-xl bg-white/10 p-3 transition hover:bg-white/20 sm:p-4"><p className="text-2xl font-bold">{totals[card.key]}</p><p className="text-xs text-gray-300 sm:text-sm">{card.label}</p></Link>)}</div>
+      <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-3">{countCards.map(card => <Link key={card.key} href={href(base + '/' + card.key)} className="min-w-0 rounded-xl bg-white/10 p-3 transition hover:bg-white/20 sm:p-4"><p className="text-2xl font-bold">{totals[card.key]}</p><p className="text-xs text-gray-300 sm:text-sm">{card.label}</p>{isOwner && <div className="mt-3 border-t border-white/10 pt-3"><p className="text-xs text-gray-300">Total de venda</p><p className="mt-1 break-words text-lg font-semibold">{money(totals[card.key + '_sale_total'])}</p></div>}</Link>)}</div>
     </section>
     {isOwner && <div className="mb-8 flex flex-wrap gap-3">{Object.entries(kinds).map(([kind, label]) => <Link key={kind} href={privateBase + '/' + kind + '/novo'} className={action}>＋ {label === 'Consoles' ? 'Console' : label === 'Jogos' ? 'Jogo' : 'Acessório'}</Link>)}</div>}
     <form className="mb-8 grid items-end gap-3 sm:grid-cols-[1fr_auto]" onSubmit={e => { e.preventDefault(); router.get(base, { ...filters, q }); }}>

@@ -288,6 +288,7 @@ class CollectionController
         $totals = $this->queries->totals($this->owner($request)->id, $filters);
         if (! $this->isOwner($request)) {
             unset($totals['investment'], $totals['priced_items']);
+            unset($totals['sale_total'], $totals['consoles_sale_total'], $totals['jogos_sale_total'], $totals['acessorios_sale_total']);
         }
 
         return Inertia::render('Collection/Dashboard', [

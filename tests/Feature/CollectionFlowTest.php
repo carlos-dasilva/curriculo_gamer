@@ -267,11 +267,12 @@ class CollectionFlowTest extends TestCase
 
     public function test_public_collection_hides_purchase_prices_from_guests_and_other_users(): void
     {
-        $this->post('/minha-colecao/consoles', $this->console(['purchase_price' => '1234.56', 'sale_price' => '1700.00']))->assertRedirect();
+        $this->post('/minha-colecao/consoles', $this->console(['purchase_price' => '1234.56', 'sale_price' => '1700.00', 'serial_number' => 'PRIVATE-CONSOLE-123']))->assertRedirect();
         $console = UserCollectionConsole::firstOrFail();
         $this->post('/minha-colecao/jogos', $this->game(['purchase_price' => '234.56']))->assertRedirect();
         $this->post('/minha-colecao/acessorios', $this->accessory([
             'purchase_price' => '345.67', 'sale_price' => '450.00', 'collection_console_id' => $console->id,
+            'serial_number' => 'PRIVATE-ACCESSORY-456',
             'images' => [['url' => 'https://example.com/controller.jpg', 'description' => 'Controle', 'is_primary' => true]],
         ]))->assertRedirect();
         $items = ['consoles' => $console, 'jogos' => UserCollectionGame::firstOrFail(), 'acessorios' => UserCollectionAccessory::firstOrFail()];
@@ -292,7 +293,9 @@ class CollectionFlowTest extends TestCase
                     ->has('items.data', 1)->missing('items.data.0.purchase_price'));
                 $this->get($url.'/'.$kind.'/'.$item->id)->assertOk()->assertInertia(fn (Assert $p) => $p
                     ->where('isOwner', false)->missing('item.purchase_price')->missing('card.purchase_price')
-                    ->missing('item.console.purchase_price')->where('item.sale_price', $item->sale_price));
+                    ->missing('item.console.purchase_price')->where('item.sale_price', $item->sale_price)
+                    ->missing('item.serial_number')->missing('item.console.serial_number')
+                    ->where('fields', fn ($fields) => ! collect($fields)->contains('key', 'serial_number')));
                 $this->getJson($url.'/'.$kind.'?sort=price')->assertUnprocessable()->assertJsonValidationErrors('sort');
                 $this->getJson('/minha-colecao/'.$kind.'/'.$item->id.'/exportar')->assertStatus($viewer ? 404 : 401);
             }
@@ -302,6 +305,13 @@ class CollectionFlowTest extends TestCase
         $this->actingAs($this->owner)->get($url)->assertInertia(fn (Assert $p) => $p
             ->where('isOwner', true)->where('totals.investment', '1814.79'));
         $this->get($url.'/consoles/'.$console->id)->assertInertia(fn (Assert $p) => $p->where('item.purchase_price', '1234.56'));
+        foreach (['consoles' => 'PRIVATE-CONSOLE-123', 'acessorios' => 'PRIVATE-ACCESSORY-456'] as $kind => $serial) {
+            $this->get($url.'/'.$kind.'/'.$items[$kind]->id)->assertInertia(fn (Assert $p) => $p->where('item.serial_number', $serial));
+            $privateUrl = '/minha-colecao/'.$kind.'/'.$items[$kind]->id;
+            $this->get($privateUrl)->assertInertia(fn (Assert $p) => $p->where('item.serial_number', $serial));
+            $export = $this->get($privateUrl.'/exportar')->assertOk();
+            $this->assertSame($serial, json_decode($export->streamedContent(), true, 512, JSON_THROW_ON_ERROR)['item']['serial_number']);
+        }
         $other = User::factory()->create();
         $this->get('/colecao/'.$other->id.'/consoles/'.$console->id)->assertNotFound();
         $console->delete();

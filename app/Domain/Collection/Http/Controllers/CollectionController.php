@@ -180,7 +180,7 @@ class CollectionController
         $fields = $this->fields($kind, $record);
         $data = $record->toArray();
         if (! $this->isOwner($request)) {
-            $fields = array_values(array_filter($fields, fn ($field) => $field['key'] !== 'purchase_price'));
+            $fields = array_values(array_filter($fields, fn ($field) => ! in_array($field['key'], ['purchase_price', 'serial_number'], true)));
             $data = $record->only(array_merge(['id'], array_column($fields, 'key')));
             $data['images'] = $record->images->map->only(['url', 'description', 'is_primary', 'sort_order'])->all();
             if ($kind === 'acessorios') {

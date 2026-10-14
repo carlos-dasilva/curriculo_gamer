@@ -70,6 +70,10 @@ export default function GamesCreate({ studios, platforms, tags, flash }: Props) 
   const applyCaptured = (d: any) => {
     if (!d || typeof d !== 'object') return;
     // Scalars: só preencher se vazio
+    if ('rawg_id' in d && !data.rawg_id) {
+      const rawgId = Number(d.rawg_id);
+      if (Number.isInteger(rawgId) && rawgId > 0) setData('rawg_id', rawgId);
+    }
     if ('cover_url' in d && !data.cover_url) setData('cover_url', typeof d.cover_url === 'string' ? d.cover_url : '');
     if ('age_rating' in d && !(data as any).age_rating) setData('age_rating', typeof d.age_rating === 'string' ? d.age_rating : '');
     if ('description' in d && !(data as any).description) setData('description', typeof d.description === 'string' ? d.description : '');

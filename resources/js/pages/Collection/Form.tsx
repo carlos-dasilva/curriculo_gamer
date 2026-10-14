@@ -77,16 +77,16 @@ export default function CollectionForm({ kind, title, fields, item, itemId, sele
         {group === 'Caixa e conteúdo' && kind === 'jogos' && <p className="mt-3 text-sm text-gray-500">CIB considera mídia, caixa e manual. Encartes e extras são registrados separadamente.</p>}
         <div className="mt-5 grid gap-5 sm:grid-cols-2">{fields.filter(f => f.group === group && visible(kind, f, form.data)).map(render)}</div>
       </details>)}
-      <details className="rounded-xl border bg-white p-5" open={Object.keys(errors).some(k => k.startsWith('images'))}>
-        <summary className="cursor-pointer font-semibold">Fotos externas ({form.data.images.length}/20)</summary>
-        <p className="my-4 text-sm text-gray-500">Cole URLs públicas HTTP ou HTTPS. A primeira foto será a principal se você não escolher outra.</p>
+      <details className="rounded-xl border bg-white p-5" open={(kind === 'jogos' && form.data.media_type === 'physical') || Object.keys(errors).some(k => k.startsWith('images'))}>
+        <summary className="cursor-pointer font-semibold">{kind === 'jogos' ? 'Fotos do estado do item' : 'Fotos externas'} ({form.data.images.length}/20)</summary>
+        <p className="my-4 text-sm text-gray-500">{kind === 'jogos' ? 'Adicione URLs públicas HTTP ou HTTPS de fotos da mídia, cartucho, caixa e manual. Elas aparecerão na galeria do item; a capa continuará sendo a do catálogo.' : 'Cole URLs públicas HTTP ou HTTPS. A primeira foto será a principal se você não escolher outra.'}</p>
         <div className="space-y-5">{form.data.images.map((image, i) => <div key={i} className="rounded-lg border p-4">
           <div className="grid gap-4 sm:grid-cols-[100px_1fr]"><ExternalImage src={image.url} alt={'Prévia da foto ' + (i + 1)} className="h-24 w-24 rounded-lg object-contain" /><div className="space-y-3">
             <Input label={'URL da foto ' + (i + 1)} type="url" value={image.url} maxLength={2048} onChange={e => updateImage(i, 'url', e.target.value)} error={errors['images.' + i + '.url']} />
             <Input label="Descrição da foto" value={image.description || ''} maxLength={255} onChange={e => updateImage(i, 'description', e.target.value)} error={errors['images.' + i + '.description']} />
           </div></div>
           <div className="mt-3 flex flex-wrap items-center gap-3">
-            <label className="flex min-h-11 items-center gap-2"><input type="radio" name="primary" checked={image.is_primary} onChange={() => updateImage(i, 'is_primary', true)} />Principal</label>
+            {kind !== 'jogos' && <label className="flex min-h-11 items-center gap-2"><input type="radio" name="primary" checked={image.is_primary} onChange={() => updateImage(i, 'is_primary', true)} />Principal</label>}
             <Button type="button" variant="outline" disabled={i === 0} onClick={() => moveImage(i, -1)} aria-label={'Mover foto ' + (i + 1) + ' para cima'}>↑</Button>
             <Button type="button" variant="outline" disabled={i === form.data.images.length - 1} onClick={() => moveImage(i, 1)} aria-label={'Mover foto ' + (i + 1) + ' para baixo'}>↓</Button>
             <Button type="button" variant="ghost" onClick={() => form.setData('images', form.data.images.filter((_, index) => index !== i))}>Remover foto</Button>

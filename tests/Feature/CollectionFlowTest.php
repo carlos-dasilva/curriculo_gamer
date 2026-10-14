@@ -317,6 +317,7 @@ class CollectionFlowTest extends TestCase
 
     public function test_game_list_is_paginated_and_keeps_filters_without_loading_galleries(): void
     {
+        $this->game->update(['cover_url' => 'https://example.com/catalog.jpg']);
         $status = CollectionItemStatus::where('slug', 'na-colecao')->firstOrFail();
         for ($i = 0; $i < 30; $i++) {
             $copy = $this->owner->collectionGames()->create([
@@ -327,10 +328,32 @@ class CollectionFlowTest extends TestCase
             $copy->images()->create(['url' => 'https://example.com/secondary.jpg', 'is_primary' => false]);
         }
         $this->get('/minha-colecao/jogos?q=Resident&sort=name')->assertOk()->assertInertia(fn (Assert $p) => $p
-            ->has('items.data', 24)->where('items.total', 30)->where('items.data.0.image', 'https://example.com/cover.jpg')
+            ->has('items.data', 24)->where('items.total', 30)->where('items.data.0.image', 'https://example.com/catalog.jpg')
             ->where('filters.q', 'Resident')->missing('items.data.0.images'));
         $this->get('/minha-colecao/jogos?q=Resident&sort=name&page=2')->assertOk()->assertInertia(fn (Assert $p) => $p
             ->has('items.data', 6)->where('items.current_page', 2));
+    }
+
+    public function test_game_condition_photos_do_not_replace_catalog_cover(): void
+    {
+        $this->game->update(['cover_url' => 'https://example.com/catalog.jpg']);
+        $photos = [
+            ['url' => 'https://example.com/disc.jpg', 'description' => 'Estado da mídia', 'is_primary' => true],
+            ['url' => 'https://example.com/box.jpg', 'description' => 'Caixa', 'is_primary' => false],
+        ];
+        $this->post('/minha-colecao/jogos', $this->game(['images' => $photos, 'sale_price' => 50]))->assertRedirect();
+        $item = UserCollectionGame::firstOrFail();
+        $url = '/minha-colecao/jogos/'.$item->id;
+        $this->get($url.'/editar')->assertInertia(fn (Assert $p) => $p->has('item.images', 2)->where('item.images.0.url', $photos[0]['url']));
+        $this->get($url)->assertInertia(fn (Assert $p) => $p->where('card.image', 'https://example.com/catalog.jpg')->has('item.images', 2));
+        $this->put($url, $this->game(['images' => array_reverse($photos), 'sale_price' => 50]))->assertRedirect();
+        auth()->logout();
+        $public = '/colecao/'.$this->owner->id;
+        $this->get($public.'/jogos/'.$item->id)->assertInertia(fn (Assert $p) => $p
+            ->where('card.image', 'https://example.com/catalog.jpg')->where('item.images.0.url', $photos[1]['url']));
+        $this->get($public.'/a-venda')->assertInertia(fn (Assert $p) => $p->where('items.data.0.image', 'https://example.com/catalog.jpg'));
+        $this->game->update(['cover_url' => null]);
+        $this->get($public.'/jogos/'.$item->id)->assertInertia(fn (Assert $p) => $p->where('card.image', null)->has('item.images', 2));
     }
 
     public function test_catalog_removal_preserves_owned_copy_and_platform_deletion_has_clear_feedback(): void

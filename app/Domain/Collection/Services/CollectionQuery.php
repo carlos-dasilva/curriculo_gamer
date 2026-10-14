@@ -231,7 +231,7 @@ class CollectionQuery
             'id' => $item->id, 'kind' => $kind, 'title' => $title,
             'quantity' => $kind === 'acessorios' ? $item->quantity : 1,
             'platforms' => $kind === 'acessorios' ? $item->platforms->map->only(['id', 'name'])->values() : [$item->platform->only(['id', 'name'])],
-            'image' => $item->primaryImage?->url ?? ($kind === 'jogos' ? $item->game?->cover_url : ($kind === 'consoles' ? $item->platform->cover_url : null)),
+            'image' => $kind === 'jogos' ? $item->game?->cover_url : ($item->primaryImage?->url ?? ($kind === 'consoles' ? $item->platform->cover_url : null)),
             'badges' => array_slice($badges, 0, 5),
             ...($isOwner ? ['purchase_price' => $item->purchase_price] : []),
             'sale_price' => $item->sale_price,

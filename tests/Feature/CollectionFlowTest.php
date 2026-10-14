@@ -59,6 +59,27 @@ class CollectionFlowTest extends TestCase
             'quantity' => 2, 'platform_ids' => [$this->platform->id], 'connection_type' => 'wired', 'images' => []], $extra);
     }
 
+    public function test_acquisition_date_round_trips_through_edit_for_all_item_types(): void
+    {
+        foreach (['consoles' => 'console', 'jogos' => 'game', 'acessorios' => 'accessory'] as $kind => $factory) {
+            $payload = $this->{$factory}(['acquired_at' => '2024-02-29']);
+            $this->post('/minha-colecao/'.$kind, $payload)->assertRedirect();
+            $item = \App\Domain\Collection\Support\CollectionItems::model($kind)->newQuery()->firstOrFail();
+            $url = '/minha-colecao/'.$kind.'/'.$item->id;
+            $this->assertSame('2024-02-29', $item->acquired_at->format('Y-m-d'));
+            $this->get($url.'/editar')->assertOk()->assertInertia(fn (Assert $p) => $p->where('item.acquired_at', '2024-02-29'));
+            $this->put($url, array_replace($payload, ['acquired_at' => '2024-03-01']))->assertRedirect();
+            $this->get($url.'/editar')->assertInertia(fn (Assert $p) => $p->where('item.acquired_at', '2024-03-01'));
+            $this->get($url)->assertInertia(fn (Assert $p) => $p->where('item.acquired_at', '2024-03-01'));
+            auth()->logout();
+            $this->get('/colecao/'.$this->owner->id.'/'.$kind.'/'.$item->id)->assertInertia(fn (Assert $p) => $p->where('item.acquired_at', '2024-03-01'));
+            $this->actingAs($this->owner);
+            $this->put($url, array_replace($payload, ['acquired_at' => '']))->assertRedirect();
+            $this->assertNull($item->fresh()->acquired_at);
+            $this->get($url.'/editar')->assertInertia(fn (Assert $p) => $p->where('item.acquired_at', null));
+        }
+    }
+
     public function test_console_crud_images_and_conditional_box_fields(): void
     {
         $images = [

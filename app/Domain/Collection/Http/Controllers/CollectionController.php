@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Models\UserCollectionConsole;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
@@ -182,7 +183,7 @@ class CollectionController
         if ($kind === 'jogos' && $item?->game && ! $item->game->platforms->contains('id', $item->platform_id)) {
             $item->game->platforms->push($item->platform);
         }
-        $data = $item?->only(array_column(CollectionItems::definition($kind)['fields'], 'key')) ?? [];
+        $data = $item ? Arr::only($item->attributesToArray(), array_column(CollectionItems::definition($kind)['fields'], 'key')) : [];
         $data['images'] = $item?->images->map->only(['url', 'description', 'is_primary'])->values()->all() ?? [];
         if ($kind === 'acessorios') {
             $data['platform_ids'] = $item?->platforms->pluck('id')->all() ?? [];
@@ -210,7 +211,7 @@ class CollectionController
         $data = $record->toArray();
         if (! $this->isOwner($request)) {
             $fields = array_values(array_filter($fields, fn ($field) => ! in_array($field['key'], ['purchase_price', 'serial_number'], true)));
-            $data = $record->only(array_merge(['id'], array_column($fields, 'key')));
+            $data = Arr::only($record->attributesToArray(), array_merge(['id'], array_column($fields, 'key')));
             $data['images'] = $record->images->map->only(['url', 'description', 'is_primary', 'sort_order'])->all();
             if ($kind === 'acessorios') {
                 $data['console'] = $record->console ? ['nickname' => $record->console->nickname, 'platform' => $record->console->platform?->only(['id', 'name'])] : null;

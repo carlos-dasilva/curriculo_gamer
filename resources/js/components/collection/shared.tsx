@@ -40,6 +40,8 @@ export function money(value: string | number | null): string {
 export function CollectionLayout({ title, children, kind }: { title: string; children: React.ReactNode; kind?: string }) {
   const page = usePage();
   const { base, isOwner, owner, shareUrl } = useCollection();
+  const salesPage = page.props.salesPage === true;
+  const shareLabel = salesPage ? 'Compartilhar itens à venda' : 'Compartilhar coleção';
   const [sharing, setSharing] = React.useState(false);
   const [message, setMessage] = React.useState('');
   const shareDialog = React.useRef<HTMLDialogElement>(null);
@@ -52,10 +54,11 @@ export function CollectionLayout({ title, children, kind }: { title: string; chi
         <Link href={base} className="underline underline-offset-4">{isOwner ? 'Minha Coleção' : 'Coleção de ' + owner?.name}</Link>
         {kind && <><span aria-hidden="true">/</span><Link href={base + '/' + kind} className="underline underline-offset-4">{kinds[kind]}</Link></>}
       </nav>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3"><h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{title}</h1>{isOwner && shareUrl ? <Button type="button" onClick={() => setSharing(true)}>Compartilhar coleção</Button> : <span className="rounded-full bg-gray-200 px-3 py-1 text-xs font-medium">{isOwner ? 'Minha coleção' : 'Coleção compartilhada'}</span>}</div>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3"><h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{title}</h1>{isOwner && shareUrl ? <Button type="button" onClick={() => setSharing(true)}>{shareLabel}</Button> : <span className="rounded-full bg-gray-200 px-3 py-1 text-xs font-medium">{isOwner ? 'Minha coleção' : 'Coleção compartilhada'}</span>}</div>
       <nav aria-label="Coleção" className="mb-8 flex flex-wrap gap-2">
         <Link href={base} className="rounded-lg border bg-white px-4 py-3 text-sm">Resumo</Link>
         {Object.entries(kinds).map(([key, label]) => <Link key={key} href={base + '/' + key} aria-current={key === kind ? 'page' : undefined} className={'rounded-lg border px-4 py-3 text-sm ' + (key === kind ? 'bg-gray-900 text-white' : 'bg-white')}>{label}</Link>)}
+        <Link href={base + '/a-venda'} aria-current={salesPage ? 'page' : undefined} className={'rounded-lg border px-4 py-3 text-sm ' + (salesPage ? 'bg-gray-900 text-white' : 'bg-white')}>{isOwner ? 'Meus itens à venda' : 'Itens à venda'}</Link>
         <Link href={base + '#empresas'} className="rounded-lg border bg-white px-4 py-3 text-sm">Por empresa</Link>
         <Link href={base + '#plataformas'} className="rounded-lg border bg-white px-4 py-3 text-sm">Por plataforma</Link>
         {isAdmin && isOwner && <>
@@ -67,14 +70,14 @@ export function CollectionLayout({ title, children, kind }: { title: string; chi
       {flash?.error && <p role="alert" className="mb-5 rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">{flash.error}</p>}
       {children}
       {sharing && shareUrl && <dialog ref={shareDialog} onClose={() => { setSharing(false); setMessage(''); }} aria-labelledby="share-collection-title" className="w-[calc(100%_-_2rem)] max-w-lg rounded-2xl p-6 backdrop:bg-black/60">
-        <h2 id="share-collection-title" className="text-xl font-semibold">Compartilhar coleção</h2>
-        <p className="my-3 text-sm text-gray-600">Qualquer pessoa com o link pode visualizar sua coleção. Valores de compra e total investido ficam visíveis somente para você.</p>
-        <Input label="Link da coleção" readOnly value={shareUrl} onFocus={e => e.target.select()} />
+        <h2 id="share-collection-title" className="text-xl font-semibold">{shareLabel}</h2>
+        <p className="my-3 text-sm text-gray-600">{salesPage ? 'Compartilhe a lista dos seus itens com valor de venda informado.' : 'Qualquer pessoa com o link pode visualizar sua coleção.'} Valores de compra e números de série ficam visíveis somente para você.</p>
+        <Input label={salesPage ? 'Link dos itens à venda' : 'Link da coleção'} readOnly value={shareUrl} onFocus={e => e.target.select()} />
         <p role="status" className="my-3 text-sm">{message}</p>
         <div className="flex flex-wrap gap-3"><Button type="button" onClick={async () => {
           try { await navigator.clipboard.writeText(shareUrl); setMessage('Link copiado!'); }
           catch { setMessage('Selecione o link acima e copie manualmente.'); }
-        }}>Copiar link</Button><a className={action} href={'https://wa.me/?text=' + encodeURIComponent('Minha coleção gamer: ' + shareUrl)} target="_blank" rel="noopener noreferrer">WhatsApp</a><Button type="button" variant="outline" onClick={() => shareDialog.current?.close()}>Fechar</Button></div>
+        }}>Copiar link</Button><a className={action} href={'https://wa.me/?text=' + encodeURIComponent((salesPage ? 'Meus itens à venda: ' : 'Minha coleção gamer: ') + shareUrl)} target="_blank" rel="noopener noreferrer">WhatsApp</a><Button type="button" variant="outline" onClick={() => shareDialog.current?.close()}>Fechar</Button></div>
       </dialog>}
     </main>
   </AppLayout>;

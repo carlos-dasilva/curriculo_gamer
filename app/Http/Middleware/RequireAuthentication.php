@@ -56,6 +56,7 @@ class RequireAuthentication
             'curriculum.chronologies.show',
             'backlog.show',
             'collection.public.dashboard',
+            'collection.public.sales',
             'collection.public.index',
             'collection.public.show',
             'games.comments.index',

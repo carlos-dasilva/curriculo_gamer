@@ -86,6 +86,67 @@ class CollectionFlowTest extends TestCase
         $this->get('/minha-colecao/consoles/'.$item->id)->assertNotFound();
     }
 
+    public function test_sales_page_filters_only_priced_items_and_preserves_privacy(): void
+    {
+        $this->post('/minha-colecao/consoles', $this->console(['sale_price' => 300, 'purchase_price' => 150, 'serial_number' => 'PRIVATE',
+            'images' => [['url' => 'https://example.com/sale.jpg', 'description' => 'Capa', 'is_primary' => true]],
+        ]))->assertRedirect();
+        $console = UserCollectionConsole::firstOrFail();
+        $this->post('/minha-colecao/jogos', $this->game(['sale_price' => 0]))->assertRedirect();
+        $this->post('/minha-colecao/acessorios', $this->accessory(['sale_price' => 90]))->assertRedirect();
+        $this->post('/minha-colecao/consoles', $this->console())->assertRedirect();
+        $deleted = $console->replicate();
+        $deleted->save();
+        $deleted->delete();
+        $company = CollectionCompany::create(['name' => 'Sony', 'slug' => 'sony']);
+        CollectionPlatformCompany::create(['platform_id' => $this->platform->id, 'company_id' => $company->id]);
+        $url = '/colecao/'.$this->owner->id.'/a-venda';
+        $this->get('/minha-colecao/a-venda')->assertOk()->assertInertia(fn (Assert $p) => $p
+            ->component('Collection/Sales', false)->where('isOwner', true)->where('items.total', 3)
+            ->where('shareUrl', url($url)));
+        $other = User::factory()->create();
+        $this->actingAs($other);
+        $this->post('/minha-colecao/consoles', $this->console(['sale_price' => 25]))->assertRedirect();
+        foreach ([$other, null] as $viewer) {
+            if (! $viewer) {
+                auth()->logout();
+            }
+            $this->get($url.'?sort=price_asc')->assertOk()->assertInertia(fn (Assert $p) => $p
+                ->where('items.total', 3)->where('isOwner', false)
+                ->where('items.data.0.kind', 'jogos')->where('items.data.0.sale_price', '0.00')
+                ->where('items.data.1.kind', 'acessorios')->where('items.data.2.kind', 'consoles')
+                ->where('items.data.2.image', 'https://example.com/sale.jpg')
+                ->missing('items.data.2.purchase_price')->missing('items.data.2.serial_number'));
+            $this->get($url.'?kind=consoles&q=Sala&price_min=100&price_max=400&platform_id='.$this->platform->id.'&company_id='.$company->id)
+                ->assertOk()->assertInertia(fn (Assert $p) => $p->where('items.total', 1)->where('items.data.0.id', $console->id));
+            $this->get($url.'?sort=price_desc')->assertInertia(fn (Assert $p) => $p->where('items.data.0.sale_price', '300.00'));
+            $this->get($url.'?sort=name')->assertInertia(fn (Assert $p) => $p->where('items.data.0.title', 'Controle'));
+            $this->get($url.'?price_max=0')->assertInertia(fn (Assert $p) => $p->where('items.total', 1));
+            $this->get($url.'?q=inexistente')->assertInertia(fn (Assert $p) => $p->where('items.total', 0));
+            $this->get('/colecao/'.$this->owner->id.'/consoles/'.$console->id)->assertOk()->assertInertia(fn (Assert $p) => $p
+                ->missing('item.serial_number')->missing('item.purchase_price'));
+        }
+        $this->getJson($url.'?kind=invalid')->assertUnprocessable();
+        $this->getJson($url.'?price_min=10&price_max=5')->assertUnprocessable();
+        $this->get('/colecao/999999/a-venda')->assertNotFound();
+        $console->update(['sale_price' => null]);
+        $this->get($url.'?kind=consoles')->assertInertia(fn (Assert $p) => $p->where('items.total', 0));
+    }
+
+    public function test_sales_pagination_keeps_filters_and_owner_scope(): void
+    {
+        $this->post('/minha-colecao/consoles', $this->console(['sale_price' => 10]))->assertRedirect();
+        $console = UserCollectionConsole::firstOrFail();
+        for ($i = 0; $i < 25; $i++) {
+            $console->replicate()->save();
+        }
+        auth()->logout();
+        $url = '/colecao/'.$this->owner->id.'/a-venda?kind=consoles&sort=price_asc';
+        $this->get($url)->assertInertia(fn (Assert $p) => $p->where('items.total', 26)->has('items.data', 24)
+            ->where('items.next_page_url', fn ($url) => str_contains($url, 'kind=consoles') && str_contains($url, 'page=2')));
+        $this->get($url.'&page=2')->assertInertia(fn (Assert $p) => $p->has('items.data', 2));
+    }
+
     public function test_owner_isolation_for_all_item_routes_and_lookup(): void
     {
         $this->post('/minha-colecao/consoles', $this->console())->assertRedirect();

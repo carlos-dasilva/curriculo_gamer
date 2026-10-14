@@ -29,12 +29,14 @@ use App\Domain\Collection\Http\Controllers\CollectionController;
 
 Route::middleware('cache.headers:private;no_store')->prefix('colecao/{user}')->whereNumber('user')->name('collection.public.')->group(function () {
     Route::get('/', [CollectionController::class, 'publicDashboard'])->name('dashboard');
+    Route::get('/a-venda', [CollectionController::class, 'publicSales'])->name('sales');
     Route::get('/{kind}', [CollectionController::class, 'publicIndex'])->whereIn('kind', ['consoles', 'jogos', 'acessorios'])->name('index');
     Route::get('/{kind}/{item}', [CollectionController::class, 'publicShow'])->whereIn('kind', ['consoles', 'jogos', 'acessorios'])->whereNumber('item')->name('show');
 });
 
 Route::middleware(['auth', 'cache.headers:private;no_store'])->prefix('minha-colecao')->name('collection.')->group(function () {
     Route::get('/', [CollectionController::class, 'dashboard'])->name('dashboard');
+    Route::get('/a-venda', [CollectionController::class, 'sales'])->name('sales');
     Route::get('/buscar/{source}', [CollectionController::class, 'lookup'])->name('lookup');
     Route::get('/{kind}', [CollectionController::class, 'index'])->whereIn('kind', ['consoles', 'jogos', 'acessorios'])->name('index');
     Route::get('/{kind}/novo', [CollectionController::class, 'create'])->whereIn('kind', ['consoles', 'jogos', 'acessorios'])->name('create');

@@ -47,6 +47,35 @@ class CollectionController
         return $this->dashboard($request);
     }
 
+    public function publicSales(Request $request, User $user)
+    {
+        return $this->sales($request);
+    }
+
+    public function sales(Request $request)
+    {
+        $filters = array_filter($request->validate([
+            'q' => ['nullable', 'string', 'max:150'],
+            'kind' => ['nullable', Rule::in(array_keys(CollectionItems::DEFINITIONS))],
+            'platform_id' => ['nullable', 'integer', 'exists:platforms,id'],
+            'company_id' => ['nullable', 'integer', 'exists:collection_companies,id'],
+            'price_min' => ['nullable', 'numeric', 'min:0', 'max:9999999999.99'],
+            'price_max' => ['nullable', 'numeric', 'min:0', 'max:9999999999.99', ...($request->filled('price_min') ? ['gte:price_min'] : [])],
+            'sort' => ['nullable', Rule::in(['newest', 'name', 'price_asc', 'price_desc'])],
+        ]), fn ($value) => $value !== null && $value !== '');
+        $owner = $this->owner($request);
+
+        return Inertia::render('Collection/Sales', [
+            ...$this->context($request),
+            'salesPage' => true,
+            'shareUrl' => route('collection.public.sales', $owner->id),
+            'filters' => $filters,
+            'items' => $this->queries->sales($owner->id, $filters, $this->isOwner($request)),
+            'platforms' => $this->queries->groups($owner->id, 'platforms'),
+            'companies' => $this->queries->groups($owner->id, 'companies'),
+        ]);
+    }
+
     public function publicIndex(Request $request, User $user, string $kind)
     {
         return $this->index($request, $kind);

@@ -11,6 +11,50 @@ use Illuminate\Support\Facades\DB;
 
 class CollectionQuery
 {
+    public function sales(int $ownerId, array $filters, bool $isOwner)
+    {
+        $union = null;
+        foreach (array_keys(CollectionItems::DEFINITIONS) as $kind) {
+            if (! empty($filters['kind']) && $filters['kind'] !== $kind) {
+                continue;
+            }
+            $query = $this->query($kind, $ownerId, $filters)->whereNotNull('sale_price');
+            $table = $query->getModel()->getTable();
+            foreach (['price_min' => '>=', 'price_max' => '<='] as $key => $operator) {
+                if (isset($filters[$key])) {
+                    $query->where('sale_price', $operator, $filters[$key]);
+                }
+            }
+            $title = match ($kind) {
+                'jogos' => DB::table('games')->select('name')->whereColumn('games.id', $table.'.game_id')->limit(1),
+                'consoles' => DB::table('platforms')->selectRaw("COALESCE(NULLIF($table.nickname, ''), name)")->whereColumn('platforms.id', $table.'.platform_id')->limit(1),
+                default => DB::raw('name'),
+            };
+            $query->select(['id', 'sale_price', 'created_at'])->selectRaw('? as kind', [$kind]);
+            if ($kind === 'acessorios') {
+                $query->selectRaw('name as title');
+            } else {
+                $query->selectSub($title, 'title');
+            }
+            $union = $union ? $union->unionAll($query) : $query;
+        }
+        $query = DB::query()->fromSub($union, 'sale_items');
+        match ($filters['sort'] ?? 'newest') {
+            'price_asc' => $query->orderBy('sale_price'),
+            'price_desc' => $query->orderByDesc('sale_price'),
+            'name' => $query->orderBy('title'),
+            default => $query->orderByDesc('created_at'),
+        };
+        $page = $query->orderBy('kind')->orderByDesc('id')->paginate(24)->withQueryString();
+        $records = [];
+        foreach ($page->getCollection()->groupBy('kind') as $kind => $rows) {
+            $records[$kind] = CollectionItems::model($kind)->newQuery()->where('user_id', $ownerId)
+                ->with($this->relations($kind))->whereIn('id', $rows->pluck('id'))->get()->keyBy('id');
+        }
+
+        return $page->through(fn ($row) => $this->present($records[$row->kind][$row->id], $row->kind, $isOwner));
+    }
+
     public function query(string $kind, int $ownerId, array $filters = []): Builder
     {
         $query = CollectionItems::model($kind)->newQuery()->where('user_id', $ownerId);

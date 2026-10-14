@@ -1,9 +1,10 @@
 import React from 'react';
 import { Link, router } from '@inertiajs/react';
 import Button from '@/components/ui/Button';
-import { CollectionLayout, ExternalImage, ConfirmDialog, Card, Field, ItemData, CollectionImage, Option, base, action, money, visible } from '@/components/collection/shared';
+import { CollectionLayout, ExternalImage, ConfirmDialog, Card, Field, ItemData, CollectionImage, Option, base as privateBase, useCollection, action, money, visible } from '@/components/collection/shared';
 
 export default function Show({ kind, item, card, fields }: { kind: string; item: Record<string, unknown> & { id: number; images: CollectionImage[]; platforms?: Option[]; console?: { nickname?: string; platform?: Option } }; card: Card; fields: Field[] }) {
+  const { base, isOwner } = useCollection();
   const [confirm, setConfirm] = React.useState(false);
   const [busy, setBusy] = React.useState(false);
   const [photo, setPhoto] = React.useState<CollectionImage | null>(null);
@@ -11,6 +12,7 @@ export default function Show({ kind, item, card, fields }: { kind: string; item:
   React.useEffect(() => { if (photo) dialog.current?.showModal(); }, [photo]);
   const display = (field: Field): string => {
     const value = item[field.key];
+    if (field.key === 'sale_price' && (value === null || value === undefined || value === '')) return 'Não está a venda';
     if (field.type === 'game') return card.title;
     if (field.type === 'platforms') return card.platforms.map(p => p.name).join(', ');
     if (field.type === 'console') return item.console?.nickname || item.console?.platform?.name || 'Não informado';
@@ -25,7 +27,7 @@ export default function Show({ kind, item, card, fields }: { kind: string; item:
   };
   const shownFields = fields.filter(f => visible(kind, f, item as unknown as ItemData));
   return <CollectionLayout title={card.title} kind={kind}>
-    <div className="mb-6 flex flex-wrap gap-3"><Link href={base + '/' + kind + '/' + item.id + '/editar'} className={action}>Editar item</Link><Button type="button" variant="outline" onClick={() => setConfirm(true)}>Remover da coleção</Button></div>
+    {isOwner && <div className="mb-6 flex flex-wrap gap-3"><Link href={privateBase + '/' + kind + '/' + item.id + '/editar'} className={action}>Editar item</Link><Button type="button" variant="outline" onClick={() => setConfirm(true)}>Remover da coleção</Button><a href={privateBase + '/' + kind + '/' + item.id + '/exportar'} className={action}>Exportar JSON</a></div>}
     <div className="grid gap-8 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
       <div>
         <div className="flex aspect-square items-center justify-center rounded-2xl border bg-white p-6"><ExternalImage src={card.image} alt={card.title} className="h-full w-full object-contain" /></div>
@@ -41,7 +43,7 @@ export default function Show({ kind, item, card, fields }: { kind: string; item:
       </section>)}</div>
     </div>
     {confirm && <ConfirmDialog title="Remover item da coleção?" busy={busy} onClose={() => setConfirm(false)} onConfirm={() => {
-      setBusy(true); router.delete(base + '/' + kind + '/' + item.id, { onFinish: () => { setBusy(false); setConfirm(false); } });
+      setBusy(true); router.delete(privateBase + '/' + kind + '/' + item.id, { onFinish: () => { setBusy(false); setConfirm(false); } });
     }}>Você está removendo <strong>{card.title}</strong>{kind === 'acessorios' ? ' (grupo com ' + card.quantity + ' unidade(s))' : ''}.</ConfirmDialog>}
     {photo && <dialog ref={dialog} onClose={() => setPhoto(null)} className="max-h-[90vh] w-[90vw] max-w-4xl rounded-xl p-4 backdrop:bg-black/80">
       <div className="mb-3 flex justify-end"><Button autoFocus type="button" variant="outline" onClick={() => dialog.current?.close()}>Fechar foto</Button></div>

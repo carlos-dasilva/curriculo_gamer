@@ -3,10 +3,11 @@ import { Link, router } from '@inertiajs/react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Pagination from '@/components/ui/Pagination';
-import { CollectionLayout, CollectionCard, Field, Card, PageLinks, base, action, control } from '@/components/collection/shared';
+import { CollectionLayout, CollectionCard, Field, Card, PageLinks, base as privateBase, useCollection, action, control } from '@/components/collection/shared';
 
 type Filters = Record<string, string | number>;
 export default function Index({ kind, title, items, filters, fields, companies }: { kind: string; title: string; items: { data: Card[]; total: number; links: PageLinks }; filters: Filters; fields: Field[]; companies: { id: number; name: string }[] }) {
+  const { base, isOwner } = useCollection();
   const [values, setValues] = React.useState<Filters>(filters);
   React.useEffect(() => setValues(filters), [filters]);
   const set = (key: string, value: string) => setValues(v => ({ ...v, [key]: value }));
@@ -14,11 +15,11 @@ export default function Index({ kind, title, items, filters, fields, companies }
   const select = (key: string, label: string, options: { value: string; label: string }[]) => <div key={key}><label htmlFor={'filter-' + key} className="mb-1 block text-sm font-medium">{label}</label><select id={'filter-' + key} className={control} value={values[key] ?? ''} onChange={e => set(key, e.target.value)}><option value="">Todos</option>{options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}</select></div>;
   const filterFields = fields.filter(f => ['catalog', 'bool', 'media', 'connection', 'score', 'platform'].includes(f.type));
   return <CollectionLayout title={title} kind={kind}>
-    <div className="mb-5 flex flex-wrap items-center justify-between gap-3"><p className="text-sm text-gray-500">{items.total} registro(s) encontrado(s){kind === 'acessorios' ? ' · cada registro pode reunir várias unidades' : ''}</p><Link href={base + '/' + kind + '/novo'} className={action}>＋ Adicionar {kind === 'consoles' ? 'console' : kind === 'jogos' ? 'jogo' : 'acessório'}</Link></div>
+    <div className="mb-5 flex flex-wrap items-center justify-between gap-3"><p className="text-sm text-gray-500">{items.total} registro(s) encontrado(s){kind === 'acessorios' ? ' · cada registro pode reunir várias unidades' : ''}</p>{isOwner && <Link href={privateBase + '/' + kind + '/novo'} className={action}>＋ Adicionar {kind === 'consoles' ? 'console' : kind === 'jogos' ? 'jogo' : 'acessório'}</Link>}</div>
     <form onSubmit={submit} className="mb-6 space-y-4 rounded-xl border bg-white p-4">
       <div className="grid items-end gap-3 sm:grid-cols-[1fr_220px_auto]">
-        <Input label="Pesquisar pelo nome" value={values.q ?? ''} maxLength={150} onChange={e => set('q', e.target.value)} placeholder="Pesquisar minha coleção..." />
-        {select('sort', 'Ordenação', [{ value: 'newest', label: 'Mais recente' }, { value: 'oldest', label: 'Mais antigo' }, { value: 'name', label: 'Nome' }, { value: 'best', label: 'Melhor estado' }, { value: 'worst', label: 'Pior estado' }, { value: 'price', label: 'Maior valor pago' }, { value: 'company', label: 'Empresa' }, { value: 'platform', label: 'Plataforma' }, ...(kind === 'acessorios' ? [{ value: 'quantity', label: 'Maior quantidade' }] : [])])}
+        <Input label="Pesquisar pelo nome" value={values.q ?? ''} maxLength={150} onChange={e => set('q', e.target.value)} placeholder="Pesquisar coleção..." />
+        {select('sort', 'Ordenação', [{ value: 'newest', label: 'Mais recente' }, { value: 'oldest', label: 'Mais antigo' }, { value: 'name', label: 'Nome' }, { value: 'best', label: 'Melhor estado' }, { value: 'worst', label: 'Pior estado' }, ...(isOwner ? [{ value: 'price', label: 'Maior valor pago' }] : []), { value: 'company', label: 'Empresa' }, { value: 'platform', label: 'Plataforma' }, ...(kind === 'acessorios' ? [{ value: 'quantity', label: 'Maior quantidade' }] : [])])}
         <Button>Pesquisar</Button>
       </div>
       <details open={Object.keys(filters).some(k => !['q', 'sort'].includes(k))}><summary className="cursor-pointer py-2 text-sm font-semibold">Filtros combinados</summary>
@@ -42,7 +43,7 @@ export default function Index({ kind, title, items, filters, fields, companies }
       </details>
     </form>
     {items.data.length ? <div className="grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{items.data.map(item => <CollectionCard key={item.id} item={item} />)}</div>
-      : <div className="rounded-2xl border border-dashed bg-white px-6 py-14 text-center"><h2 className="text-xl font-semibold">Nenhum item encontrado</h2><p className="mt-2 text-gray-500">Adicione seu primeiro item ou ajuste os filtros da pesquisa.</p><Link href={base + '/' + kind + '/novo'} className={action + ' mt-5'}>Adicionar à coleção</Link></div>}
+      : <div className="rounded-2xl border border-dashed bg-white px-6 py-14 text-center"><h2 className="text-xl font-semibold">Nenhum item encontrado</h2><p className="mt-2 text-gray-500">Ajuste os filtros da pesquisa para encontrar itens.</p>{isOwner && <Link href={privateBase + '/' + kind + '/novo'} className={action + ' mt-5'}>Adicionar à coleção</Link>}</div>}
     <Pagination links={items.links} />
   </CollectionLayout>;
 }

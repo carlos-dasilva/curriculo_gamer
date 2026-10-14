@@ -57,6 +57,7 @@ export default function CollectionForm({ kind, title, fields, item, itemId, sele
     return <div key={key} className={type === 'platforms' || type === 'textarea' ? 'sm:col-span-2' : ''}>
       <label htmlFor={type === 'platforms' ? undefined : id} className="mb-1 block text-sm font-medium">{label}{field.required ? ' *' : ''}</label>{input}
       {error && <p id={id + '-error'} className="mt-1 text-sm text-red-700">{error}</p>}
+      {key === 'sale_price' && <p className="mt-1 text-xs text-gray-500">Deixe vazio se não estiver à venda.{kind === 'acessorios' ? ' Informe o valor de venda do grupo.' : ''}</p>}
       {key === 'region_id' && isAdmin && <div className="mt-2 flex flex-wrap gap-3">
         <a href="/admin/colecao/cadastros/regions" target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center text-sm font-medium underline underline-offset-4">Cadastrar região (nova aba)</a>
         <button type="button" onClick={() => router.reload({ only: ['fields'] })} className="inline-flex min-h-11 items-center text-sm font-medium underline underline-offset-4">Atualizar regiões</button>

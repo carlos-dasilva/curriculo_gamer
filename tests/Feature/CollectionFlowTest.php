@@ -264,4 +264,84 @@ class CollectionFlowTest extends TestCase
             rmdir($temporary);
         }
     }
+
+    public function test_public_collection_hides_purchase_prices_from_guests_and_other_users(): void
+    {
+        $this->post('/minha-colecao/consoles', $this->console(['purchase_price' => '1234.56', 'sale_price' => '1700.00']))->assertRedirect();
+        $console = UserCollectionConsole::firstOrFail();
+        $this->post('/minha-colecao/jogos', $this->game(['purchase_price' => '234.56']))->assertRedirect();
+        $this->post('/minha-colecao/acessorios', $this->accessory([
+            'purchase_price' => '345.67', 'sale_price' => '450.00', 'collection_console_id' => $console->id,
+            'images' => [['url' => 'https://example.com/controller.jpg', 'description' => 'Controle', 'is_primary' => true]],
+        ]))->assertRedirect();
+        $items = ['consoles' => $console, 'jogos' => UserCollectionGame::firstOrFail(), 'acessorios' => UserCollectionAccessory::firstOrFail()];
+        $url = '/colecao/'.$this->owner->id;
+        foreach ([null, User::factory()->create(), User::factory()->create(['role' => 'admin'])] as $viewer) {
+            if ($viewer) {
+                $this->actingAs($viewer);
+            } else {
+                auth()->logout();
+            }
+            $this->get($url)->assertOk()->assertInertia(fn (Assert $p) => $p
+                ->where('isOwner', false)->where('totals.items', 4)
+                ->missing('totals.investment')->missing('totals.priced_items')
+                ->missing('sections.consoles.0.purchase_price')->missing('sections.jogos.0.purchase_price')
+                ->missing('sections.acessorios.0.purchase_price')->missing('collectionOwner.email'));
+            foreach ($items as $kind => $item) {
+                $this->get($url.'/'.$kind)->assertOk()->assertInertia(fn (Assert $p) => $p
+                    ->has('items.data', 1)->missing('items.data.0.purchase_price'));
+                $this->get($url.'/'.$kind.'/'.$item->id)->assertOk()->assertInertia(fn (Assert $p) => $p
+                    ->where('isOwner', false)->missing('item.purchase_price')->missing('card.purchase_price')
+                    ->missing('item.console.purchase_price')->where('item.sale_price', $item->sale_price));
+                $this->getJson($url.'/'.$kind.'?sort=price')->assertUnprocessable()->assertJsonValidationErrors('sort');
+                $this->getJson('/minha-colecao/'.$kind.'/'.$item->id.'/exportar')->assertStatus($viewer ? 404 : 401);
+            }
+            $this->get($url.'/acessorios/'.$items['acessorios']->id)->assertInertia(fn (Assert $p) => $p
+                ->where('item.images.0.url', 'https://example.com/controller.jpg')->where('item.console.nickname', 'Sala'));
+        }
+        $this->actingAs($this->owner)->get($url)->assertInertia(fn (Assert $p) => $p
+            ->where('isOwner', true)->where('totals.investment', '1814.79'));
+        $this->get($url.'/consoles/'.$console->id)->assertInertia(fn (Assert $p) => $p->where('item.purchase_price', '1234.56'));
+        $other = User::factory()->create();
+        $this->get('/colecao/'.$other->id.'/consoles/'.$console->id)->assertNotFound();
+        $console->delete();
+        $this->get($url.'/consoles/'.$console->id)->assertNotFound();
+        $this->get('/colecao/999999')->assertNotFound();
+    }
+
+    public function test_sale_prices_and_owner_json_export_for_all_kinds(): void
+    {
+        foreach (['consoles' => 'console', 'jogos' => 'game', 'acessorios' => 'accessory'] as $kind => $factory) {
+            $payload = $this->{$factory}([
+                'purchase_price' => '100.50', 'sale_price' => '250.75', 'notes' => 'Descrição do item',
+                'images' => [
+                    ['url' => 'https://example.com/front.jpg', 'description' => 'Frente', 'is_primary' => true],
+                    ['url' => 'https://example.com/back.jpg', 'description' => 'Verso', 'is_primary' => false],
+                ],
+            ]);
+            foreach ([-1, '12.345', 'invalid', '10000000000'] as $invalid) {
+                $this->postJson('/minha-colecao/'.$kind, array_replace($payload, ['sale_price' => $invalid]))
+                    ->assertUnprocessable()->assertJsonValidationErrors('sale_price');
+            }
+            $this->post('/minha-colecao/'.$kind, $payload)->assertRedirect();
+            $item = \App\Domain\Collection\Support\CollectionItems::model($kind)->newQuery()->firstOrFail();
+            $url = '/minha-colecao/'.$kind.'/'.$item->id;
+            $this->assertSame('250.75', $item->sale_price);
+            $response = $this->get($url.'/exportar')->assertOk()->assertDownload('colecao-'.$kind.'-'.$item->id.'.json');
+            $this->assertStringContainsString('no-store', $response->headers->get('Cache-Control'));
+            $data = json_decode($response->streamedContent(), true, 512, JSON_THROW_ON_ERROR);
+            $this->assertSame($kind, $data['kind']);
+            $this->assertSame('100.50', $data['item']['purchase_price']);
+            $this->assertSame('250.75', $data['item']['sale_price']);
+            $this->assertSame('Descrição do item', $data['item']['notes']);
+            $this->assertSame(['https://example.com/front.jpg', 'https://example.com/back.jpg'], array_column($data['item']['images'], 'url'));
+            $this->assertArrayHasKey('item_status', $data['item']);
+            foreach (['0' => '0.00', '' => null] as $price => $expected) {
+                $this->put($url, array_replace($payload, ['sale_price' => $price]))->assertRedirect();
+                $this->assertSame($expected, $item->fresh()->sale_price);
+            }
+            $this->delete($url)->assertRedirect();
+            $this->get($url.'/exportar')->assertNotFound();
+        }
+    }
 }

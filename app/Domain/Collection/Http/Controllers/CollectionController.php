@@ -9,6 +9,7 @@ use App\Domain\Collection\Support\CollectionCatalogs;
 use App\Domain\Collection\Support\CollectionItems;
 use App\Models\Game;
 use App\Models\Platform;
+use App\Models\User;
 use App\Models\UserCollectionConsole;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -19,13 +20,61 @@ class CollectionController
 {
     public function __construct(private CollectionQuery $queries, private CollectionItemWriter $writer) {}
 
+    private function owner(Request $request): User
+    {
+        return $request->route('user') instanceof User ? $request->route('user') : $request->user();
+    }
+
+    private function isOwner(Request $request): bool
+    {
+        return $request->user()?->id === $this->owner($request)->id;
+    }
+
+    private function context(Request $request): array
+    {
+        $owner = $this->owner($request);
+
+        return [
+            'isOwner' => $this->isOwner($request),
+            'collectionOwner' => $owner->only(['id', 'name']),
+            'collectionBase' => $request->route('user') ? '/colecao/'.$owner->id : '/minha-colecao',
+            'shareUrl' => route('collection.public.dashboard', $owner->id),
+        ];
+    }
+
+    public function publicDashboard(Request $request, User $user)
+    {
+        return $this->dashboard($request);
+    }
+
+    public function publicIndex(Request $request, User $user, string $kind)
+    {
+        return $this->index($request, $kind);
+    }
+
+    public function publicShow(Request $request, User $user, string $kind, int $item)
+    {
+        return $this->show($request, $kind, $item);
+    }
+
+    public function export(Request $request, string $kind, int $item)
+    {
+        $record = CollectionItems::owned($kind, $request->user()->id, $item);
+        $record->load(array_merge($this->queries->relations($kind), ['images', 'itemStatus']));
+        $data = ['version' => 1, 'kind' => $kind, 'item' => $record->toArray()];
+
+        return response()->streamDownload(function () use ($data) {
+            echo json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+        }, 'colecao-'.$kind.'-'.$item.'.json', ['Content-Type' => 'application/json; charset=UTF-8', 'Cache-Control' => 'private, no-store']);
+    }
+
     private function filters(Request $request): array
     {
         $rules = [
             'q' => ['nullable', 'string', 'max:150'],
             'platform_id' => ['nullable', 'integer', 'exists:platforms,id'],
             'company_id' => ['nullable', 'integer', 'exists:collection_companies,id'],
-            'sort' => ['nullable', Rule::in(['name', 'newest', 'oldest', 'best', 'worst', 'price', 'platform', 'company', 'quantity'])],
+            'sort' => ['nullable', Rule::in(['name', 'newest', 'oldest', 'best', 'worst', ...($this->isOwner($request) ? ['price'] : []), 'platform', 'company', 'quantity'])],
             'completeness' => ['nullable', Rule::in(['cib', 'boxed', 'loose'])],
             'condition_min' => ['nullable', 'integer', 'min:1', 'max:10'],
             'condition_max' => ['nullable', 'integer', 'min:1', 'max:10'],
@@ -70,14 +119,15 @@ class CollectionController
     public function index(Request $request, string $kind)
     {
         $filters = $this->filters($request);
-        $query = $this->queries->query($kind, $request->user()->id, $filters)->with($this->queries->relations($kind));
+        $query = $this->queries->query($kind, $this->owner($request)->id, $filters)->with($this->queries->relations($kind));
 
         return Inertia::render('Collection/Index', [
+            ...$this->context($request),
             'kind' => $kind, 'title' => CollectionItems::definition($kind)['label'], 'filters' => $filters,
             'fields' => $this->fields($kind, null, true),
-            'companies' => $this->queries->groups($request->user()->id, 'companies'),
+            'companies' => $this->queries->groups($this->owner($request)->id, 'companies'),
             'items' => $this->queries->ordered($query, $kind, $filters['sort'] ?? 'newest')->paginate(24)->withQueryString()
-                ->through(fn ($item) => $this->queries->present($item, $kind)),
+                ->through(fn ($item) => $this->queries->present($item, $kind, $this->isOwner($request))),
         ]);
     }
 
@@ -124,12 +174,24 @@ class CollectionController
 
     public function show(Request $request, string $kind, int $item)
     {
-        $record = CollectionItems::owned($kind, $request->user()->id, $item);
+        $record = CollectionItems::owned($kind, $this->owner($request)->id, $item);
         $record->load(array_merge($this->queries->relations($kind), ['images']));
 
+        $fields = $this->fields($kind, $record);
+        $data = $record->toArray();
+        if (! $this->isOwner($request)) {
+            $fields = array_values(array_filter($fields, fn ($field) => $field['key'] !== 'purchase_price'));
+            $data = $record->only(array_merge(['id'], array_column($fields, 'key')));
+            $data['images'] = $record->images->map->only(['url', 'description', 'is_primary', 'sort_order'])->all();
+            if ($kind === 'acessorios') {
+                $data['console'] = $record->console ? ['nickname' => $record->console->nickname, 'platform' => $record->console->platform?->only(['id', 'name'])] : null;
+            }
+        }
+
         return Inertia::render('Collection/Show', [
-            'kind' => $kind, 'item' => $record, 'card' => $this->queries->present($record, $kind),
-            'fields' => $this->fields($kind, $record),
+            ...$this->context($request),
+            'kind' => $kind, 'item' => $data, 'card' => $this->queries->present($record, $kind, $this->isOwner($request)),
+            'fields' => $fields,
         ]);
     }
 
@@ -174,11 +236,11 @@ class CollectionController
         $filters = $this->filters($request);
         $sections = [];
         foreach (array_keys(CollectionItems::DEFINITIONS) as $kind) {
-            $query = $this->queries->query($kind, $request->user()->id, $filters)->with($this->queries->relations($kind));
-            $sections[$kind] = $query->orderByDesc('created_at')->orderByDesc('id')->limit(6)->get()->map(fn ($item) => $this->queries->present($item, $kind));
+            $query = $this->queries->query($kind, $this->owner($request)->id, $filters)->with($this->queries->relations($kind));
+            $sections[$kind] = $query->orderByDesc('created_at')->orderByDesc('id')->limit(6)->get()->map(fn ($item) => $this->queries->present($item, $kind, $this->isOwner($request)));
         }
-        $platforms = $this->queries->groups($request->user()->id, 'platforms');
-        $companies = $this->queries->groups($request->user()->id, 'companies');
+        $platforms = $this->queries->groups($this->owner($request)->id, 'platforms');
+        $companies = $this->queries->groups($this->owner($request)->id, 'companies');
         $scope = null;
         if (! empty($filters['platform_id'])) {
             $scope = collect($platforms)->firstWhere('id', (int) $filters['platform_id']);
@@ -193,10 +255,16 @@ class CollectionController
             $platforms = array_values(array_filter($platforms, fn ($p) => $ids->contains($p['id'])));
         }
 
+        $totals = $this->queries->totals($this->owner($request)->id, $filters);
+        if (! $this->isOwner($request)) {
+            unset($totals['investment'], $totals['priced_items']);
+        }
+
         return Inertia::render('Collection/Dashboard', [
+            ...$this->context($request),
             'filters' => $filters, 'scope' => $scope, 'sections' => $sections,
-            'totals' => $this->queries->totals($request->user()->id, $filters),
-            'breakdowns' => $this->queries->breakdowns($request->user()->id, $filters),
+            'totals' => $totals,
+            'breakdowns' => $this->queries->breakdowns($this->owner($request)->id, $filters),
             'platforms' => $platforms, 'companies' => $companies,
         ]);
     }

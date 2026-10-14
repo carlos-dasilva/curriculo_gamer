@@ -31,6 +31,9 @@ class RedirectGuestsToGoogle
             'curriculum.show',
             'curriculum.chronologies.show',
             'backlog.show',
+            'collection.public.dashboard',
+            'collection.public.index',
+            'collection.public.show',
             'games.comments.index',
         ];
 

@@ -27,6 +27,7 @@ class CollectionItems
             ['key' => 'acquired_at', 'label' => 'Data de aquisição', 'type' => 'date', 'group' => 'Aquisição', 'required' => false],
             ['key' => 'acquisition_location', 'label' => 'Local de aquisição', 'type' => 'text', 'group' => 'Aquisição', 'required' => false],
             ['key' => 'purchase_price', 'label' => 'Valor pago (R$)', 'type' => 'money', 'group' => 'Aquisição', 'required' => false],
+            ['key' => 'sale_price', 'label' => 'Valor para Venda (R$)', 'type' => 'money', 'group' => 'Venda', 'required' => false],
             ['key' => 'notes', 'label' => 'Observações', 'type' => 'textarea', 'group' => 'Observações', 'required' => false],
         ]],
         'jogos' => ['model' => \App\Models\UserCollectionGame::class, 'label' => 'Jogos', 'singular' => 'Jogo', 'fields' => [
@@ -53,6 +54,7 @@ class CollectionItems
             ['key' => 'acquired_at', 'label' => 'Data de aquisição', 'type' => 'date', 'group' => 'Aquisição', 'required' => false],
             ['key' => 'acquisition_location', 'label' => 'Local de aquisição', 'type' => 'text', 'group' => 'Aquisição', 'required' => false],
             ['key' => 'purchase_price', 'label' => 'Valor pago (R$)', 'type' => 'money', 'group' => 'Aquisição', 'required' => false],
+            ['key' => 'sale_price', 'label' => 'Valor para Venda (R$)', 'type' => 'money', 'group' => 'Venda', 'required' => false],
             ['key' => 'notes', 'label' => 'Observações', 'type' => 'textarea', 'group' => 'Observações', 'required' => false],
         ]],
         'acessorios' => ['model' => \App\Models\UserCollectionAccessory::class, 'label' => 'Acessórios', 'singular' => 'Acessório', 'fields' => [
@@ -77,6 +79,7 @@ class CollectionItems
             ['key' => 'acquired_at', 'label' => 'Data de aquisição', 'type' => 'date', 'group' => 'Aquisição', 'required' => false],
             ['key' => 'acquisition_location', 'label' => 'Local de aquisição', 'type' => 'text', 'group' => 'Aquisição', 'required' => false],
             ['key' => 'purchase_price', 'label' => 'Valor pago pelo grupo (R$)', 'type' => 'money', 'group' => 'Aquisição', 'required' => false],
+            ['key' => 'sale_price', 'label' => 'Valor para Venda (R$)', 'type' => 'money', 'group' => 'Venda', 'required' => false],
             ['key' => 'notes', 'label' => 'Observações', 'type' => 'textarea', 'group' => 'Observações', 'required' => false],
         ]],
     ];

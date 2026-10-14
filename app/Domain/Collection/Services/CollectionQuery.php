@@ -142,7 +142,7 @@ class CollectionQuery
         });
     }
 
-    public function present(Model $item, string $kind): array
+    public function present(Model $item, string $kind, bool $isOwner = true): array
     {
         $title = match ($kind) {
             'jogos' => $item->game?->name ?? 'Jogo removido',
@@ -189,7 +189,8 @@ class CollectionQuery
             'platforms' => $kind === 'acessorios' ? $item->platforms->map->only(['id', 'name'])->values() : [$item->platform->only(['id', 'name'])],
             'image' => $item->primaryImage?->url ?? ($kind === 'jogos' ? $item->game?->cover_url : ($kind === 'consoles' ? $item->platform->cover_url : null)),
             'badges' => array_slice($badges, 0, 5),
-            'purchase_price' => $item->purchase_price,
+            ...($isOwner ? ['purchase_price' => $item->purchase_price] : []),
+            'sale_price' => $item->sale_price,
         ];
     }
 

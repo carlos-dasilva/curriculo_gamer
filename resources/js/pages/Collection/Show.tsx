@@ -26,8 +26,10 @@ export default function Show({ kind, item, card, fields }: { kind: string; item:
     return field.options?.find(o => String(o.id) === String(value))?.name ?? String(value);
   };
   const shownFields = fields.filter(f => visible(kind, f, item as unknown as ItemData));
+  const gameUrl = kind === 'jogos' && typeof item.game_id === 'number' ? '/jogos/' + item.game_id : null;
   return <CollectionLayout title={card.title} kind={kind}>
     {isOwner && <div className="mb-6 flex flex-wrap gap-3"><Link href={privateBase + '/' + kind + '/' + item.id + '/editar'} className={action}>Editar item</Link><Button type="button" variant="outline" onClick={() => setConfirm(true)}>Remover da coleção</Button><a href={privateBase + '/' + kind + '/' + item.id + '/exportar'} className={action}>Exportar JSON</a></div>}
+    {gameUrl && <div className="mb-6"><Link href={gameUrl} className={action}>Ver jogo no Currículo Gamer</Link></div>}
     <div className="grid gap-8 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
       <div>
         <div className="flex aspect-square items-center justify-center rounded-2xl border bg-white p-6"><ExternalImage src={card.image} alt={card.title} className="h-full w-full object-contain" /></div>
@@ -38,7 +40,7 @@ export default function Show({ kind, item, card, fields }: { kind: string; item:
       <div className="space-y-4">{[...new Set(shownFields.map(f => f.group))].map(group => <section key={group} className="rounded-xl border bg-white p-5">
         <h2 className="mb-4 text-lg font-semibold">{group}</h2>
         <dl className="grid gap-4 sm:grid-cols-2">{shownFields.filter(f => f.group === group).map(field => <div key={field.key} className={field.type === 'textarea' ? 'sm:col-span-2' : ''}>
-          <dt className="text-sm text-gray-500">{field.label}</dt><dd className="mt-1 whitespace-pre-wrap break-words text-sm font-medium">{display(field)}</dd>
+          <dt className="text-sm text-gray-500">{field.label}</dt><dd className="mt-1 whitespace-pre-wrap break-words text-sm font-medium">{field.type === 'game' && gameUrl ? <Link href={gameUrl} className="underline underline-offset-4">{display(field)}</Link> : display(field)}</dd>
         </div>)}</dl>
       </section>)}</div>
     </div>
